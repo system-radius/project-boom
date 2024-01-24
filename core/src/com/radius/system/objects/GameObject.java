@@ -25,4 +25,12 @@ public abstract class GameObject {
 
     public abstract void Draw(SpriteBatch batch);
 
+    public float GetX() {
+        return x;
+    }
+
+    public float GetY() {
+        return y;
+    }
+
 }

@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public abstract class AbstractScreen extends ScreenAdapter {
 
-    private SpriteBatch spriteBatch = new SpriteBatch();
+    private final SpriteBatch spriteBatch = new SpriteBatch();
 
     protected Color bgColor = Color.GRAY;
 
