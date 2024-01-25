@@ -4,6 +4,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.GameObject;
 import com.radius.system.objects.blocks.Block;
+import com.radius.system.objects.players.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BoardState extends GameObject {
 
@@ -15,11 +19,14 @@ public class BoardState extends GameObject {
 
     private final int boardHeight;
 
+    private final List<Player> players;
+
     public BoardState(int boardWidth, int boardHeight) {
         super(0, 0);
 
         this.board = new BoomGameObject[boardWidth][boardHeight];
         this.boardRep = new char[boardWidth][boardHeight];
+        this.players = new ArrayList<>();
 
         this.boardWidth = boardWidth;
         this.boardHeight = boardHeight;
@@ -33,6 +40,10 @@ public class BoardState extends GameObject {
         boardRep[x][y] = block.GetCharRep();
     }
 
+    public void AddToBoard(Player player) {
+        players.add(player);
+    }
+
     @Override
     public void Update(float delta) {
         for (int i = 0; i < boardWidth; i++) {
@@ -41,6 +52,11 @@ public class BoardState extends GameObject {
                     board[i][j].Update(delta);
                 }
             }
+        }
+
+        for (Player player : players) {
+            player.Update(delta);
+
         }
     }
 
@@ -52,6 +68,10 @@ public class BoardState extends GameObject {
                     board[i][j].Draw(batch);
                 }
             }
+        }
+
+        for (Player player : players) {
+            player.Draw(batch);
         }
     }
 }

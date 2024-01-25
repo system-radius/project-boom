@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.radius.system.enums.Direction;
+import com.radius.system.enums.PlayerState;
 import com.radius.system.objects.BoomGameObject;
 
 public class Player extends BoomGameObject {
@@ -81,16 +83,60 @@ public class Player extends BoomGameObject {
     private Texture spriteSheet;
 
     /**
+     * The base speed that will be multiplied with the current speed level to gat the actual speed.
+     * This value is separate from the velocity values because the velocities are reset every
+     * update. When moving the character, the speed is set as either the velocity X or velocity Y.
+     */
+    protected float baseSpeed = 10;
+
+    /**
+     * The player's current speed level. To avoid having the player jump over walls dues to too
+     * much computation using the velocity values, the maximum speed level is up to 5.
+     */
+    protected float speedLevel = 1f;
+
+    /**
      * The current scale value, provided on the creation of this object, relevant for the creation
      * of the collision bounds.
      */
     protected float scale;
+
+    /**
+     * The player's current direction.
+     */
+    protected Direction direction = Direction.SOUTH;
+
+    /**
+     * The player's current state.
+     */
+    protected PlayerState state = PlayerState.IDLE;
+
+    private float thinWidth;
+
+    private float thinHeight;
 
     public Player(float x, float y, float scale) {
         super(' ', x, y);
 
         this.scale = scale;
         LoadAsset("img/tokoy_sprite_sheet.png");
+        FixBounds();
+    }
+
+    private void FixBounds() {
+        float width = scale;
+        float height = scale;
+
+        float divider = SPEED_COUNTER - speedLevel;
+        thinWidth = (width / (divider * 2));
+        thinHeight = (height / (divider * 2));
+
+        northRect = new Rectangle(x + thinWidth, (y + height) - thinHeight,
+                width - (thinWidth * 2), thinHeight);
+        southRect = new Rectangle(x + thinWidth, y, width - (thinWidth * 2), thinHeight);
+        westRect = new Rectangle(x, y + thinHeight, thinWidth, height - (thinHeight * 2));
+        eastRect = new Rectangle(x + width - thinWidth, y + thinHeight, thinWidth,
+                height - (thinHeight * 2));
     }
 
     private void LoadAsset(String spriteSheetPath) {
@@ -124,6 +170,48 @@ public class Player extends BoomGameObject {
         return container;
     }
 
+    private Animation<TextureRegion> GetActiveMovingAnimation() {
+        switch (direction) {
+            case NORTH:
+                return wAnim;
+            case WEST:
+                return aAnim;
+            case EAST:
+                return dAnim;
+            case SOUTH:
+            default:
+                return sAnim;
+        }
+    }
+
+    private Animation<TextureRegion> GetActiveAnimation() {
+        switch(state) {
+            case DYING:
+                return deathAnim;
+            case MOVING:
+            default:
+                return GetActiveMovingAnimation();
+        }
+    }
+
+    private TextureRegion GetActiveKeyFrame() {
+        switch(state) {
+            case DEAD:
+                return deathAnim.getKeyFrames()[3];
+            case IDLE:
+            default:
+                return GetActiveMovingAnimation().getKeyFrames()[0];
+        }
+    }
+
+    public void SetVelX(float multiplier) {
+        this.velX = (baseSpeed * speedLevel) * multiplier;
+    }
+
+    public void SetVelY(float multiplier) {
+        this.velY = (baseSpeed * speedLevel) * multiplier;
+    }
+
     @Override
     public void dispose() {
         spriteSheet.dispose();
@@ -137,10 +225,18 @@ public class Player extends BoomGameObject {
     @Override
     public void Update(float delta) {
         animationElapsedTime += delta;
+
+        this.x += velX * delta;
+        this.y += velY * delta;
     }
 
     @Override
     public void Draw(SpriteBatch batch) {
-        batch.draw(sAnim.getKeyFrame(animationElapsedTime), x * scale, y * scale, scale, scale);
+
+        if (state == PlayerState.MOVING || state == PlayerState.DYING) {
+            batch.draw(GetActiveAnimation().getKeyFrame(animationElapsedTime), x * scale, y * scale, scale, scale);
+        } else {
+            batch.draw(GetActiveKeyFrame(), x * scale, y * scale, scale, scale);
+        }
     }
 }
