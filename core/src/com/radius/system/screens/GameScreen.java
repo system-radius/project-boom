@@ -12,9 +12,13 @@ public class GameScreen extends AbstractScreen {
 
     private final float WORLD_WIDTH = 31f;
 
-    private final float WORLD_HEIGHT = 17f;
+    private final float WORLD_HEIGHT = 31f;
 
     private final float WORLD_SCALE = 20f;
+
+    private final float ZOOM = 1f;
+
+    private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
     private final float scaledWorldWidth = WORLD_WIDTH * WORLD_SCALE;
 
@@ -28,8 +32,6 @@ public class GameScreen extends AbstractScreen {
 
     public GameScreen() {
         InitializeField();
-
-
     }
 
     public void InitializeField() {
@@ -51,8 +53,8 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void UpdateCamera() {
-        float effectiveViewportWidth = camera.viewportWidth / 2f;
-        float effectiveViewportHeight = camera.viewportHeight / 2f;
+        float effectiveViewportWidth = camera.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER;
+        float effectiveViewportHeight = camera.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER;
 
         camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth, scaledWorldWidth - effectiveViewportWidth);
         camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight, scaledWorldHeight - effectiveViewportHeight);
@@ -62,11 +64,14 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void show() {
-        camera = new OrthographicCamera();
+        camera = new OrthographicCamera(WORLD_WIDTH * 16, WORLD_HEIGHT * 9);
         camera.position.set(0, 0, 0);
         UpdateCamera();
 
-        viewport = new FitViewport(scaledWorldWidth, scaledWorldHeight, camera);
+        float viewportWidth = (WORLD_WIDTH * 16) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
+        float viewportHeight = (WORLD_HEIGHT * 9) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
+
+        viewport = new FitViewport(viewportWidth, viewportHeight, camera);
     }
 
     @Override
