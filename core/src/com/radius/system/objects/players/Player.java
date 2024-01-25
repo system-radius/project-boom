@@ -12,7 +12,7 @@ import com.radius.system.objects.BoomGameObject;
 
 public class Player extends BoomGameObject {
 
-    private static final float FRAME_DURATION_MOVING = 1f / 15f;
+    private static final float FRAME_DURATION_MOVING = 1f / 10f;
 
     private static final float FRAME_DURATION_DYING = 1f / 4f;
 
@@ -87,7 +87,7 @@ public class Player extends BoomGameObject {
      * This value is separate from the velocity values because the velocities are reset every
      * update. When moving the character, the speed is set as either the velocity X or velocity Y.
      */
-    protected float baseSpeed = 10;
+    protected float baseSpeed = 5f;
 
     /**
      * The player's current speed level. To avoid having the player jump over walls dues to too
@@ -204,6 +204,29 @@ public class Player extends BoomGameObject {
         }
     }
 
+    private void UpdateDirection() {
+
+        if (velX > 0) {
+            direction = Direction.EAST;
+        } else if (velX < 0) {
+            direction = Direction.WEST;
+        }
+
+        if (velY > 0) {
+            direction = Direction.NORTH;
+        } else if (velY < 0) {
+            direction = Direction.SOUTH;
+        }
+    }
+
+    private void UpdateState() {
+        if (velX != 0 || velY != 0) {
+            state = PlayerState.MOVING;
+        } else {
+            state = PlayerState.IDLE;
+        }
+    }
+
     public void SetVelX(float multiplier) {
         this.velX = (baseSpeed * speedLevel) * multiplier;
     }
@@ -225,6 +248,9 @@ public class Player extends BoomGameObject {
     @Override
     public void Update(float delta) {
         animationElapsedTime += delta;
+
+        UpdateDirection();
+        UpdateState();
 
         this.x += velX * delta;
         this.y += velY * delta;
