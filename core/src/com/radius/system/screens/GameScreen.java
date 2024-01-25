@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.board.BoardState;
 import com.radius.system.objects.blocks.Block;
+import com.radius.system.objects.players.Player;
 
 public class GameScreen extends AbstractScreen {
 
@@ -30,6 +31,8 @@ public class GameScreen extends AbstractScreen {
 
     private BoardState boardState;
 
+    private Player player;
+
     public GameScreen() {
         InitializeField();
     }
@@ -50,11 +53,16 @@ public class GameScreen extends AbstractScreen {
                 }
             }
         }
+
+        player = new Player(1, 1, WORLD_SCALE);
     }
 
     private void UpdateCamera() {
         float effectiveViewportWidth = camera.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER;
         float effectiveViewportHeight = camera.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER;
+
+        camera.position.x = player.GetX();
+        camera.position.y = player.GetY();
 
         camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth, scaledWorldWidth - effectiveViewportWidth);
         camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight, scaledWorldHeight - effectiveViewportHeight);
@@ -83,6 +91,7 @@ public class GameScreen extends AbstractScreen {
     public void Update(float delta) {
         UpdateCamera();
         boardState.Update(delta);
+        player.Update(delta);
     }
 
     @Override
@@ -92,6 +101,7 @@ public class GameScreen extends AbstractScreen {
         spriteBatch.begin();
 
         boardState.Draw(spriteBatch);
+        player.Draw(spriteBatch);
 
         spriteBatch.end();
     }
