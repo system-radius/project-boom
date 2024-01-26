@@ -5,10 +5,13 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public abstract class AbstractScreen extends ScreenAdapter {
 
     private final SpriteBatch spriteBatch = new SpriteBatch();
+
+    private final ShapeRenderer renderer = new ShapeRenderer();
 
     protected Color bgColor = Color.GRAY;
 
@@ -25,16 +28,20 @@ public abstract class AbstractScreen extends ScreenAdapter {
 
     public abstract void Draw(SpriteBatch spriteBatch);
 
+    public abstract void DrawDebug(ShapeRenderer renderer);
+
     @Override
     public final void render(float delta) {
         Update(delta);
         ClearScreen();
         Draw(spriteBatch);
+        DrawDebug(renderer);
     }
 
     @Override
     public void dispose() {
         spriteBatch.dispose();
+        renderer.dispose();
     }
 
 }

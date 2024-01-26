@@ -1,11 +1,13 @@
 package com.radius.system.board;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.GameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.players.Player;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +46,22 @@ public class BoardState extends GameObject {
         players.add(player);
     }
 
+    public List<Block> GetSurroundingBlocks(int x, int y) {
+        List<Block> blocks = new ArrayList<>();
+
+        for (int i = x - 1; i <= x + 1; i++) {
+            if (i < 0 || i > boardWidth) continue;
+            for (int j = y - 1; j <= y + 1; j++) {
+                if (j < 0 || j > boardHeight) continue;
+                if (board[i][j] instanceof Block) {
+                    blocks.add((Block)board[i][j]);
+                }
+            }
+        }
+
+        return blocks;
+    }
+
     @Override
     public void Update(float delta) {
         for (int i = 0; i < boardWidth; i++) {
@@ -56,7 +74,7 @@ public class BoardState extends GameObject {
 
         for (Player player : players) {
             player.Update(delta);
-
+            player.Collide(GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
         }
     }
 
@@ -72,6 +90,21 @@ public class BoardState extends GameObject {
 
         for (Player player : players) {
             player.Draw(batch);
+        }
+    }
+
+    @Override
+    public void DrawDebug(ShapeRenderer renderer) {
+        for (int i = 0; i < boardWidth; i++) {
+            for (int j = 0; j < boardHeight; j++) {
+                if (board[i][j] != null) {
+                    board[i][j].DrawDebug(renderer);
+                }
+            }
+        }
+
+        for (Player player : players) {
+            player.DrawDebug(renderer);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.radius.system.objects;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 /**
  * A representation of objects in the game. Has position and velocity.
@@ -24,6 +25,8 @@ public abstract class GameObject {
     public abstract void Update(float delta);
 
     public abstract void Draw(SpriteBatch batch);
+
+    public abstract void DrawDebug(ShapeRenderer renderer);
 
     public float GetX() {
         return x;

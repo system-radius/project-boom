@@ -2,9 +2,14 @@ package com.radius.system.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.PlayerController;
@@ -18,9 +23,9 @@ public class GameScreen extends AbstractScreen {
 
     private final float WORLD_HEIGHT = 31f;
 
-    private final float WORLD_SCALE = 20f;
+    private final float WORLD_SCALE = 24f;
 
-    private final float ZOOM = 0.6f;
+    private final float ZOOM = 0.3f;
 
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
@@ -36,8 +41,11 @@ public class GameScreen extends AbstractScreen {
 
     private Player player;
 
+    private BitmapFont font;
+
     public GameScreen() {
         InitializeField();
+        font = new BitmapFont();
     }
 
     public void InitializeField() {
@@ -108,7 +116,26 @@ public class GameScreen extends AbstractScreen {
         spriteBatch.begin();
 
         boardState.Draw(spriteBatch);
+        font.draw(spriteBatch, "(" + player.GetWorldX() + ", " + player.GetWorldY() + ")" , (camera.position.x - (viewport.getWorldWidth() / 2)), (camera.position.y - (viewport.getWorldHeight() / 2) + 20));
 
         spriteBatch.end();
+    }
+
+    @Override
+    public void DrawDebug(ShapeRenderer renderer) {
+        renderer.setProjectionMatrix(camera.projection);
+        renderer.setTransformMatrix(camera.view);
+        renderer.begin(ShapeRenderer.ShapeType.Line);
+
+        boardState.DrawDebug(renderer);
+
+
+        renderer.end();
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        font.dispose();
     }
 }

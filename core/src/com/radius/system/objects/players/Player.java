@@ -1,14 +1,21 @@
 package com.radius.system.objects.players;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
 import com.radius.system.objects.BoomGameObject;
+import com.radius.system.objects.blocks.Block;
+
+import java.util.List;
 
 public class Player extends BoomGameObject {
 
@@ -93,7 +100,7 @@ public class Player extends BoomGameObject {
      * The player's current speed level. To avoid having the player jump over walls dues to too
      * much computation using the velocity values, the maximum speed level is up to 5.
      */
-    protected float speedLevel = 1f;
+    protected float speedLevel = 2f;
 
     /**
      * The current scale value, provided on the creation of this object, relevant for the creation
@@ -124,19 +131,25 @@ public class Player extends BoomGameObject {
     }
 
     private void FixBounds() {
-        float width = scale;
-        float height = scale;
+        float width = 1;
+        float height = 1;
 
-        float divider = SPEED_COUNTER - speedLevel;
+        float divider = 1;
         thinWidth = (width / (divider * 2));
         thinHeight = (height / (divider * 2));
 
-        northRect = new Rectangle(x + thinWidth, (y + height) - thinHeight,
-                width - (thinWidth * 2), thinHeight);
-        southRect = new Rectangle(x + thinWidth, y, width - (thinWidth * 2), thinHeight);
-        westRect = new Rectangle(x, y + thinHeight, thinWidth, height - (thinHeight * 2));
-        eastRect = new Rectangle(x + width - thinWidth, y + thinHeight, thinWidth,
-                height - (thinHeight * 2));
+        northRect = RefreshRectangle(northRect, x, y, width - (thinWidth * 2), thinHeight);
+        southRect = RefreshRectangle(southRect, x, y, width - (thinWidth * 2), thinHeight);
+        westRect = RefreshRectangle(westRect, x, y, thinWidth, height - (thinHeight * 2));
+        eastRect = RefreshRectangle(eastRect, x, y, thinWidth, height - (thinHeight * 2));
+    }
+
+    private Rectangle RefreshRectangle (Rectangle rectangle, float x, float y, float width, float height) {
+        if (rectangle == null) {
+            return new Rectangle(x, y, width, height);
+        }
+
+        return rectangle.set(x, y, width, height);
     }
 
     private void LoadAsset(String spriteSheetPath) {
@@ -227,12 +240,57 @@ public class Player extends BoomGameObject {
         }
     }
 
+    private void UpdateBounds() {
+
+        float offset = 0.5f;
+        northRect.setPosition(x + (thinWidth), (y + 1) - (thinHeight) - (offset / scale));
+        southRect.setPosition(x + (thinWidth), y + (offset / scale));
+        eastRect.setPosition(x + (1 - (thinWidth)) - (offset / scale), y + (thinHeight));
+        westRect.setPosition(x + (offset / scale), y + (thinHeight));
+    }
+
     public void SetVelX(float multiplier) {
         this.velX = (baseSpeed * speedLevel) * multiplier;
     }
 
     public void SetVelY(float multiplier) {
         this.velY = (baseSpeed * speedLevel) * multiplier;
+    }
+
+    private int GetWorldPosition(float c, float scale) {
+        float excess = (c * scale) % scale >= scale / 2 ? 1 : 0;
+
+        return (int)(c + excess);
+    }
+
+    public int GetWorldX() {
+        return GetWorldPosition(x, scale);
+    }
+
+    public int GetWorldY() {
+        return GetWorldPosition(y, scale);
+    }
+
+    public void Collide(List<Block> blocks) {
+        for (Block block : blocks) {
+            Rectangle blockBounds = block.GetBounds();
+            float blockX = block.GetX();
+            float blockY = block.GetY();
+            float blockWidth = block.GetWidth();
+            float blockHeight = block.GetHeight();
+
+            if (Intersector.overlaps(blockBounds, northRect)) {
+                this.y = (blockY - (blockHeight / scale));
+            } else if (Intersector.overlaps(blockBounds, southRect)) {
+                this.y = (blockY + (blockHeight / scale));
+            }
+
+            if (Intersector.overlaps(blockBounds, eastRect)) {
+                this.x = (blockX - (blockWidth / scale ));
+            } else if (Intersector.overlaps(blockBounds, westRect)) {
+                this.x = (blockX + (blockWidth / scale));
+            }
+        }
     }
 
     @Override
@@ -254,6 +312,8 @@ public class Player extends BoomGameObject {
 
         this.x += velX * delta;
         this.y += velY * delta;
+
+        UpdateBounds();
     }
 
     @Override
@@ -264,5 +324,14 @@ public class Player extends BoomGameObject {
         } else {
             batch.draw(GetActiveKeyFrame(), x * scale, y * scale, scale, scale);
         }
+    }
+
+    @Override
+    public void DrawDebug(ShapeRenderer renderer) {
+        renderer.setColor(Color.GREEN);
+        renderer.rect(northRect.x * scale, northRect.y * scale, northRect.width * scale, northRect.height * scale);
+        renderer.rect(southRect.x * scale, southRect.y * scale, southRect.width * scale, southRect.height * scale);
+        renderer.rect(eastRect.x * scale, eastRect.y * scale, eastRect.width * scale, eastRect.height * scale);
+        renderer.rect(westRect.x * scale, westRect.y * scale, westRect.width * scale, westRect.height * scale);
     }
 }

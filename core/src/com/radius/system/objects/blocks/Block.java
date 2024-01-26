@@ -1,10 +1,12 @@
 package com.radius.system.objects.blocks;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.objects.BoomGameObject;
 
@@ -41,8 +43,20 @@ public class Block extends BoomGameObject {
         this.width = width;
         this.height = height;
 
-        this.bounds = new Rectangle(this.x, this.y, this.width, this.height);
+        this.bounds = new Rectangle(this.x, this.y, 1, 1);
         Initialize();
+    }
+
+    public float GetWidth() {
+        return width;
+    }
+
+    public float GetHeight() {
+        return height;
+    }
+
+    public Rectangle GetBounds() {
+        return bounds;
     }
 
     protected void Initialize() {
@@ -82,5 +96,11 @@ public class Block extends BoomGameObject {
         if (!burning) {
             batch.draw(animation.getKeyFrames()[0], x * width, y * height, width, height);
         }
+    }
+
+    @Override
+    public void DrawDebug(ShapeRenderer renderer) {
+        renderer.setColor(Color.BLUE);
+        renderer.rect(x * width, y * height, width, height);
     }
 }
