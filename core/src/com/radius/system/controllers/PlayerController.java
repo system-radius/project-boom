@@ -1,21 +1,32 @@
-package com.radius.system;
+package com.radius.system.controllers;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Disposable;
 import com.radius.system.enums.ControlKeys;
 import com.radius.system.objects.players.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class PlayerController implements InputProcessor {
+public class PlayerController implements InputProcessor, Drawable, Disposable {
 
     private final Map<ControlKeys, Boolean> pressedKeys = new HashMap<>();
 
     private Player player;
 
+    private Texture joystickOuter;
+
+    private Texture joystickFill;
+
     public PlayerController(Player player) {
         this.player = player;
+        joystickOuter = new Texture(Gdx.files.internal("img/JoystickOuter.png"));
+        joystickFill = new Texture(Gdx.files.internal("img/JoystickFill.png"));
 
         for (ControlKeys key: ControlKeys.values()) {
             pressedKeys.put(key, false);
@@ -119,5 +130,79 @@ public class PlayerController implements InputProcessor {
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
+    }
+
+    @Override
+    public void draw(Batch batch, float x, float y, float width, float height) {
+        batch.setColor(1, 1, 1, 0.5f);
+        batch.draw(joystickOuter, x, y, width, height);
+        batch.draw(joystickFill, x + width / 4, y + height / 4, width / 2, height / 2);
+        batch.setColor(1, 1, 1, 1f);
+    }
+
+    @Override
+    public float getLeftWidth() {
+        return 0;
+    }
+
+    @Override
+    public void setLeftWidth(float leftWidth) {
+
+    }
+
+    @Override
+    public float getRightWidth() {
+        return 0;
+    }
+
+    @Override
+    public void setRightWidth(float rightWidth) {
+
+    }
+
+    @Override
+    public float getTopHeight() {
+        return 0;
+    }
+
+    @Override
+    public void setTopHeight(float topHeight) {
+
+    }
+
+    @Override
+    public float getBottomHeight() {
+        return 0;
+    }
+
+    @Override
+    public void setBottomHeight(float bottomHeight) {
+
+    }
+
+    @Override
+    public float getMinWidth() {
+        return 0;
+    }
+
+    @Override
+    public void setMinWidth(float minWidth) {
+
+    }
+
+    @Override
+    public float getMinHeight() {
+        return 0;
+    }
+
+    @Override
+    public void setMinHeight(float minHeight) {
+
+    }
+
+    @Override
+    public void dispose() {
+        joystickOuter.dispose();
+        joystickFill.dispose();
     }
 }

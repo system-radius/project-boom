@@ -2,17 +2,14 @@ package com.radius.system.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.radius.system.PlayerController;
+import com.radius.system.controllers.PlayerController;
 import com.radius.system.board.BoardState;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.players.Player;
@@ -46,6 +43,8 @@ public class GameScreen extends AbstractScreen {
 
     private Player player;
 
+    private PlayerController controller;
+
     private BitmapFont font;
 
     public GameScreen() {
@@ -74,7 +73,8 @@ public class GameScreen extends AbstractScreen {
         boardState.AddToBoard(player);
 
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(new PlayerController(player));
+        controller = new PlayerController(player);
+        multiplexer.addProcessor(controller);
         Gdx.input.setInputProcessor(multiplexer);
     }
 
@@ -121,7 +121,8 @@ public class GameScreen extends AbstractScreen {
         spriteBatch.begin();
 
         boardState.Draw(spriteBatch);
-        font.draw(spriteBatch, "(" + player.GetWorldX() + ", " + player.GetWorldY() + ")" , (camera.position.x - (viewport.getWorldWidth() / 2)), (camera.position.y - (viewport.getWorldHeight() / 2) + 20));
+        //font.draw(spriteBatch, "(" + camera.viewportWidth + ", " + player.GetWorldY() + ")" , (camera.position.x - (viewport.getWorldWidth() / 2)), (camera.position.y - (viewport.getWorldHeight() / 2) + 20));
+        controller.draw(spriteBatch, (camera.position.x - (viewport.getWorldWidth() / 2) + WORLD_SCALE), (camera.position.y - (viewport.getWorldHeight() / 2) + 20), 3 * WORLD_SCALE,  3 * WORLD_SCALE);
 
         spriteBatch.end();
     }
