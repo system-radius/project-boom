@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -14,6 +13,7 @@ import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.blocks.Block;
+import com.radius.system.utils.SegmentIntersector;
 
 import java.util.List;
 
@@ -60,6 +60,11 @@ public class Player extends BoomGameObject {
     private Rectangle eastRect;
 
     /**
+     * The rectangle representing the collision bounds of the player.
+     */
+    protected Rectangle collisionRect;
+
+    /**
      * The animation frames when going south or pressing "S" key.
      */
     private Animation<TextureRegion> sAnim;
@@ -100,7 +105,7 @@ public class Player extends BoomGameObject {
      * The player's current speed level. To avoid having the player jump over walls dues to too
      * much computation using the velocity values, the maximum speed level is up to 5.
      */
-    protected float speedLevel = 2f;
+    protected float speedLevel = 4f;
 
     /**
      * The current scale value, provided on the creation of this object, relevant for the creation
@@ -131,12 +136,14 @@ public class Player extends BoomGameObject {
     }
 
     private void FixBounds() {
-        float width = 1;
-        float height = 1;
+        float width = 1f;
+        float height = 1f;
 
-        float divider = 1;
+        float divider = 1.1f;
         thinWidth = (width / (divider * 2));
         thinHeight = (height / (divider * 2));
+
+        collisionRect = RefreshRectangle(collisionRect, x, y, width - thinWidth, height - thinHeight);
 
         northRect = RefreshRectangle(northRect, x, y, width - (thinWidth * 2), thinHeight);
         southRect = RefreshRectangle(southRect, x, y, width - (thinWidth * 2), thinHeight);
@@ -242,11 +249,13 @@ public class Player extends BoomGameObject {
 
     private void UpdateBounds() {
 
-        float offset = 0.5f;
+        float offset = -speedLevel;
         northRect.setPosition(x + (thinWidth), (y + 1) - (thinHeight) - (offset / scale));
         southRect.setPosition(x + (thinWidth), y + (offset / scale));
         eastRect.setPosition(x + (1 - (thinWidth)) - (offset / scale), y + (thinHeight));
         westRect.setPosition(x + (offset / scale), y + (thinHeight));
+
+        collisionRect.setPosition(x + thinWidth / 2, y + thinHeight / 2);
     }
 
     public void SetVelX(float multiplier) {
@@ -293,6 +302,30 @@ public class Player extends BoomGameObject {
         }
     }
 
+    public void CollideExperimental(List<Block> blocks) {
+        for (Block block : blocks) {
+            Rectangle blockBounds = block.GetBounds();
+            float blockX = block.GetX();
+            float blockY = block.GetY();
+            float blockWidth = block.GetWidth();
+            float blockHeight = block.GetHeight();
+
+            int collision = SegmentIntersector.HasIntersection(collisionRect, blockBounds);
+
+            if ((collision & SegmentIntersector.SOUTH) != 0) {
+                this.y = (blockY - (blockHeight / scale));
+            } else if ((collision & SegmentIntersector.NORTH) != 0) {
+                this.y = (blockY + (blockHeight / scale));
+            }
+
+            if ((collision & SegmentIntersector.WEST) != 0) {
+                this.x = (blockX - (blockWidth / scale ));
+            } else if ((collision & SegmentIntersector.EAST) != 0) {
+                this.x = (blockX + (blockWidth / scale));
+            }
+        }
+    }
+
     @Override
     public void dispose() {
         spriteSheet.dispose();
@@ -328,6 +361,9 @@ public class Player extends BoomGameObject {
 
     @Override
     public void DrawDebug(ShapeRenderer renderer) {
+        renderer.setColor(Color.RED);
+        renderer.rect(collisionRect.x * scale, collisionRect.y * scale, collisionRect.width * scale, collisionRect.height * scale);
+
         renderer.setColor(Color.GREEN);
         renderer.rect(northRect.x * scale, northRect.y * scale, northRect.width * scale, northRect.height * scale);
         renderer.rect(southRect.x * scale, southRect.y * scale, southRect.width * scale, southRect.height * scale);

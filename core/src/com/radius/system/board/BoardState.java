@@ -50,9 +50,9 @@ public class BoardState extends GameObject {
         List<Block> blocks = new ArrayList<>();
 
         for (int i = x - 1; i <= x + 1; i++) {
-            if (i < 0 || i > boardWidth) continue;
+            if (i < 0 || i >= boardWidth) continue;
             for (int j = y - 1; j <= y + 1; j++) {
-                if (j < 0 || j > boardHeight) continue;
+                if (j < 0 || j >= boardHeight) continue;
                 if (board[i][j] instanceof Block) {
                     blocks.add((Block)board[i][j]);
                 }
@@ -75,6 +75,7 @@ public class BoardState extends GameObject {
         for (Player player : players) {
             player.Update(delta);
             player.Collide(GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
+            //player.CollideExperimental(GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
         }
     }
 

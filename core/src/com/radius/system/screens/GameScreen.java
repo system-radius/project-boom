@@ -23,9 +23,14 @@ public class GameScreen extends AbstractScreen {
 
     private final float WORLD_HEIGHT = 31f;
 
+    private final float VIEWPORT_WIDTH = 16f;
+
+    private final float VIEWPORT_HEIGHT =16f;
+
     private final float WORLD_SCALE = 24f;
 
-    private final float ZOOM = 0.3f;
+    //private final float ZOOM = 0.25785f;
+    private final float ZOOM = 1f;
 
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
@@ -92,8 +97,8 @@ public class GameScreen extends AbstractScreen {
         camera.position.set(0, 0, 0);
         UpdateCamera();
 
-        float viewportWidth = (WORLD_SCALE * 16) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
-        float viewportHeight = (WORLD_SCALE * 9) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
+        float viewportWidth = (WORLD_SCALE * VIEWPORT_WIDTH) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
+        float viewportHeight = (WORLD_SCALE * VIEWPORT_HEIGHT) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
 
         viewport = new FitViewport(viewportWidth, viewportHeight, camera);
     }
