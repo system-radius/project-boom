@@ -25,12 +25,12 @@ public class GameScreen extends AbstractScreen {
 
     private final float VIEWPORT_WIDTH = 16f;
 
-    private final float VIEWPORT_HEIGHT =16f;
+    private final float VIEWPORT_HEIGHT = 9f;
 
     private final float WORLD_SCALE = 24f;
 
     //private final float ZOOM = 0.25785f;
-    private final float ZOOM = 1f;
+    private final float ZOOM = 0.5f;
 
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
@@ -133,7 +133,6 @@ public class GameScreen extends AbstractScreen {
         renderer.begin(ShapeRenderer.ShapeType.Line);
 
         boardState.DrawDebug(renderer);
-
 
         renderer.end();
     }
