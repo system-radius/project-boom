@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.radius.system.objects.GameObject;
 
@@ -17,11 +18,11 @@ public class Joystick extends GameObject implements Disposable {
 
     private final float scale;
 
-    private final Vector2 innerJoystickPosition;
+    private final Vector3 innerJoystickPosition;
 
     public Joystick(float x, float y, float scale) {
         super(x, y);
-        innerJoystickPosition = new Vector2();
+        innerJoystickPosition = new Vector3();
         this.scale = scale;
         joystickOuter = new Texture(Gdx.files.internal("img/JoystickOuter.png"));
         joystickFill = new Texture(Gdx.files.internal("img/JoystickFill.png"));
@@ -29,12 +30,12 @@ public class Joystick extends GameObject implements Disposable {
 
     public void SetPosition(float x, float y) {
         this.x = x - 2 * scale;
-        this.innerJoystickPosition.x = this.x + scale;
         this.y = y - 2 * scale;
+        this.innerJoystickPosition.x = this.x + scale;
         this.innerJoystickPosition.y = this.y + scale;
     }
 
-    public void SetDragPosition(float x, float y) {
+    public Vector3 SetDragPosition(float x, float y) {
         x -= scale;
         y -= scale;
 
@@ -55,6 +56,8 @@ public class Joystick extends GameObject implements Disposable {
             this.innerJoystickPosition.x = x;
             this.innerJoystickPosition.y = y;
         }
+
+        return this.innerJoystickPosition;
     }
 
     @Override

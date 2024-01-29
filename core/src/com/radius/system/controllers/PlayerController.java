@@ -124,13 +124,24 @@ public class PlayerController implements InputProcessor, Disposable {
         vector.x = screenX;
         vector.y = screenY;
         vector.set(camera.unproject(vector));
-        joystick.SetPosition(vector.x, vector.y);
-        isTouching = true;
+
+        if (screenX < Gdx.graphics.getWidth() / 3f) {
+            joystick.SetPosition(vector.x, vector.y);
+            isTouching = true;
+            return true;
+        }
+
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+
+        if (isTouching) {
+            player.SetVelX(0);
+            player.SetVelY(0);
+        }
+
         isTouching = false;
         return false;
     }
@@ -145,9 +156,16 @@ public class PlayerController implements InputProcessor, Disposable {
         vector.x = screenX;
         vector.y = screenY;
         vector.set(camera.unproject(vector));
-        joystick.SetDragPosition(vector.x, vector.y);
 
-        return false;
+        // Get new vector coordinates for joystick drag.
+        vector.set(joystick.SetDragPosition(vector.x, vector.y));
+
+        float velX = Math.round(((vector.x - joystick.GetX()) / (2 * scale) - 0.5f) * 10)/10f;
+        float velY = Math.round(((vector.y - joystick.GetY()) / (2 * scale) - 0.5f) * 10)/10f;
+        player.SetVelX(velX);
+        player.SetVelY(velY);
+
+        return true;
     }
 
     @Override

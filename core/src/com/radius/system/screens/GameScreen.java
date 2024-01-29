@@ -54,9 +54,12 @@ public class GameScreen extends AbstractScreen {
 
     private BitmapFont font;
 
+    private boolean initial;
+
     public GameScreen() {
         font = new BitmapFont();
 
+        initial = true;
         InitializeView();
         InitializeField();
 
@@ -112,10 +115,13 @@ public class GameScreen extends AbstractScreen {
         mainCamera.position.x = MathUtils.clamp(mainCamera.position.x, effectiveViewportWidth, scaledWorldWidth - effectiveViewportWidth);
         mainCamera.position.y = MathUtils.clamp(mainCamera.position.y, effectiveViewportHeight, scaledWorldHeight - effectiveViewportHeight);
 
-        uiCamera.position.x = mainCamera.position.x;
-        uiCamera.position.y = mainCamera.position.y;
+        if (initial) {
+            uiCamera.position.x = mainCamera.position.x;
+            uiCamera.position.y = mainCamera.position.y;
 
-        uiCamera.update();
+            uiCamera.update();
+            initial = false;
+        }
         mainCamera.update();
     }
 
