@@ -7,7 +7,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.controllers.PlayerController;
 import com.radius.system.board.BoardState;
@@ -35,9 +38,13 @@ public class GameScreen extends AbstractScreen {
 
     private final float scaledWorldHeight = WORLD_HEIGHT * WORLD_SCALE;
 
-    private OrthographicCamera camera;
+    private OrthographicCamera mainCamera;
 
-    private Viewport viewport;
+    private OrthographicCamera uiCamera;
+
+    private Viewport mainViewport;
+
+    private Viewport uiViewport;
 
     private BoardState boardState;
 
@@ -48,8 +55,26 @@ public class GameScreen extends AbstractScreen {
     private BitmapFont font;
 
     public GameScreen() {
-        InitializeField();
         font = new BitmapFont();
+
+        InitializeView();
+        InitializeField();
+
+        UpdateCamera();
+    }
+
+    public void InitializeView() {
+        mainCamera = new OrthographicCamera();
+        mainCamera.position.set(0, 0, 0);
+
+        uiCamera = new OrthographicCamera();
+
+        float viewportWidth = (WORLD_SCALE * VIEWPORT_WIDTH) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
+        float viewportHeight = (WORLD_SCALE * VIEWPORT_HEIGHT) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
+
+        mainViewport = new FitViewport(viewportWidth, viewportHeight, mainCamera);
+        uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
+        //uiViewport = new FitViewport(viewportWidth, viewportHeight, uiCamera);
     }
 
     public void InitializeField() {
@@ -73,64 +98,84 @@ public class GameScreen extends AbstractScreen {
         boardState.AddToBoard(player);
 
         InputMultiplexer multiplexer = new InputMultiplexer();
-        controller = new PlayerController(player);
+        controller = new PlayerController(player, uiViewport, WORLD_SCALE);
         multiplexer.addProcessor(controller);
         Gdx.input.setInputProcessor(multiplexer);
     }
 
     private void UpdateCamera() {
-        float effectiveViewportWidth = camera.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER;
-        float effectiveViewportHeight = camera.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER;
+        float effectiveViewportWidth = mainCamera.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER;
+        float effectiveViewportHeight = mainCamera.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER;
 
-        camera.position.x = player.GetX() * WORLD_SCALE;
-        camera.position.y = player.GetY() * WORLD_SCALE;
+        mainCamera.position.x = player.GetX() * WORLD_SCALE;
+        mainCamera.position.y = player.GetY() * WORLD_SCALE;
 
-        camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth, scaledWorldWidth - effectiveViewportWidth);
-        camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight, scaledWorldHeight - effectiveViewportHeight);
+        mainCamera.position.x = MathUtils.clamp(mainCamera.position.x, effectiveViewportWidth, scaledWorldWidth - effectiveViewportWidth);
+        mainCamera.position.y = MathUtils.clamp(mainCamera.position.y, effectiveViewportHeight, scaledWorldHeight - effectiveViewportHeight);
 
-        camera.update();
+        uiCamera.position.x = mainCamera.position.x;
+        uiCamera.position.y = mainCamera.position.y;
+
+        uiCamera.update();
+        mainCamera.update();
     }
 
     @Override
     public void show() {
-        camera = new OrthographicCamera();
-        camera.position.set(0, 0, 0);
-        UpdateCamera();
-
-        float viewportWidth = (WORLD_SCALE * VIEWPORT_WIDTH) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
-        float viewportHeight = (WORLD_SCALE * VIEWPORT_HEIGHT) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
-
-        viewport = new FitViewport(viewportWidth, viewportHeight, camera);
+        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mainCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
+        uiViewport.update(width, height);
+        mainViewport.update(width, height);
     }
 
     @Override
     public void Update(float delta) {
         boardState.Update(delta);
         UpdateCamera();
+        controller.Update(delta);
     }
 
     @Override
     public void Draw(SpriteBatch spriteBatch) {
-        spriteBatch.setProjectionMatrix(camera.projection);
-        spriteBatch.setTransformMatrix(camera.view);
+        DrawObjects(spriteBatch);
+        DrawUI(spriteBatch);
+    }
+
+    private void DrawObjects(SpriteBatch spriteBatch) {
+        spriteBatch.begin();
+        spriteBatch.setProjectionMatrix(mainCamera.projection);
+        spriteBatch.setTransformMatrix(mainCamera.view);
+        mainViewport.apply();
+        boardState.Draw(spriteBatch);
+
+        spriteBatch.end();
+    }
+
+    private void DrawUI(SpriteBatch spriteBatch) {
         spriteBatch.begin();
 
-        boardState.Draw(spriteBatch);
-        //font.draw(spriteBatch, "(" + camera.viewportWidth + ", " + player.GetWorldY() + ")" , (camera.position.x - (viewport.getWorldWidth() / 2)), (camera.position.y - (viewport.getWorldHeight() / 2) + 20));
-        controller.draw(spriteBatch, (camera.position.x - (viewport.getWorldWidth() / 2) + WORLD_SCALE), (camera.position.y - (viewport.getWorldHeight() / 2) + 20), 3 * WORLD_SCALE,  3 * WORLD_SCALE);
+        uiViewport.apply();
+        spriteBatch.setProjectionMatrix(uiCamera.projection);
+        spriteBatch.setTransformMatrix(uiCamera.view);
+        controller.Draw(spriteBatch);
+
+        float x = (uiCamera.position.x - uiViewport.getWorldWidth() / 2f);
+        float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + 20f;
+
+        font.draw(spriteBatch, "(" + Gdx.graphics.getWidth() + ", " + Gdx.graphics.getHeight() + ")" , x, y);
+        //font.draw(spriteBatch, "(" + resizeWidth + ", " + resizeHeight + ")" , (uiCamera.position.x), (uiCamera.position.y) + 20);
 
         spriteBatch.end();
     }
 
     @Override
     public void DrawDebug(ShapeRenderer renderer) {
-        renderer.setProjectionMatrix(camera.projection);
-        renderer.setTransformMatrix(camera.view);
+        renderer.setProjectionMatrix(mainCamera.projection);
+        renderer.setTransformMatrix(mainCamera.view);
         renderer.begin(ShapeRenderer.ShapeType.Line);
 
         boardState.DrawDebug(renderer);
@@ -142,5 +187,6 @@ public class GameScreen extends AbstractScreen {
     public void dispose() {
         super.dispose();
         font.dispose();
+        controller.dispose();
     }
 }

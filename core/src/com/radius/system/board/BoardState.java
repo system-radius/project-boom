@@ -81,16 +81,17 @@ public class BoardState extends GameObject {
 
     @Override
     public void Draw(SpriteBatch batch) {
+
+        for (Player player : players) {
+            player.Draw(batch);
+        }
+
         for (int i = 0; i < boardWidth; i++) {
             for (int j = 0; j < boardHeight; j++) {
                 if (board[i][j] != null) {
                     board[i][j].Draw(batch);
                 }
             }
-        }
-
-        for (Player player : players) {
-            player.Draw(batch);
         }
     }
 
