@@ -35,19 +35,26 @@ public class Joystick extends GameObject implements Disposable {
     }
 
     public void SetDragPosition(float x, float y) {
-        this.innerJoystickPosition.x = x - scale;
-        this.innerJoystickPosition.y = y - scale;
+        x -= scale;
+        y -= scale;
 
-        float tempX = (this.x - this.innerJoystickPosition.x);
-        tempX *= tempX;
-
-        float tempY = (this.y - this.innerJoystickPosition.y);
-        tempY *= tempY;
+        float dx = (x - this.x) - scale;
+        float dy = (y - this.y) - scale;
 
 
-        //mainCamera.position.x = MathUtils.clamp(mainCamera.position.x, effectiveViewportWidth, scaledWorldWidth - effectiveViewportWidth);
-        //mainCamera.position.y = MathUtils.clamp(mainCamera.position.y, effectiveViewportHeight, scaledWorldHeight - effectiveViewportHeight);
+        float dx2 = dx * dx;
+        float dy2 = dy * dy;
+        float c = (float)Math.sqrt(dx2 + dy2);
 
+        if (c >= 2 * scale) {
+            float tan = MathUtils.atan2(dy, dx);
+
+            this.innerJoystickPosition.x = this.x + (2 * scale * MathUtils.cos(tan)) + scale;
+            this.innerJoystickPosition.y = this.y + (2 * scale * MathUtils.sin(tan)) + scale;
+        } else {
+            this.innerJoystickPosition.x = x;
+            this.innerJoystickPosition.y = y;
+        }
     }
 
     @Override
