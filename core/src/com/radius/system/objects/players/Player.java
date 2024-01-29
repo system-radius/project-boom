@@ -226,16 +226,24 @@ public class Player extends BoomGameObject {
 
     private void UpdateDirection() {
 
+        Direction horizontalDirection = null;
+        Direction verticalDirection = null;
         if (velX > 0) {
-            direction = Direction.EAST;
+            horizontalDirection = Direction.EAST;
         } else if (velX < 0) {
-            direction = Direction.WEST;
+            horizontalDirection = Direction.WEST;
         }
 
         if (velY > 0) {
-            direction = Direction.NORTH;
+            verticalDirection = Direction.NORTH;
         } else if (velY < 0) {
-            direction = Direction.SOUTH;
+            verticalDirection = Direction.SOUTH;
+        }
+
+        if (horizontalDirection != null && verticalDirection != null) {
+            direction = Math.abs(velX) > Math.abs(velY) ? horizontalDirection : verticalDirection;
+        } else if (horizontalDirection != null || verticalDirection != null) {
+            direction = horizontalDirection == null ? verticalDirection : horizontalDirection;
         }
     }
 
