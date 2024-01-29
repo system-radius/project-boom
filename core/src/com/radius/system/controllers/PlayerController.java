@@ -33,6 +33,8 @@ public class PlayerController implements InputProcessor, Disposable {
 
     private final float scale;
 
+    private boolean isTouching;
+
     public PlayerController(Player player, Viewport viewport, float scale) {
         this.player = player;
         this.viewport = viewport;
@@ -122,12 +124,14 @@ public class PlayerController implements InputProcessor, Disposable {
         vector.x = screenX;
         vector.y = screenY;
         vector.set(camera.unproject(vector));
-        System.out.println("Touch down: (" + vector.x + ", " + vector.y + ")");
+        joystick.SetPosition(vector.x, vector.y);
+        isTouching = true;
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        isTouching = false;
         return false;
     }
 
@@ -141,7 +145,8 @@ public class PlayerController implements InputProcessor, Disposable {
         vector.x = screenX;
         vector.y = screenY;
         vector.set(camera.unproject(vector));
-        System.out.println("Drag: (" + vector.x + ", " + vector.y + ")");
+        joystick.SetDragPosition(vector.x, vector.y);
+
         return false;
     }
 
@@ -157,7 +162,9 @@ public class PlayerController implements InputProcessor, Disposable {
 
     public void Update(float delta) {
         joystick.Update(delta);
-        joystick.SetPosition(camera.position.x - (viewport.getWorldWidth() / 2f) + scale / 2f, camera.position.y - (viewport.getWorldHeight() / 2f) + scale / 2f);
+        if (!isTouching) {
+            joystick.SetPosition(camera.position.x - (viewport.getWorldWidth() / 2f) + 2.5f * scale, camera.position.y - (viewport.getWorldHeight() / 2f) + 2.5f * scale);
+        }
     }
 
     public void Draw(SpriteBatch batch) {

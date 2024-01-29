@@ -74,7 +74,6 @@ public class GameScreen extends AbstractScreen {
 
         mainViewport = new FitViewport(viewportWidth, viewportHeight, mainCamera);
         uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
-        //uiViewport = new FitViewport(viewportWidth, viewportHeight, uiCamera);
     }
 
     public void InitializeField() {
