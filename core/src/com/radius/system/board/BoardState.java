@@ -23,6 +23,10 @@ public class BoardState extends GameObject {
 
     private final List<Player> players;
 
+    private boolean hasEventA;
+
+    private boolean hasEventB;
+
     public BoardState(int boardWidth, int boardHeight) {
         super(0, 0);
 
@@ -62,6 +66,11 @@ public class BoardState extends GameObject {
         return blocks;
     }
 
+    public void SetEvents(boolean eventA, boolean eventB) {
+        hasEventA = eventA;
+        hasEventB = eventB;
+    }
+
     @Override
     public void Update(float delta) {
         for (int i = 0; i < boardWidth; i++) {
@@ -75,6 +84,10 @@ public class BoardState extends GameObject {
         for (Player player : players) {
             player.Update(delta);
             player.Collide(GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
+
+            if (hasEventA) {
+                player.SetBomb();
+            }
             //player.CollideExperimental(GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
         }
     }

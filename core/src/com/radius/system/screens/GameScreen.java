@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -14,8 +16,10 @@ import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.controllers.PlayerController;
 import com.radius.system.board.BoardState;
+import com.radius.system.objects.Burnable;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.players.Player;
+import com.radius.system.stages.GameStage;
 
 public class GameScreen extends AbstractScreen {
 
@@ -37,6 +41,8 @@ public class GameScreen extends AbstractScreen {
     private final float scaledWorldWidth = WORLD_WIDTH * WORLD_SCALE;
 
     private final float scaledWorldHeight = WORLD_HEIGHT * WORLD_SCALE;
+
+    private final GameStage stage;
 
     private OrthographicCamera mainCamera;
 
@@ -63,7 +69,20 @@ public class GameScreen extends AbstractScreen {
         InitializeView();
         InitializeField();
 
+        stage = new GameStage(uiViewport, WORLD_SCALE);
+        InitializeStage();
         UpdateCamera();
+    }
+
+    private void InitializeStage() {
+        player = new Player(1, 1, WORLD_SCALE);
+        boardState.AddToBoard(player);
+
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        controller = new PlayerController(player, uiViewport, WORLD_SCALE);
+        multiplexer.addProcessor(controller);
+        multiplexer.addProcessor(stage);
+        Gdx.input.setInputProcessor(multiplexer);
     }
 
     public void InitializeView() {
@@ -95,14 +114,6 @@ public class GameScreen extends AbstractScreen {
                 }
             }
         }
-
-        player = new Player(1, 1, WORLD_SCALE);
-        boardState.AddToBoard(player);
-
-        InputMultiplexer multiplexer = new InputMultiplexer();
-        controller = new PlayerController(player, uiViewport, WORLD_SCALE);
-        multiplexer.addProcessor(controller);
-        Gdx.input.setInputProcessor(multiplexer);
     }
 
     private void UpdateCamera() {
@@ -127,27 +138,33 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void show() {
-        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         mainCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     @Override
     public void resize(int width, int height) {
-        uiViewport.update(width, height);
+        stage.getViewport().update(width, height, true);
         mainViewport.update(width, height);
     }
 
     @Override
     public void Update(float delta) {
+        boardState.SetEvents(stage.HasEventA(), stage.HasEventB());
         boardState.Update(delta);
+
+        stage.ResetEventA();
+        stage.ResetEventB();
+
         UpdateCamera();
         controller.Update(delta);
+        stage.act(delta);
     }
 
     @Override
     public void Draw(SpriteBatch spriteBatch) {
         DrawObjects(spriteBatch);
         DrawUI(spriteBatch);
+        stage.draw();
     }
 
     private void DrawObjects(SpriteBatch spriteBatch) {
@@ -193,5 +210,6 @@ public class GameScreen extends AbstractScreen {
         super.dispose();
         font.dispose();
         controller.dispose();
+        stage.dispose();
     }
 }

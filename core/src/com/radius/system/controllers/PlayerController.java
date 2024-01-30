@@ -153,6 +153,10 @@ public class PlayerController implements InputProcessor, Disposable {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
+        if (!isTouching) {
+            return false;
+        }
+
         vector.x = screenX;
         vector.y = screenY;
         vector.set(camera.unproject(vector));

@@ -334,6 +334,12 @@ public class Player extends BoomGameObject {
         }
     }
 
+    public void SetBomb() {
+        float worldX = GetWorldX();
+        float worldY = GetWorldY();
+        System.out.println("Bomb has been planted at (" + worldX + ", " + worldY + ")");
+    }
+
     @Override
     public void dispose() {
         spriteSheet.dispose();
