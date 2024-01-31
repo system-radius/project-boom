@@ -138,6 +138,7 @@ public class GameScreen extends AbstractScreen {
     public void show() {
         mainCamera.setToOrtho(false, mainViewport.getWorldWidth(), mainViewport.getWorldHeight());
         mainCamera.update();
+        stage.RepositionButtons();
     }
 
     @Override
@@ -145,6 +146,7 @@ public class GameScreen extends AbstractScreen {
         stage.getViewport().update(width, height, true);
         mainViewport.update(width, height);
         mainCamera.update();
+        stage.RepositionButtons();
     }
 
     @Override
@@ -188,8 +190,8 @@ public class GameScreen extends AbstractScreen {
         float x = (uiCamera.position.x - uiViewport.getWorldWidth() / 2f);
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
-        font.draw(spriteBatch, "(" + Gdx.graphics.getWidth() + ", " + Gdx.graphics.getHeight() + ")" , x, y);
-        //font.draw(spriteBatch, "(" + mainCamera.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER + ", " + mainCamera.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER + ")" , x, y + WORLD_SCALE);
+        font.draw(spriteBatch, "(" + (Gdx.graphics.getWidth() / 4f) + ", " + Gdx.graphics.getHeight() + ")" , x, y);
+        font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
         //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
 
         spriteBatch.end();

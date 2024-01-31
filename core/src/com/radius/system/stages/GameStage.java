@@ -19,17 +19,26 @@ public class GameStage extends Stage {
 
     private final Image bButton;
 
+    private final Camera camera;
+
     private boolean hasEventA;
 
     private boolean hasEventB;
 
+    private float scale;
+
     public GameStage(Viewport viewport, float scale) {
         super(viewport);
         float buttonSize = 2f * scale;
+        this.scale = scale;
 
-        Camera camera = viewport.getCamera();
+        this.camera = viewport.getCamera();
 
-        aButton = CreateButton(aTexture, camera.position.x + viewport.getWorldWidth() / 3f + scale / 2f, camera.position.y - viewport.getWorldHeight() / 3f, buttonSize, buttonSize);
+        aButton = CreateButton(aTexture,
+                camera.position.x + viewport.getWorldWidth(),
+                camera.position.y - viewport.getWorldHeight() / 3f,
+                buttonSize, buttonSize);
+
         aButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -37,7 +46,11 @@ public class GameStage extends Stage {
             }
         });
 
-        bButton = CreateButton(bTexture, camera.position.x + viewport.getWorldWidth() / 4f - scale / 2f, camera.position.y - viewport.getWorldHeight() / 3f, buttonSize, buttonSize);
+        bButton = CreateButton(bTexture,
+                camera.position.x + viewport.getWorldWidth() - 15.5f * scale,
+                camera.position.y - viewport.getWorldHeight() / 3f,
+                buttonSize, buttonSize);
+
         bButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -72,6 +85,11 @@ public class GameStage extends Stage {
 
     public boolean HasEventB() {
         return hasEventB;
+    }
+
+    public void RepositionButtons() {
+        aButton.setPosition(getViewport().getWorldWidth() - 2.5f * scale, aButton.getY());
+        bButton.setPosition(getViewport().getWorldWidth() - 5f * scale, bButton.getY());
     }
 
     @Override
