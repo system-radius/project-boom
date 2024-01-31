@@ -7,7 +7,6 @@ import com.radius.system.objects.GameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.players.Player;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +85,7 @@ public class BoardState extends GameObject {
             player.Collide(GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
 
             if (hasEventA) {
-                player.SetBomb();
+                player.PlantBomb();
             }
             //player.CollideExperimental(GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
         }
