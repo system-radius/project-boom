@@ -39,7 +39,7 @@ public class GameScreen extends AbstractScreen {
 
     private final GameStage stage;
 
-    private OrthographicCamera mainCamera;
+    private GameCamera mainCamera;
 
     private OrthographicCamera uiCamera;
 
@@ -66,11 +66,11 @@ public class GameScreen extends AbstractScreen {
 
         stage = new GameStage(uiViewport, WORLD_SCALE);
         InitializeStage();
-        UpdateCamera();
     }
 
     private void InitializeStage() {
         player = new Player(1, 1, WORLD_SCALE);
+        player.AddCoordinateEventListener(mainCamera);
         boardState.AddToBoard(player);
 
         InputMultiplexer multiplexer = new InputMultiplexer();
@@ -81,7 +81,8 @@ public class GameScreen extends AbstractScreen {
     }
 
     public void InitializeView() {
-        mainCamera = new OrthographicCamera();
+        mainCamera = new GameCamera(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE);
+        mainCamera.SetZoom(ZOOM);
 
         uiCamera = new OrthographicCamera();
 
@@ -92,6 +93,11 @@ public class GameScreen extends AbstractScreen {
         uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
 
         mainCamera.position.set(scaledWorldWidth, scaledWorldHeight, 0);
+
+        uiCamera.position.x = mainCamera.position.x;
+        uiCamera.position.y = mainCamera.position.y;
+
+        uiCamera.update();
     }
 
     public void InitializeField() {
@@ -110,28 +116,6 @@ public class GameScreen extends AbstractScreen {
                 }
             }
         }
-    }
-
-    private void UpdateCamera() {
-        float effectiveViewportWidth = mainCamera.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER;
-        float effectiveViewportHeight = mainCamera.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER;
-
-        if (ZOOM >= 0.35f) {
-            mainCamera.position.x = player.GetX() * WORLD_SCALE;
-            mainCamera.position.y = player.GetY() * WORLD_SCALE;
-
-            mainCamera.position.x = MathUtils.clamp(mainCamera.position.x, effectiveViewportWidth, scaledWorldWidth - effectiveViewportWidth);
-            mainCamera.position.y = MathUtils.clamp(mainCamera.position.y, effectiveViewportHeight, scaledWorldHeight - effectiveViewportHeight);
-        }
-
-        if (initial) {
-            uiCamera.position.x = mainCamera.position.x;
-            uiCamera.position.y = mainCamera.position.y;
-
-            uiCamera.update();
-            initial = false;
-        }
-        mainCamera.update();
     }
 
     @Override
@@ -157,7 +141,6 @@ public class GameScreen extends AbstractScreen {
         stage.ResetEventA();
         stage.ResetEventB();
 
-        UpdateCamera();
         controller.Update(delta);
         stage.act(delta);
     }

@@ -11,10 +11,12 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
+import com.radius.system.events.CoordinateEventListener;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.utils.SegmentIntersector;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Player extends BoomGameObject {
@@ -127,12 +129,20 @@ public class Player extends BoomGameObject {
 
     private float thinHeight;
 
+    private float pastX;
+
+    private float pastY;
+
+    private final List<CoordinateEventListener> coordEventListeners;
+
     public Player(float x, float y, float scale) {
         super(' ', x, y);
 
         this.scale = scale;
         LoadAsset("img/tokoy_sprite_sheet.png");
         FixBounds();
+
+        coordEventListeners = new ArrayList<>();
     }
 
     private void FixBounds() {
@@ -334,6 +344,11 @@ public class Player extends BoomGameObject {
         }
     }
 
+    public void AddCoordinateEventListener(CoordinateEventListener listener) {
+        if (coordEventListeners.contains(listener)) return;
+        coordEventListeners.add(listener);
+    }
+
     public void PlantBomb() {
         float worldX = GetWorldX();
         float worldY = GetWorldY();
@@ -360,6 +375,12 @@ public class Player extends BoomGameObject {
         this.x += velX * delta;
         this.y += velY * delta;
 
+        if (pastX != x || pastY != y) {
+            FireCoordinateEvent();
+            pastX = x;
+            pastY = y;
+        }
+
         UpdateBounds();
     }
 
@@ -383,5 +404,11 @@ public class Player extends BoomGameObject {
         renderer.rect(southRect.x * scale, southRect.y * scale, southRect.width * scale, southRect.height * scale);
         renderer.rect(eastRect.x * scale, eastRect.y * scale, eastRect.width * scale, eastRect.height * scale);
         renderer.rect(westRect.x * scale, westRect.y * scale, westRect.width * scale, westRect.height * scale);
+    }
+
+    private void FireCoordinateEvent() {
+        for (CoordinateEventListener listener : coordEventListeners) {
+            listener.Trigger(x, y);
+        }
     }
 }
