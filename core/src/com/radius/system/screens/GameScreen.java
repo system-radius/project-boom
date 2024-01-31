@@ -26,10 +26,10 @@ public class GameScreen extends AbstractScreen {
 
     private final float VIEWPORT_HEIGHT = 9f;
 
-    private final float WORLD_SCALE = 24f;
+    private final float WORLD_SCALE = 20f;
 
     //private final float ZOOM = 0.25785f;
-    private final float ZOOM = 0.5f;
+    private final float ZOOM = 0.35f;
 
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
@@ -82,7 +82,6 @@ public class GameScreen extends AbstractScreen {
 
     public void InitializeView() {
         mainCamera = new OrthographicCamera();
-        mainCamera.position.set(0, 0, 0);
 
         uiCamera = new OrthographicCamera();
 
@@ -91,6 +90,8 @@ public class GameScreen extends AbstractScreen {
 
         mainViewport = new FitViewport(viewportWidth, viewportHeight, mainCamera);
         uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
+
+        mainCamera.position.set(scaledWorldWidth, scaledWorldHeight, 0);
     }
 
     public void InitializeField() {
@@ -115,11 +116,13 @@ public class GameScreen extends AbstractScreen {
         float effectiveViewportWidth = mainCamera.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER;
         float effectiveViewportHeight = mainCamera.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER;
 
-        mainCamera.position.x = player.GetX() * WORLD_SCALE;
-        mainCamera.position.y = player.GetY() * WORLD_SCALE;
+        if (ZOOM >= 0.35f) {
+            mainCamera.position.x = player.GetX() * WORLD_SCALE;
+            mainCamera.position.y = player.GetY() * WORLD_SCALE;
 
-        mainCamera.position.x = MathUtils.clamp(mainCamera.position.x, effectiveViewportWidth, scaledWorldWidth - effectiveViewportWidth);
-        mainCamera.position.y = MathUtils.clamp(mainCamera.position.y, effectiveViewportHeight, scaledWorldHeight - effectiveViewportHeight);
+            mainCamera.position.x = MathUtils.clamp(mainCamera.position.x, effectiveViewportWidth, scaledWorldWidth - effectiveViewportWidth);
+            mainCamera.position.y = MathUtils.clamp(mainCamera.position.y, effectiveViewportHeight, scaledWorldHeight - effectiveViewportHeight);
+        }
 
         if (initial) {
             uiCamera.position.x = mainCamera.position.x;
@@ -133,13 +136,15 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void show() {
-        mainCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mainCamera.setToOrtho(false, mainViewport.getWorldWidth(), mainViewport.getWorldHeight());
+        mainCamera.update();
     }
 
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
         mainViewport.update(width, height);
+        mainCamera.update();
     }
 
     @Override
@@ -181,10 +186,11 @@ public class GameScreen extends AbstractScreen {
         controller.Draw(spriteBatch);
 
         float x = (uiCamera.position.x - uiViewport.getWorldWidth() / 2f);
-        float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + 20f;
+        float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
         font.draw(spriteBatch, "(" + Gdx.graphics.getWidth() + ", " + Gdx.graphics.getHeight() + ")" , x, y);
-        //font.draw(spriteBatch, "(" + resizeWidth + ", " + resizeHeight + ")" , (uiCamera.position.x), (uiCamera.position.y) + 20);
+        //font.draw(spriteBatch, "(" + mainCamera.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER + ", " + mainCamera.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER + ")" , x, y + WORLD_SCALE);
+        //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
 
         spriteBatch.end();
     }
