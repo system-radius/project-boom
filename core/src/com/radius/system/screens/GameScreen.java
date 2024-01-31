@@ -20,7 +20,7 @@ public class GameScreen extends AbstractScreen {
 
     private final float WORLD_WIDTH = 31f;
 
-    private final float WORLD_HEIGHT = 31f;
+    private final float WORLD_HEIGHT = 17f;
 
     private final float VIEWPORT_WIDTH = 16f;
 
@@ -29,7 +29,7 @@ public class GameScreen extends AbstractScreen {
     private final float WORLD_SCALE = 20f;
 
     //private final float ZOOM = 0.25785f;
-    private final float ZOOM = 0.35f;
+    private final float ZOOM = 0.5f;
 
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
@@ -55,12 +55,11 @@ public class GameScreen extends AbstractScreen {
 
     private BitmapFont font;
 
-    private boolean initial;
+    private boolean maxZoomOut = false;
 
     public GameScreen() {
         font = new BitmapFont();
 
-        initial = true;
         InitializeView();
         InitializeField();
 
@@ -82,22 +81,46 @@ public class GameScreen extends AbstractScreen {
 
     public void InitializeView() {
         mainCamera = new GameCamera(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE);
-        mainCamera.SetZoom(ZOOM);
 
         uiCamera = new OrthographicCamera();
 
-        float viewportWidth = (WORLD_SCALE * VIEWPORT_WIDTH) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
-        float viewportHeight = (WORLD_SCALE * VIEWPORT_HEIGHT) / ZOOM / EFFECTIVE_VIEWPORT_DIVIDER;
+        float zoom = ZOOM;
+        if (maxZoomOut) {
+            zoom = ComputeZoomValue();
+        }
+
+        float viewportWidth = (WORLD_SCALE * VIEWPORT_WIDTH) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
+        float viewportHeight = (WORLD_SCALE * VIEWPORT_HEIGHT) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
+        mainCamera.SetZoom(zoom);
 
         mainViewport = new FitViewport(viewportWidth, viewportHeight, mainCamera);
         uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
 
-        mainCamera.position.set(scaledWorldWidth, scaledWorldHeight, 0);
+        mainCamera.position.set(scaledWorldWidth / 2, scaledWorldHeight / 2, 0);
 
         uiCamera.position.x = mainCamera.position.x;
         uiCamera.position.y = mainCamera.position.y;
 
         uiCamera.update();
+    }
+
+    private float ComputeZoomValue() {
+
+        float viewportWidth = 0;
+        float viewportHeight = 0;
+
+        float zoom = ZOOM;
+
+        do {
+            zoom -= 0.01f;
+
+            viewportWidth = (WORLD_SCALE * VIEWPORT_WIDTH) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
+            viewportHeight = (WORLD_SCALE * VIEWPORT_HEIGHT) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
+
+            System.out.println("zoom: " + zoom + " ---> " + (viewportWidth / WORLD_WIDTH) + ", " + (viewportHeight / WORLD_HEIGHT));
+        } while (viewportWidth / WORLD_WIDTH < WORLD_SCALE || viewportHeight / WORLD_HEIGHT < WORLD_SCALE);
+
+        return zoom;
     }
 
     public void InitializeField() {
@@ -120,8 +143,6 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void show() {
-        mainCamera.setToOrtho(false, mainViewport.getWorldWidth(), mainViewport.getWorldHeight());
-        mainCamera.update();
         stage.RepositionButtons();
     }
 
@@ -173,7 +194,7 @@ public class GameScreen extends AbstractScreen {
         float x = (uiCamera.position.x - uiViewport.getWorldWidth() / 2f);
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
-        font.draw(spriteBatch, "(" + (Gdx.graphics.getWidth() / 4f) + ", " + Gdx.graphics.getHeight() + ")" , x, y);
+        font.draw(spriteBatch, "(" + mainViewport.getWorldWidth() + ", " + mainViewport.getWorldHeight() + ")" , x, y);
         font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
         //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
 

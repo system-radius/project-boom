@@ -29,6 +29,10 @@ public class GameCamera extends OrthographicCamera implements CoordinateEventLis
 
     @Override
     public void Trigger(float x, float y) {
+        if (zoom < 0.35f) {
+            return;
+        }
+
         x *= scale;
         y *= scale;
 
@@ -39,6 +43,5 @@ public class GameCamera extends OrthographicCamera implements CoordinateEventLis
         this.position.y = MathUtils.clamp(y, effectiveViewportHeight, (worldHeight * scale) - effectiveViewportHeight);
 
         this.update();
-        System.out.println("Triggered camera movement (" + position.x + ", " + position.y + ")");
     }
 }
