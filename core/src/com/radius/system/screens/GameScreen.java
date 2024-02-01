@@ -68,7 +68,7 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void InitializeStage() {
-        player = new Player(1, 1, WORLD_SCALE);
+        player = new Player(0, 1, 1, WORLD_SCALE);
         player.AddCoordinateEventListener(mainCamera);
         boardState.AddToBoard(player);
 

@@ -2,9 +2,9 @@ package com.radius.system.screens;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
-import com.radius.system.events.CoordinateEventListener;
+import com.radius.system.events.MovementEventListener;
 
-public class GameCamera extends OrthographicCamera implements CoordinateEventListener {
+public class GameCamera extends OrthographicCamera implements MovementEventListener {
 
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
@@ -15,6 +15,8 @@ public class GameCamera extends OrthographicCamera implements CoordinateEventLis
     private final float scale;
 
     private float zoom = 0.35f;
+
+    private int watchId = 0;
 
     public GameCamera(float worldWidth, float worldHeight, float scale) {
         this.worldWidth = worldWidth;
@@ -27,8 +29,17 @@ public class GameCamera extends OrthographicCamera implements CoordinateEventLis
         this.zoom = zoom;
     }
 
+    public void SetWatchId(int watchId) {
+        this.watchId = watchId;
+    }
+
     @Override
-    public void Trigger(float x, float y) {
+    public void OnMove(int id, float x, float y) {
+
+        if (watchId != id) {
+            return;
+        }
+
         if (zoom < 0.35f) {
             return;
         }

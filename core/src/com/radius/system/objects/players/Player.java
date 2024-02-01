@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
-import com.radius.system.events.CoordinateEventListener;
+import com.radius.system.events.MovementEventListener;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.utils.SegmentIntersector;
@@ -133,10 +133,14 @@ public class Player extends BoomGameObject {
 
     private float pastY;
 
-    private final List<CoordinateEventListener> coordEventListeners;
+    private final List<MovementEventListener> coordEventListeners;
 
-    public Player(float x, float y, float scale) {
+    private final int id;
+
+    public Player(int id, float x, float y, float scale) {
         super(' ', x, y);
+
+        this.id = id;
 
         this.scale = scale;
         LoadAsset("img/tokoy_sprite_sheet.png");
@@ -344,7 +348,7 @@ public class Player extends BoomGameObject {
         }
     }
 
-    public void AddCoordinateEventListener(CoordinateEventListener listener) {
+    public void AddCoordinateEventListener(MovementEventListener listener) {
         if (coordEventListeners.contains(listener)) return;
         coordEventListeners.add(listener);
     }
@@ -407,8 +411,8 @@ public class Player extends BoomGameObject {
     }
 
     private void FireCoordinateEvent() {
-        for (CoordinateEventListener listener : coordEventListeners) {
-            listener.Trigger(x, y);
+        for (MovementEventListener listener : coordEventListeners) {
+            listener.OnMove(id, x, y);
         }
     }
 }
