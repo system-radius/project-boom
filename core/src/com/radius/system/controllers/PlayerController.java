@@ -1,54 +1,26 @@
 package com.radius.system.controllers;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.radius.system.board.BoardState;
-import com.radius.system.events.ButtonEventListener;
-import com.radius.system.events.MovementEventListener;
 import com.radius.system.objects.players.Player;
 
-public class PlayerController implements MovementEventListener, ButtonEventListener {
+public abstract class PlayerController {
 
-    private final BoardState boardState;
+    protected final BoardState boardState;
 
-    private final Player player;
+    protected final Player player;
 
-    private final int id;
-
-    private ButtonPressTrigger buttonA;
-
-    public PlayerController(int id, BoardState boardState, float scale) {
+    public PlayerController(BoardState boardState, Player player) {
         this.boardState = boardState;
-        this.id = id;
-
-        this.player = new Player(id, 1, 1, scale);
-        boardState.AddToBoard(player);
-
-        buttonA = new ButtonPressTrigger(id, 0, this);
+        this.player = player;
     }
 
     public Player GetPlayer() {
         return player;
     }
 
-    public ButtonPressTrigger GetButtonA() {
-        return buttonA;
-    }
+    public abstract void Update(float delta);
 
-    @Override
-    public void OnButtonPress(int id) {
-        if (id == 0) {
-            player.PlantBomb();
-        }
-    }
+    public abstract void Draw(Batch batch);
 
-    @Override
-    public void OnMove(int id, float x, float y) {
-        if (this.id != id) {
-            return;
-        }
-
-        player.SetVelX(x);
-        player.SetVelY(y);
-
-        player.Collide(boardState.GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
-    }
 }

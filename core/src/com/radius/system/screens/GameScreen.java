@@ -9,9 +9,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.radius.system.controllers.PlayerController;
+import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.board.BoardState;
+import com.radius.system.controllers.PlayerController;
 import com.radius.system.objects.blocks.Block;
+import com.radius.system.objects.players.Player;
 import com.radius.system.stages.GameStage;
 
 public class GameScreen extends AbstractScreen {
@@ -64,11 +66,11 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void InitializeStage() {
-        controller = new PlayerController(0, boardState, WORLD_SCALE);
+        controller = new HumanPlayerController(0, boardState, WORLD_SCALE);
         controller.GetPlayer().AddCoordinateEventListener(mainCamera);
 
-        stage.AddMovementEventListener(controller);
-        stage.AddButtonAListener(controller.GetButtonA());
+        stage.AddMovementEventListener((HumanPlayerController)controller);
+        stage.AddButtonAListener( ((HumanPlayerController) controller).GetButtonA());
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
