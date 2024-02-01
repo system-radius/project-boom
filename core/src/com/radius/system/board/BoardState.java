@@ -71,21 +71,10 @@ public class BoardState extends GameObject {
                 }
             }
         }
-
-        for (Player player : players) {
-            player.Update(delta);
-            player.Collide(GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
-            //player.CollideExperimental(GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
-        }
     }
 
     @Override
     public void Draw(Batch batch) {
-
-        for (Player player : players) {
-            player.Draw(batch);
-        }
-
         for (int i = 0; i < boardWidth; i++) {
             for (int j = 0; j < boardHeight; j++) {
                 if (board[i][j] != null) {

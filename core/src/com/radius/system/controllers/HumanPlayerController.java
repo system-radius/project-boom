@@ -45,11 +45,12 @@ public class HumanPlayerController extends PlayerController implements MovementE
 
     @Override
     public void Update(float delta) {
-
+        player.Update(delta);
+        player.Collide(boardState.GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
     }
 
     @Override
     public void Draw(Batch batch) {
-
+        player.Draw(batch);
     }
 }

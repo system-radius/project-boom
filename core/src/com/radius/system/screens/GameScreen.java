@@ -154,6 +154,7 @@ public class GameScreen extends AbstractScreen {
     @Override
     public void Update(float delta) {
         boardState.Update(delta);
+        controller.Update(delta);
 
         stage.act(delta);
     }
@@ -171,6 +172,7 @@ public class GameScreen extends AbstractScreen {
         spriteBatch.setTransformMatrix(mainCamera.view);
         mainViewport.apply();
         boardState.Draw(spriteBatch);
+        controller.Draw(spriteBatch);
 
         spriteBatch.end();
     }
