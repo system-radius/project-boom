@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -322,6 +323,8 @@ public class Player extends BoomGameObject {
                 this.x = (blockX + (blockWidth / scale));
             }
         }
+
+        FireCoordinateEvent();
     }
 
     public void CollideExperimental(List<Block> blocks) {
@@ -389,7 +392,7 @@ public class Player extends BoomGameObject {
     }
 
     @Override
-    public void Draw(SpriteBatch batch) {
+    public void Draw(Batch batch) {
 
         if (state == PlayerState.MOVING || state == PlayerState.DYING) {
             batch.draw(GetActiveAnimation().getKeyFrame(animationElapsedTime), x * scale, y * scale, scale, scale);

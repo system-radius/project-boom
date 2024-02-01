@@ -2,6 +2,7 @@ package com.radius.system.controllers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -65,7 +66,7 @@ public class Joystick extends GameObject implements Disposable {
     }
 
     @Override
-    public void Draw(SpriteBatch batch) {
+    public void Draw(Batch batch) {
         batch.draw(joystickOuter, x, y, 4 * scale, 4 * scale);
         batch.draw(joystickFill, innerJoystickPosition.x, innerJoystickPosition.y, 2 * scale, 2 * scale);
     }

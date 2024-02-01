@@ -1,5 +1,6 @@
 package com.radius.system.objects;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
@@ -24,7 +25,7 @@ public abstract class GameObject {
 
     public abstract void Update(float delta);
 
-    public abstract void Draw(SpriteBatch batch);
+    public abstract void Draw(Batch batch);
 
     public abstract void DrawDebug(ShapeRenderer renderer);
 

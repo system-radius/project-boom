@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -92,7 +93,7 @@ public class Block extends BoomGameObject {
     }
 
     @Override
-    public void Draw(SpriteBatch batch) {
+    public void Draw(Batch batch) {
         if (!burning) {
             batch.draw(animation.getKeyFrames()[0], x * width, y * height, width, height);
         }

@@ -1,13 +1,25 @@
 package com.radius.system.stages;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.radius.system.controllers.Joystick;
+import com.radius.system.enums.ControlKeys;
+import com.radius.system.events.ButtonEventListener;
+import com.radius.system.events.MovementEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GameStage extends Stage {
 
@@ -15,24 +27,47 @@ public class GameStage extends Stage {
 
     private final Texture bTexture = new Texture(Gdx.files.internal("img/B.png"));
 
+    private final Map<ControlKeys, Boolean> pressedKeys = new HashMap<>();
+
+    private final List<MovementEventListener> movementListeners = new ArrayList<>();
+
+    private final List<ButtonEventListener> buttonAListeners = new ArrayList<>();
+
+    private final List<ButtonEventListener> buttonBListeners = new ArrayList<>();
+
+    private final Vector3 vector;
+
+    private final float scale;
+
     private final Image aButton;
 
     private final Image bButton;
 
-    private final Camera camera;
+    private Viewport viewport;
 
-    private boolean hasEventA;
+    private Camera camera;
 
-    private boolean hasEventB;
+    private Joystick joystick;
 
-    private float scale;
+    private boolean isTouching;
 
-    public GameStage(Viewport viewport, float scale) {
+    private float movementX;
+
+    private float movementY;
+
+    private int id;
+
+    public GameStage(int id, Viewport viewport, float scale) {
         super(viewport);
+        this.id = id;
         float buttonSize = 2f * scale;
         this.scale = scale;
+        this.vector = new Vector3();
 
+        this.viewport = viewport;
         this.camera = viewport.getCamera();
+
+        joystick = new Joystick(camera.position.x - (Gdx.graphics.getWidth() / 2f), camera.position.y - (Gdx.graphics.getHeight() / 2f), scale);
 
         aButton = CreateButton(aTexture,
                 camera.position.x + viewport.getWorldWidth(),
@@ -42,7 +77,7 @@ public class GameStage extends Stage {
         aButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                hasEventA = true;
+                FireButtonEvent(buttonAListeners);
             }
         });
 
@@ -54,12 +89,16 @@ public class GameStage extends Stage {
         bButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                hasEventB = true;
+                FireButtonEvent(buttonBListeners);
             }
         });
 
         this.addActor(aButton);
         this.addActor(bButton);
+
+        for (ControlKeys key: ControlKeys.values()) {
+            pressedKeys.put(key, false);
+        }
     }
 
     private Image CreateButton(Texture texture, float x, float y, float width, float height) {
@@ -71,20 +110,48 @@ public class GameStage extends Stage {
         return image;
     }
 
-    public void ResetEventA() {
-        hasEventA = false;
+    private void FireButtonEvent(List<ButtonEventListener> listeners) {
+        for (ButtonEventListener listener : listeners) {
+            listener.OnButtonPress(id);
+        }
     }
 
-    public void ResetEventB() {
-        hasEventB = false;
+    private boolean ProcessKeyInput(ControlKeys currentKey, float directionality, boolean isPressed) {
+        if (pressedKeys.get(currentKey.GetOppositeKey())) {
+            return false;
+        }
+        pressedKeys.put(currentKey, isPressed);
+
+        switch (currentKey) {
+            case NORTH:
+            case SOUTH:
+                return ProcessYKeyInput(directionality, isPressed);
+            case EAST:
+            case WEST:
+                return ProcessXKeyInput(directionality, isPressed);
+            default:
+                // Do nothing just yet.
+        }
+
+        return true;
     }
 
-    public boolean HasEventA() {
-        return hasEventA;
+    private boolean ProcessXKeyInput(float directionality, boolean isPressed) {
+        movementX = isPressed ? directionality : 0;
+        FireMovementEvent();
+        return true;
     }
 
-    public boolean HasEventB() {
-        return hasEventB;
+    private boolean ProcessYKeyInput(float directionality, boolean isPressed) {
+        movementY = isPressed ? directionality : 0;
+        FireMovementEvent();
+        return true;
+    }
+
+    private void FireMovementEvent() {
+        for (MovementEventListener listener : movementListeners) {
+            listener.OnMove(id, movementX, movementY);
+        }
     }
 
     public void RepositionButtons() {
@@ -92,10 +159,131 @@ public class GameStage extends Stage {
         bButton.setPosition(getViewport().getWorldWidth() - 5f * scale, bButton.getY());
     }
 
+    public void AddMovementEventListener(MovementEventListener listener) {
+        movementListeners.add(listener);
+    }
+
+    public void AddButtonAListener(ButtonEventListener listener) {
+        buttonAListeners.add(listener);
+    }
+
+    public void AddButtonBListener(ButtonEventListener listener) {
+        buttonBListeners.add(listener);
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+
+        joystick.Update(delta);
+        if (!isTouching) {
+            joystick.SetPosition(camera.position.x - (viewport.getWorldWidth() / 2f) + 2.5f * scale, camera.position.y - (viewport.getWorldHeight() / 2f) + 2.5f * scale);
+        }
+    }
+
+    @Override
+    public void draw() {
+        super.draw();
+
+        Batch batch = getBatch();
+        batch.setProjectionMatrix(camera.combined);
+
+        batch.begin();
+        batch.setColor(1, 1, 1, 0.5f);
+        joystick.Draw(batch);
+        batch.setColor(1, 1, 1, 1f);
+        batch.end();
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+
+        switch (keycode) {
+            case Input.Keys.A:
+                return ProcessKeyInput(ControlKeys.WEST, -1, true);
+            case Input.Keys.D:
+                return ProcessKeyInput(ControlKeys.EAST, 1, true);
+            case Input.Keys.W:
+                return ProcessKeyInput(ControlKeys.NORTH, 1, true);
+            case Input.Keys.S:
+                return ProcessKeyInput(ControlKeys.SOUTH, -1, true);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+
+        switch (keycode) {
+            case Input.Keys.A:
+                return ProcessKeyInput(ControlKeys.WEST, 0, false);
+            case Input.Keys.D:
+                return ProcessKeyInput(ControlKeys.EAST, 0, false);
+            case Input.Keys.W:
+                return ProcessKeyInput(ControlKeys.NORTH, 0, false);
+            case Input.Keys.S:
+                return ProcessKeyInput(ControlKeys.SOUTH, 0, false);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        vector.x = screenX;
+        vector.y = screenY;
+        vector.set(camera.unproject(vector));
+
+        if (screenX < Gdx.graphics.getWidth() / 3f) {
+            joystick.SetPosition(vector.x, vector.y);
+            isTouching = true;
+            return true;
+        }
+
+        return super.touchDown(screenX, screenY, pointer, button);
+    }
+
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+
+        if (isTouching) {
+            movementX = 0;
+            movementY = 0;
+            FireMovementEvent();
+        }
+
+        isTouching = false;
+        return super.touchUp(screenX, screenY, pointer, button);
+    }
+
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        if (!isTouching) {
+            return super.touchDragged(screenX, screenY, pointer);
+        }
+
+        vector.x = screenX;
+        vector.y = screenY;
+        vector.set(camera.unproject(vector));
+
+        // Get new vector coordinates for joystick drag.
+        vector.set(joystick.SetDragPosition(vector.x, vector.y));
+
+        float velX = Math.round(((vector.x - joystick.GetX()) / (2 * scale) - 0.5f) * 10)/10f;
+        float velY = Math.round(((vector.y - joystick.GetY()) / (2 * scale) - 0.5f) * 10)/10f;
+        movementX = velX;
+        movementY = velY;
+        FireMovementEvent();
+
+        return true;
+    }
+
     @Override
     public void dispose() {
         aTexture.dispose();
         bTexture.dispose();
+        joystick.dispose();
         super.dispose();
     }
 

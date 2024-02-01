@@ -6,14 +6,12 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.controllers.PlayerController;
 import com.radius.system.board.BoardState;
 import com.radius.system.objects.blocks.Block;
-import com.radius.system.objects.players.Player;
 import com.radius.system.stages.GameStage;
 
 public class GameScreen extends AbstractScreen {
@@ -49,8 +47,6 @@ public class GameScreen extends AbstractScreen {
 
     private BoardState boardState;
 
-    private Player player;
-
     private PlayerController controller;
 
     private BitmapFont font;
@@ -63,18 +59,18 @@ public class GameScreen extends AbstractScreen {
         InitializeView();
         InitializeField();
 
-        stage = new GameStage(uiViewport, WORLD_SCALE);
+        stage = new GameStage(0, uiViewport, WORLD_SCALE);
         InitializeStage();
     }
 
     private void InitializeStage() {
-        player = new Player(0, 1, 1, WORLD_SCALE);
-        player.AddCoordinateEventListener(mainCamera);
-        boardState.AddToBoard(player);
+        controller = new PlayerController(0, boardState, WORLD_SCALE);
+        controller.GetPlayer().AddCoordinateEventListener(mainCamera);
+
+        stage.AddMovementEventListener(controller);
+        stage.AddButtonAListener(controller.GetButtonA());
 
         InputMultiplexer multiplexer = new InputMultiplexer();
-        controller = new PlayerController(player, uiViewport, WORLD_SCALE);
-        multiplexer.addProcessor(controller);
         multiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -117,7 +113,6 @@ public class GameScreen extends AbstractScreen {
             viewportWidth = (WORLD_SCALE * VIEWPORT_WIDTH) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
             viewportHeight = (WORLD_SCALE * VIEWPORT_HEIGHT) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
 
-            System.out.println("zoom: " + zoom + " ---> " + (viewportWidth / WORLD_WIDTH) + ", " + (viewportHeight / WORLD_HEIGHT));
         } while (viewportWidth / WORLD_WIDTH < WORLD_SCALE || viewportHeight / WORLD_HEIGHT < WORLD_SCALE);
 
         return zoom;
@@ -156,13 +151,8 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void Update(float delta) {
-        boardState.SetEvents(stage.HasEventA(), stage.HasEventB());
         boardState.Update(delta);
 
-        stage.ResetEventA();
-        stage.ResetEventB();
-
-        controller.Update(delta);
         stage.act(delta);
     }
 
@@ -189,7 +179,6 @@ public class GameScreen extends AbstractScreen {
         uiViewport.apply();
         spriteBatch.setProjectionMatrix(uiCamera.projection);
         spriteBatch.setTransformMatrix(uiCamera.view);
-        controller.Draw(spriteBatch);
 
         float x = (uiCamera.position.x - uiViewport.getWorldWidth() / 2f);
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
@@ -216,7 +205,6 @@ public class GameScreen extends AbstractScreen {
     public void dispose() {
         super.dispose();
         font.dispose();
-        controller.dispose();
         stage.dispose();
     }
 }
