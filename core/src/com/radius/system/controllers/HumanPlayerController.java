@@ -1,6 +1,7 @@
 package com.radius.system.controllers;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.radius.system.board.BoardState;
 import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.MovementEventListener;
@@ -32,15 +33,13 @@ public class HumanPlayerController extends PlayerController implements MovementE
     }
 
     @Override
-    public void OnMove(int id, float x, float y) {
+    public void OnMove(int id, float velX, float velY) {
         if (this.id != id) {
             return;
         }
 
-        player.SetVelX(x);
-        player.SetVelY(y);
-
-        player.Collide(boardState.GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
+        player.SetVelX(velX);
+        player.SetVelY(velY);
     }
 
     @Override
@@ -52,5 +51,15 @@ public class HumanPlayerController extends PlayerController implements MovementE
     @Override
     public void Draw(Batch batch) {
         player.Draw(batch);
+    }
+
+    @Override
+    public void DrawDebug(ShapeRenderer renderer) {
+        player.DrawDebug(renderer);
+    }
+
+    @Override
+    public void dispose() {
+        player.dispose();
     }
 }

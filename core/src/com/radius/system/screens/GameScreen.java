@@ -15,6 +15,7 @@ import com.radius.system.controllers.PlayerController;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.players.Player;
 import com.radius.system.stages.GameStage;
+import com.radius.system.states.GameState;
 
 public class GameScreen extends AbstractScreen {
 
@@ -37,19 +38,17 @@ public class GameScreen extends AbstractScreen {
 
     private final float scaledWorldHeight = WORLD_HEIGHT * WORLD_SCALE;
 
-    private final GameStage stage;
+    private GameStage stage;
 
     private GameCamera mainCamera;
+
+    private GameState gameState;
 
     private OrthographicCamera uiCamera;
 
     private Viewport mainViewport;
 
     private Viewport uiViewport;
-
-    private BoardState boardState;
-
-    private PlayerController controller;
 
     private BitmapFont font;
 
@@ -59,25 +58,19 @@ public class GameScreen extends AbstractScreen {
         font = new BitmapFont();
 
         InitializeView();
-        InitializeField();
-
-        stage = new GameStage(0, uiViewport, WORLD_SCALE);
         InitializeStage();
+        InitializeGameState();
     }
 
     private void InitializeStage() {
-        controller = new HumanPlayerController(0, boardState, WORLD_SCALE);
-        controller.GetPlayer().AddCoordinateEventListener(mainCamera);
-
-        stage.AddMovementEventListener((HumanPlayerController)controller);
-        stage.AddButtonAListener( ((HumanPlayerController) controller).GetButtonA());
+        stage = new GameStage(0, uiViewport, WORLD_SCALE);;
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(multiplexer);
     }
 
-    public void InitializeView() {
+    private void InitializeView() {
         mainCamera = new GameCamera(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE);
 
         uiCamera = new OrthographicCamera();
@@ -120,22 +113,8 @@ public class GameScreen extends AbstractScreen {
         return zoom;
     }
 
-    public void InitializeField() {
-
-        float spacing = 2f; // Allows for leaving spaces when generating hard blocks.
-        boardState = new BoardState((int)WORLD_WIDTH, (int)WORLD_HEIGHT);
-
-        for(int x = 0; x < WORLD_WIDTH; x++) {
-            for(int y = 0; y < WORLD_HEIGHT; y++) {
-                if (x == 0 || y == 0 || x + 1 == WORLD_WIDTH || y + 1 == WORLD_HEIGHT) {
-                    // Create permanent blocks.
-                    boardState.AddToBoard(new Block(x, y, WORLD_SCALE, WORLD_SCALE));
-                } else if (x % spacing == 0 && y % spacing == 0) {
-                    // Create hard blocks.
-                    boardState.AddToBoard(new Block(x, y, WORLD_SCALE, WORLD_SCALE));
-                }
-            }
-        }
+    private void InitializeGameState() {
+        gameState = new GameState(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE, stage, mainCamera);
     }
 
     @Override
@@ -153,9 +132,7 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void Update(float delta) {
-        boardState.Update(delta);
-        controller.Update(delta);
-
+        gameState.Update(delta);
         stage.act(delta);
     }
 
@@ -171,8 +148,7 @@ public class GameScreen extends AbstractScreen {
         spriteBatch.setProjectionMatrix(mainCamera.projection);
         spriteBatch.setTransformMatrix(mainCamera.view);
         mainViewport.apply();
-        boardState.Draw(spriteBatch);
-        controller.Draw(spriteBatch);
+        gameState.Draw(spriteBatch);
 
         spriteBatch.end();
     }
@@ -200,7 +176,7 @@ public class GameScreen extends AbstractScreen {
         renderer.setTransformMatrix(mainCamera.view);
         renderer.begin(ShapeRenderer.ShapeType.Line);
 
-        boardState.DrawDebug(renderer);
+        gameState.DrawDebug(renderer);
 
         renderer.end();
     }
@@ -210,5 +186,6 @@ public class GameScreen extends AbstractScreen {
         super.dispose();
         font.dispose();
         stage.dispose();
+        gameState.dispose();
     }
 }
