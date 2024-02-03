@@ -174,6 +174,8 @@ public class GameScreen extends AbstractScreen {
     public void DrawDebug(ShapeRenderer renderer) {
         renderer.setProjectionMatrix(mainCamera.projection);
         renderer.setTransformMatrix(mainCamera.view);
+        mainViewport.apply();
+
         renderer.begin(ShapeRenderer.ShapeType.Line);
 
         gameState.DrawDebug(renderer);

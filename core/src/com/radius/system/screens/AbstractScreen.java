@@ -35,7 +35,7 @@ public abstract class AbstractScreen extends ScreenAdapter {
         Update(delta);
         ClearScreen();
         Draw(spriteBatch);
-        //DrawDebug(renderer);
+        DrawDebug(renderer);
     }
 
     @Override

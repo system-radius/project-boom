@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.radius.system.enums.BoardRep;
 import com.radius.system.objects.BoomGameObject;
 
 public class Block extends BoomGameObject {
@@ -39,7 +40,11 @@ public class Block extends BoomGameObject {
             TextureRegion.split(BLOCKS_SPRITE_SHEET, 32, 32);
 
     public Block(float x, float y, float width, float height) {
-        super('#', x, y);
+        this(BoardRep.PERMANENT_BLOCK, x, y, width, height);
+    }
+
+    public Block(BoardRep rep, float x, float y, float width, float height) {
+        super(rep, x, y);
 
         this.width = width;
         this.height = height;
@@ -65,6 +70,10 @@ public class Block extends BoomGameObject {
         frames[0] = REGIONS[0][6];
 
         animation = new Animation<>(0, frames);
+    }
+
+    public boolean HasActiveCollision() {
+        return true;
     }
 
     @Override

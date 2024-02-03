@@ -15,10 +15,16 @@ public abstract class PlayerController implements Disposable {
     public PlayerController(BoardState boardState, Player player) {
         this.boardState = boardState;
         this.player = player;
+
+        boardState.AddToBoard(player);
     }
 
     public Player GetPlayer() {
         return player;
+    }
+
+    public final void PlantBomb() {
+        boardState.AddBombToBoard(player.PlantBomb(boardState));
     }
 
     public abstract void Update(float delta);

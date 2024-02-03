@@ -1,22 +1,23 @@
 package com.radius.system.objects;
 
 import com.badlogic.gdx.utils.Disposable;
+import com.radius.system.enums.BoardRep;
 
 public abstract class BoomGameObject extends GameObject implements Disposable, Burnable {
 
-    protected char charRep;
+    protected BoardRep rep;
 
     protected float animationElapsedTime;
 
     protected int life;
 
-    public BoomGameObject(char charRep, float x, float y) {
+    public BoomGameObject(BoardRep rep, float x, float y) {
         super(x, y);
-        this.charRep = charRep;
+        this.rep = rep;
     }
 
-    public char GetCharRep() {
-        return charRep;
+    public BoardRep GetRep() {
+        return rep;
     }
 
 }

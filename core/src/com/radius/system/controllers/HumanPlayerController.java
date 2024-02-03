@@ -9,6 +9,8 @@ import com.radius.system.objects.players.Player;
 
 public class HumanPlayerController extends PlayerController implements MovementEventListener, ButtonEventListener {
 
+    private final static int BUTTON_A = 0;
+
     private final int id;
 
     private ButtonPressTrigger buttonA;
@@ -16,8 +18,6 @@ public class HumanPlayerController extends PlayerController implements MovementE
     public HumanPlayerController(int id, BoardState boardState, float scale) {
         super(boardState, new Player(id, 1, 1, scale));
         this.id = id;
-
-        boardState.AddToBoard(player);
         buttonA = new ButtonPressTrigger(id, 0, this);
     }
 
@@ -27,8 +27,8 @@ public class HumanPlayerController extends PlayerController implements MovementE
 
     @Override
     public void OnButtonPress(int id) {
-        if (id == 0) {
-            player.PlantBomb();
+        if (id == BUTTON_A) {
+            PlantBomb();
         }
     }
 

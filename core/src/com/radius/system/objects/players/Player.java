@@ -5,14 +5,17 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
+import com.radius.system.board.BoardState;
+import com.radius.system.enums.BoardRep;
+import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
 import com.radius.system.events.MovementEventListener;
+import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.utils.SegmentIntersector;
@@ -41,6 +44,10 @@ public class Player extends BoomGameObject {
      * The amount of time to watch the player die.
      */
     private static final float DYING_TIMER = 2f;
+
+    private final List<MovementEventListener> coordEventListeners;
+
+    private final List<Bomb> bombs;
 
     /**
      * The top collision bound.
@@ -134,12 +141,14 @@ public class Player extends BoomGameObject {
 
     private float pastY;
 
-    private final List<MovementEventListener> coordEventListeners;
+    private int bombStock = 1;
+
+    private int firePower = 3;
 
     private final int id;
 
     public Player(int id, float x, float y, float scale) {
-        super(' ', x, y);
+        super(BoardRep.PLAYER, x, y);
 
         this.id = id;
 
@@ -148,6 +157,7 @@ public class Player extends BoomGameObject {
         FixBounds();
 
         coordEventListeners = new ArrayList<>();
+        bombs = new ArrayList<>();
     }
 
     private void FixBounds() {
@@ -303,8 +313,25 @@ public class Player extends BoomGameObject {
         return GetWorldPosition(y, scale);
     }
 
+    public int GetFirePower() {
+        return firePower;
+    }
+
+    public int GetBombStock() {
+        return bombStock - bombs.size();
+    }
+
+    public Rectangle GetCollisionRect() {
+        return collisionRect;
+    }
+
     public void Collide(List<Block> blocks) {
         for (Block block : blocks) {
+
+            if (!block.HasActiveCollision()) {
+                continue;
+            }
+
             Rectangle blockBounds = block.GetBounds();
             float blockX = block.GetX();
             float blockY = block.GetY();
@@ -356,10 +383,22 @@ public class Player extends BoomGameObject {
         coordEventListeners.add(listener);
     }
 
-    public void PlantBomb() {
-        float worldX = GetWorldX();
-        float worldY = GetWorldY();
-        System.out.println("Bomb has been planted at (" + worldX + ", " + worldY + ")");
+    public Bomb PlantBomb(BoardState boardState) {
+        int worldX = GetWorldX();
+        int worldY = GetWorldY();
+
+        if (boardState.GetBoardEntry(worldX, worldY) != BoardRep.EMPTY) {
+            return null;
+        }
+
+        Bomb bomb = new Bomb(this, worldX, worldY, scale, scale, scale);
+        bombs.add(bomb);
+
+        return bomb;
+    }
+
+    public void RemoveBomb(Bomb bomb) {
+        bombs.remove(bomb);
     }
 
     @Override
