@@ -328,7 +328,7 @@ public class Player extends BoomGameObject {
     public void Collide(List<Block> blocks) {
         for (Block block : blocks) {
 
-            if (!block.HasActiveCollision()) {
+            if (!block.HasActiveCollision(this)) {
                 continue;
             }
 

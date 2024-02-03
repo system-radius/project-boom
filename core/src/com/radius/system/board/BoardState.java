@@ -65,6 +65,8 @@ public class BoardState extends GameObject {
 
         AddToBoard(bomb);
         bombs.add(bomb);
+
+        bomb.AddPlayerCollision(players);
     }
 
     public void AddToBoard(Player player) {
@@ -152,7 +154,12 @@ public class BoardState extends GameObject {
     public void Draw(Batch batch) {
 
         for (int i = 0; i < bombs.size(); i++) {
-            bombs.get(i).Draw(batch);
+            Bomb bomb = bombs.get(i);
+            if (bomb.IsExploded()) {
+                continue;
+            }
+
+            bomb.Draw(batch);
         }
 
         for (int i = 0; i < boardWidth; i++) {

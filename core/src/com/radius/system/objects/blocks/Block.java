@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.objects.BoomGameObject;
+import com.radius.system.objects.players.Player;
 
 public class Block extends BoomGameObject {
 
@@ -72,7 +73,7 @@ public class Block extends BoomGameObject {
         animation = new Animation<>(0, frames);
     }
 
-    public boolean HasActiveCollision() {
+    public boolean HasActiveCollision(Player player) {
         return true;
     }
 

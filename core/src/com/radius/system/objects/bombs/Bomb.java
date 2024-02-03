@@ -18,6 +18,11 @@ import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.players.Player;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class Bomb extends Block {
 
     public static final Texture BOMB_TEXTURE = new Texture(Gdx.files.internal("img/bomb.png"));
@@ -32,13 +37,13 @@ public class Bomb extends Block {
 
     protected static final float FRAME_DURATION_BREATHING = 1f / 5f;
 
-    protected static final float FRAME_DURATION_EXPLODING = 1f / 5f;
-
     protected static final float FRAME_DURATION_FIRE = 1f / 7.5f;
 
-    private static final float WAIT_TIMER = 3;
+    private static final float WAIT_TIMER = 3f;
 
     private static final float EXPLOSION_TIMER = 1f;
+
+    protected final Map<Player, Boolean> playerCollisions = new HashMap<>();
 
     protected final Player owner;
 
@@ -228,9 +233,25 @@ public class Bomb extends Block {
                 Intersector.overlaps(fireStreamSouthBound, rect);
     }
 
+    public void AddPlayerCollision(List<Player> players) {
+        for (Player player : players) {
+            playerCollisions.put(player, !Intersector.overlaps(player.GetCollisionRect(), bounds));
+        }
+    }
+
+    public void UpdatePlayerCollision() {
+        for (Player player : playerCollisions.keySet()) {
+            if (playerCollisions.get(player)) {
+                continue;
+            }
+
+            playerCollisions.put(player, !Intersector.overlaps(player.GetCollisionRect(), bounds));
+        }
+    }
+
     @Override
-    public boolean HasActiveCollision() {
-        return false;
+    public boolean HasActiveCollision(Player player) {
+        return playerCollisions.get(player);
     }
 
     @Override
@@ -252,6 +273,7 @@ public class Bomb extends Block {
             case BREATHING:
             case SET_TO_EXPLODE:
                 UpdateBreathing(delta);
+                UpdatePlayerCollision();
                 break;
             case EXPLODING:
                 UpdateExploding(delta);
