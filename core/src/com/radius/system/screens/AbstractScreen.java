@@ -19,6 +19,8 @@ public abstract class AbstractScreen extends ScreenAdapter {
 
     protected int screenHeight = Gdx.graphics.getHeight();
 
+    protected boolean debug = false;
+
     public void ClearScreen() {
         Gdx.gl.glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -35,7 +37,10 @@ public abstract class AbstractScreen extends ScreenAdapter {
         Update(delta);
         ClearScreen();
         Draw(spriteBatch);
-        DrawDebug(renderer);
+
+        if (debug) {
+            DrawDebug(renderer);
+        }
     }
 
     @Override
