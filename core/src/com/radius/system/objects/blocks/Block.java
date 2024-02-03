@@ -40,18 +40,18 @@ public class Block extends BoomGameObject {
     protected static final TextureRegion[][] REGIONS =
             TextureRegion.split(BLOCKS_SPRITE_SHEET, 32, 32);
 
-    public Block(float x, float y, float width, float height) {
-        this(BoardRep.PERMANENT_BLOCK, x, y, width, height);
+    public Block(int fieldIndex, float x, float y, float width, float height) {
+        this(BoardRep.PERMANENT_BLOCK, fieldIndex, x, y, width, height);
     }
 
-    public Block(BoardRep rep, float x, float y, float width, float height) {
+    public Block(BoardRep rep, int fieldIndex, float x, float y, float width, float height) {
         super(rep, x, y);
 
         this.width = width;
         this.height = height;
 
         this.bounds = new Rectangle(this.x, this.y, 1, 1);
-        Initialize();
+        Initialize(fieldIndex);
     }
 
     public float GetWidth() {
@@ -66,9 +66,13 @@ public class Block extends BoomGameObject {
         return bounds;
     }
 
-    protected void Initialize() {
+    protected void Initialize(int fieldIndex) {
+        if (fieldIndex < 0) {
+            return;
+        }
+
         TextureRegion[] frames = new TextureRegion[1];
-        frames[0] = REGIONS[0][6];
+        frames[0] = REGIONS[fieldIndex][6];
 
         animation = new Animation<>(0, frames);
     }

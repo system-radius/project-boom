@@ -94,7 +94,7 @@ public class Bomb extends Block {
     }
 
     public Bomb(BombType bombType, Player player, float x, float y, float width, float height, float scale) {
-        super(BoardRep.BOMB, x, y, width, height);
+        super(BoardRep.BOMB, -1, x, y, width, height);
 
         this.owner = player;
         this.range = player.GetFirePower();
