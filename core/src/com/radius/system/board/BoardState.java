@@ -145,6 +145,13 @@ public class BoardState extends GameObject {
             for (int j = 0; j < boardHeight; j++) {
                 if (board[i][j] != null) {
                     board[i][j].Update(delta);
+
+                    if (board[i][j] instanceof Block) {
+                        Block block = (Block) board[i][j];
+                        if (block.IsDestroyed()) {
+                            RemoveFromBoard(block);
+                        }
+                    }
                 }
             }
         }

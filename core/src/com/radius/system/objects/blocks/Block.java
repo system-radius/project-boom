@@ -13,9 +13,13 @@ import com.radius.system.enums.BoardRep;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.players.Player;
 
+import java.util.Random;
+
 public class Block extends BoomGameObject {
 
     public static final Texture BLOCKS_SPRITE_SHEET = new Texture(Gdx.files.internal("img/blocks.png"));
+
+    protected static final Random randomizer = new Random(System.currentTimeMillis());
 
     protected static final float DESTROY_TIMER = 1f;
 
@@ -81,6 +85,10 @@ public class Block extends BoomGameObject {
         return true;
     }
 
+    public boolean IsDestroyed() {
+        return destroyed;
+    }
+
     @Override
     public void dispose() {
         // Nothing to do here as the sprite sheet is to be disposed outside the class.
@@ -110,7 +118,10 @@ public class Block extends BoomGameObject {
     public void Draw(Batch batch) {
         if (!burning) {
             batch.draw(animation.getKeyFrames()[0], x * width, y * height, width, height);
+            return;
         }
+
+        batch.draw(animation.getKeyFrame(animationElapsedTime), x * width, y * height, width, height);
     }
 
     @Override

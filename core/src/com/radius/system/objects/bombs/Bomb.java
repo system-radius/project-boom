@@ -83,6 +83,8 @@ public class Bomb extends Block {
 
     protected float range;
 
+    protected boolean burnt = false;
+
     protected BombState state = BombState.BREATHING;
 
     private float preExplosionTime = 0f;
@@ -187,6 +189,10 @@ public class Bomb extends Block {
 
     public void BurnObjects(BoardState boardState) {
 
+        if (burnt) {
+            return;
+        }
+
         int x = (int) this.x;
         int y = (int) this.y;
 
@@ -196,6 +202,8 @@ public class Bomb extends Block {
             BurnObject(boardState, i, (int) rangeWest, x - i, y);
             BurnObject(boardState, i, (int) rangeEast, x + i, y);
         }
+
+        burnt = true;
     }
 
     protected void BurnObject(BoardState boardState, int counter, int range, int x, int y) {
@@ -204,7 +212,7 @@ public class Bomb extends Block {
         }
 
         BoomGameObject object = boardState.GetBoardObject(x, y);
-        if (object != null) {
+        if (object != null && (!burnt || object instanceof Bomb)) {
             object.Burn();
         }
     }
