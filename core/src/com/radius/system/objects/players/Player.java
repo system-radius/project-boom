@@ -115,7 +115,7 @@ public class Player extends BoomGameObject {
      * The player's current speed level. To avoid having the player jump over walls dues to too
      * much computation using the velocity values, the maximum speed level is up to 5.
      */
-    protected float speedLevel = 4f;
+    protected float speedLevel = 2.5f;
 
     /**
      * The current scale value, provided on the creation of this object, relevant for the creation

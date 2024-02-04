@@ -58,6 +58,8 @@ public class GameStage extends Stage {
 
     private int id;
 
+    private int joystickPointer = -1;
+
     public GameStage(int id, Viewport viewport, float scale) {
         super(viewport);
         this.id = id;
@@ -72,7 +74,7 @@ public class GameStage extends Stage {
 
         aButton = CreateButton(aTexture,
                 camera.position.x + viewport.getWorldWidth(),
-                camera.position.y - viewport.getWorldHeight() / 3f,
+                camera.position.y - viewport.getWorldHeight() / 3.5f,
                 buttonSize, buttonSize);
 
         aButton.addListener(new ClickListener() {
@@ -91,6 +93,8 @@ public class GameStage extends Stage {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 FireButtonEvent(buttonBListeners);
+                // Remove this from here.
+                joystick.dynamicPosition = !joystick.dynamicPosition;;
             }
         });
 
@@ -178,7 +182,7 @@ public class GameStage extends Stage {
 
         joystick.Update(delta);
         if (!isTouching) {
-            joystick.SetPosition(camera.position.x - (viewport.getWorldWidth() / 2f) + 2.5f * scale, camera.position.y - (viewport.getWorldHeight() / 2f) + 2.5f * scale);
+            joystick.SetPosition(camera.position.x - (viewport.getWorldWidth() / 2f) + 3f * scale, camera.position.y - (viewport.getWorldHeight() / 2f) + 3f * scale, true);
         }
     }
 
@@ -236,9 +240,10 @@ public class GameStage extends Stage {
         vector.y = screenY;
         vector.set(camera.unproject(vector));
 
-        if (screenX < Gdx.graphics.getWidth() / 3f) {
-            joystick.SetPosition(vector.x, vector.y);
+        if (screenX < Gdx.graphics.getWidth() / 3f && joystickPointer < 0) {
+            joystick.SetPosition(vector.x, vector.y, false);
             isTouching = true;
+            joystickPointer = pointer;
             return true;
         }
 
@@ -247,20 +252,20 @@ public class GameStage extends Stage {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-
-        if (isTouching) {
+        if (isTouching && pointer == joystickPointer) {
+            joystickPointer = -1;
             movementX = 0;
             movementY = 0;
             FireMovementEvent();
+            isTouching = false;
         }
 
-        isTouching = false;
         return super.touchUp(screenX, screenY, pointer, button);
     }
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if (!isTouching) {
+        if (!isTouching || joystickPointer != pointer) {
             return super.touchDragged(screenX, screenY, pointer);
         }
 
@@ -271,8 +276,11 @@ public class GameStage extends Stage {
         // Get new vector coordinates for joystick drag.
         vector.set(joystick.SetDragPosition(vector.x, vector.y));
 
-        float velX = Math.round(((vector.x - joystick.GetX()) / (2 * scale) - 0.5f) * 10)/10f;
-        float velY = Math.round(((vector.y - joystick.GetY()) / (2 * scale) - 0.5f) * 10)/10f;
+        float modifier = 0.5f;
+        float divider = 10f;
+
+        float velX = Math.round(((vector.x - joystick.GetX()) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
+        float velY = Math.round(((vector.y - joystick.GetY()) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
         movementX = velX;
         movementY = velY;
         FireMovementEvent();
