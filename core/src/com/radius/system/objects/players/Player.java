@@ -42,7 +42,7 @@ public class Player extends BoomGameObject {
     /**
      * The maximum speed that a player can have.
      */
-    public static final float SPEED_LIMIT = 4f;
+    public static final float SPEED_LIMIT = 3.5f;
 
     /**
      * The timer until the player respawns after dying.
@@ -390,12 +390,12 @@ public class Player extends BoomGameObject {
     }
 
     public void IncreaseMovementSpeed() {
-        if (speedLevel + 0.5f > SPEED_LIMIT) {
+        if (speedLevel + 0.1f > SPEED_LIMIT) {
             speedLevel = SPEED_LIMIT;
             return;
         }
 
-        speedLevel += 0.5f;
+        speedLevel += 0.1f;
     }
 
     public void ChangeBombType() {
