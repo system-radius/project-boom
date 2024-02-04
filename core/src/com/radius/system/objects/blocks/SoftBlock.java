@@ -17,4 +17,10 @@ public class SoftBlock extends HardBlock {
 
         animation = new Animation<>(1f/3f, frames);
     }
+
+    @Override
+    protected void Destroy() {
+        super.Destroy();
+        hasBonus = randomizer.nextInt(100) >= 75;
+    }
 }

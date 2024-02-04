@@ -18,7 +18,7 @@ import com.radius.system.events.MovementEventListener;
 import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.blocks.Block;
-import com.radius.system.utils.SegmentIntersector;
+import com.radius.system.objects.blocks.Bonus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,19 @@ public class Player extends BoomGameObject {
     private static final float FRAME_DURATION_DYING = 1f / 4f;
 
     /**
-     * The max speed + two. This is mainly used for computations that rely on the remaining speed
-     * levels that are not acquired yet. Leaving with 2 on full speed.
+     * The maximum amount of bombs that a player can have.
      */
-    public static final float SPEED_COUNTER = 5f;
+    public static final int BOMB_STOCK_LIMIT = 20;
+
+    /**
+     * THe maximum range for the fire power of the player.
+     */
+    public static final int FIRE_POWER_LIMIT = 100;
+
+    /**
+     * The maximum speed that a player can have.
+     */
+    public static final float SPEED_LIMIT = 4f;
 
     /**
      * The timer until the player respawns after dying.
@@ -115,7 +124,7 @@ public class Player extends BoomGameObject {
      * The player's current speed level. To avoid having the player jump over walls dues to too
      * much computation using the velocity values, the maximum speed level is up to 5.
      */
-    protected float speedLevel = 2.5f;
+    protected float speedLevel = 0.5f;
 
     /**
      * The current scale value, provided on the creation of this object, relevant for the creation
@@ -143,7 +152,9 @@ public class Player extends BoomGameObject {
 
     private int bombStock = 1;
 
-    private int firePower = 3;
+    private int firePower = 1;
+
+    private BombType bombType = BombType.NORMAL;
 
     private final int id;
 
@@ -328,11 +339,17 @@ public class Player extends BoomGameObject {
     public void Collide(List<Block> blocks) {
         for (Block block : blocks) {
 
+            Rectangle blockBounds = block.GetBounds();
+
+            if (block instanceof Bonus && Intersector.overlaps(blockBounds, collisionRect)) {
+                ((Bonus) block).ApplyBonus(this);
+                continue;
+            }
+
             if (!block.HasActiveCollision(this)) {
                 continue;
             }
 
-            Rectangle blockBounds = block.GetBounds();
             float blockX = block.GetX();
             float blockY = block.GetY();
             float blockWidth = block.GetWidth();
@@ -354,28 +371,35 @@ public class Player extends BoomGameObject {
         FireCoordinateEvent();
     }
 
-    public void CollideExperimental(List<Block> blocks) {
-        for (Block block : blocks) {
-            Rectangle blockBounds = block.GetBounds();
-            float blockX = block.GetX();
-            float blockY = block.GetY();
-            float blockWidth = block.GetWidth();
-            float blockHeight = block.GetHeight();
-
-            int collision = SegmentIntersector.HasIntersection(collisionRect, blockBounds);
-
-            if ((collision & SegmentIntersector.SOUTH) != 0) {
-                this.y = (blockY - (blockHeight / scale));
-            } else if ((collision & SegmentIntersector.NORTH) != 0) {
-                this.y = (blockY + (blockHeight / scale));
-            }
-
-            if ((collision & SegmentIntersector.WEST) != 0) {
-                this.x = (blockX - (blockWidth / scale ));
-            } else if ((collision & SegmentIntersector.EAST) != 0) {
-                this.x = (blockX + (blockWidth / scale));
-            }
+    public void IncreaseBombStock() {
+        if (bombStock + 1 > BOMB_STOCK_LIMIT) {
+            bombStock = BOMB_STOCK_LIMIT;
+            return;
         }
+
+        bombStock++;
+    }
+
+    public void IncreaseFirePower(int increase) {
+        if (firePower + increase >= FIRE_POWER_LIMIT) {
+            firePower = FIRE_POWER_LIMIT;
+            return;
+        }
+
+        firePower++;
+    }
+
+    public void IncreaseMovementSpeed() {
+        if (speedLevel + 0.5f > SPEED_LIMIT) {
+            speedLevel = SPEED_LIMIT;
+            return;
+        }
+
+        speedLevel += 0.5f;
+    }
+
+    public void ChangeBombType() {
+
     }
 
     public void AddCoordinateEventListener(MovementEventListener listener) {
@@ -387,11 +411,28 @@ public class Player extends BoomGameObject {
         int worldX = GetWorldX();
         int worldY = GetWorldY();
 
-        if (boardState.GetBoardEntry(worldX, worldY) != BoardRep.EMPTY) {
+        if (boardState.GetBoardEntry(worldX, worldY) != BoardRep.EMPTY || bombs.size() >= bombStock) {
             return null;
         }
 
-        Bomb bomb = new Bomb(this, worldX, worldY, scale, scale, scale);
+        Bomb bomb = null;
+
+        switch (bombType) {
+            case REMOTE:
+                break;
+            case PIERCE:
+                break;
+            case IMPACT:
+                break;
+            case NORMAL:
+            default:
+                bomb = new Bomb(this, worldX, worldY, scale, scale, scale);
+        }
+
+        if (bomb == null) {
+            return null;
+        }
+
         bombs.add(bomb);
 
         return bomb;

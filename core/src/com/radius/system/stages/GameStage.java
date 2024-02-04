@@ -15,6 +15,7 @@ import com.radius.system.controllers.Joystick;
 import com.radius.system.enums.ControlKeys;
 import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.MovementEventListener;
+import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.bombs.Bomb;
 
 import java.util.ArrayList;
@@ -293,6 +294,7 @@ public class GameStage extends Stage {
         aTexture.dispose();
         bTexture.dispose();
         joystick.dispose();
+        Block.BLOCKS_SPRITE_SHEET.dispose();
         Bomb.BOMB_TEXTURE.dispose();
         Bomb.FIRE_TEXTURE.dispose();
         super.dispose();

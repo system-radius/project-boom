@@ -10,6 +10,8 @@ public enum BoardRep {
 
     BOMB('o'),
 
+    BONUS('*'),
+
     PLAYER('+'),
 
     EMPTY(' ');

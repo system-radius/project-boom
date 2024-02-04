@@ -25,6 +25,12 @@ public class HardBlock extends Block {
     }
 
     @Override
+    protected void Destroy() {
+        super.Destroy();
+        hasBonus = true;
+    }
+
+    @Override
     public void Burn() {
         if (burning) {
             return;

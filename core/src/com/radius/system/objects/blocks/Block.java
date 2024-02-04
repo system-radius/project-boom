@@ -33,7 +33,7 @@ public class Block extends BoomGameObject {
 
     protected boolean activeCollision = true;
 
-    protected boolean hasBonus;
+    protected boolean hasBonus = false;
 
     protected boolean destroyed = false;
 
@@ -89,6 +89,15 @@ public class Block extends BoomGameObject {
         return destroyed;
     }
 
+    public boolean HasBonus() {
+        return hasBonus;
+    }
+
+    protected void Destroy() {
+        // Mark this object for removal.
+        this.destroyed = true;
+    }
+
     @Override
     public void dispose() {
         // Nothing to do here as the sprite sheet is to be disposed outside the class.
@@ -109,8 +118,7 @@ public class Block extends BoomGameObject {
         burnTimer += delta;
         animationElapsedTime += delta;
         if (burnTimer >= DESTROY_TIMER) {
-            // Mark this object for removal.
-            this.destroyed = true;
+            Destroy();
         }
     }
 

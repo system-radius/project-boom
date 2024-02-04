@@ -41,7 +41,7 @@ public class GameState implements Disposable {
     private void InitializeField() {
 
         float spacing = 2f; // Allows for leaving spaces when generating hard blocks.
-        boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT);
+        boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT, (int) WORLD_SCALE);
 
         int fieldIndex = new Random(System.currentTimeMillis()).nextInt(7);
 

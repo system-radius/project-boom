@@ -8,6 +8,7 @@ import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.GameObject;
 import com.radius.system.objects.blocks.Block;
+import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.players.Player;
 
 import java.util.ArrayList;
@@ -23,11 +24,13 @@ public class BoardState extends GameObject {
 
     private final int boardHeight;
 
+    private final int scale;
+
     private final List<Player> players;
 
     private final List<Bomb> bombs;
 
-    public BoardState(int boardWidth, int boardHeight) {
+    public BoardState(int boardWidth, int boardHeight, int scale) {
         super(0, 0);
 
         this.board = new BoomGameObject[boardWidth][boardHeight];
@@ -37,6 +40,7 @@ public class BoardState extends GameObject {
 
         this.boardWidth = boardWidth;
         this.boardHeight = boardHeight;
+        this.scale = scale;
 
         ClearBoard();
     }
@@ -77,8 +81,13 @@ public class BoardState extends GameObject {
         int x = (int) block.GetX();
         int y = (int) block.GetY();
 
-        board[x][y] = null;
-        boardRep[x][y] = BoardRep.EMPTY;
+        if (block.HasBonus()) {
+            board[x][y] = new Bonus(x, y, scale, scale);
+            boardRep[x][y] = BoardRep.BONUS;
+        } else {
+            board[x][y] = null;
+            boardRep[x][y] = BoardRep.EMPTY;
+        }
     }
 
     public void RemoveBombFromBoard(Bomb bomb) {
