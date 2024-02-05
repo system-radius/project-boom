@@ -46,6 +46,10 @@ public class Bonus extends Block {
                 break;
             case PIERCE_BOMB:
                 player.ChangeBombType(BombType.PIERCE);
+                break;
+            case REMOTE_MINE:
+                player.ChangeBombType(BombType.REMOTE);
+                break;
             case BOMB_STOCK:
             default:
                 player.IncreaseBombStock();

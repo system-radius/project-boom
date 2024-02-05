@@ -156,7 +156,7 @@ public class Player extends BoomGameObject {
 
     private int firePower = 1;
 
-    private BombType bombType = BombType.REMOTE;
+    private BombType bombType = BombType.NORMAL;
 
     private final int id;
 
@@ -404,6 +404,10 @@ public class Player extends BoomGameObject {
     }
 
     public void ChangeBombType(BombType bombType) {
+
+        if (this.bombType == bombType) {
+            IncreaseBombStock();
+        }
         this.bombType = bombType;
     }
 

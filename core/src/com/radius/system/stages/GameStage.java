@@ -123,7 +123,7 @@ public class GameStage extends Stage {
     }
 
     private boolean ProcessKeyInput(ControlKeys currentKey, float directionality, boolean isPressed) {
-        if (pressedKeys.get(currentKey.GetOppositeKey())) {
+        if (currentKey.GetOppositeKey() != null && pressedKeys.get(currentKey.GetOppositeKey())) {
             return false;
         }
         pressedKeys.put(currentKey, isPressed);
@@ -135,10 +135,23 @@ public class GameStage extends Stage {
             case EAST:
             case WEST:
                 return ProcessXKeyInput(directionality, isPressed);
+            case BOMB:
+                return ProcessButtonInput(isPressed, buttonAListeners);
+            case DETONATE:
+                return ProcessButtonInput(isPressed, buttonBListeners);
             default:
                 // Do nothing just yet.
         }
 
+        return true;
+    }
+
+    private boolean ProcessButtonInput(boolean isPressed, List<ButtonEventListener> listeners) {
+        if (!isPressed) {
+            return false;
+        }
+
+        FireButtonEvent(listeners);
         return true;
     }
 
@@ -213,6 +226,10 @@ public class GameStage extends Stage {
                 return ProcessKeyInput(ControlKeys.NORTH, 1, true);
             case Input.Keys.S:
                 return ProcessKeyInput(ControlKeys.SOUTH, -1, true);
+            case Input.Keys.SHIFT_RIGHT:
+                return ProcessKeyInput(ControlKeys.BOMB, 0, true);
+            case Input.Keys.SLASH:
+                return ProcessKeyInput(ControlKeys.DETONATE, 0, true);
         }
 
         return false;
@@ -230,6 +247,10 @@ public class GameStage extends Stage {
                 return ProcessKeyInput(ControlKeys.NORTH, 0, false);
             case Input.Keys.S:
                 return ProcessKeyInput(ControlKeys.SOUTH, 0, false);
+            case Input.Keys.SHIFT_RIGHT:
+                return ProcessKeyInput(ControlKeys.BOMB, 0, false);
+            case Input.Keys.SLASH:
+                return ProcessKeyInput(ControlKeys.DETONATE, 0, false);
         }
 
         return false;

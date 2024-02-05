@@ -6,7 +6,9 @@ public enum ControlKeys {
     SOUTH,
     EAST,
     WEST,
-    BOMB;
+    BOMB,
+
+    DETONATE;
 
     private ControlKeys oppositeKey;
 
@@ -15,6 +17,8 @@ public enum ControlKeys {
         SOUTH.SetOpposite(NORTH);
         EAST.SetOpposite(WEST);
         WEST.SetOpposite(EAST);
+        BOMB.SetOpposite(null);
+        DETONATE.SetOpposite(null);
     }
 
     void SetOpposite(ControlKeys key) {

@@ -1,0 +1,125 @@
+[1mdiff --git a/core/src/com/radius/system/enums/ControlKeys.java b/core/src/com/radius/system/enums/ControlKeys.java[m
+[1mindex a7ee7de..09cacf0 100644[m
+[1m--- a/core/src/com/radius/system/enums/ControlKeys.java[m
+[1m+++ b/core/src/com/radius/system/enums/ControlKeys.java[m
+[36m@@ -6,7 +6,9 @@[m [mpublic enum ControlKeys {[m
+     SOUTH,[m
+     EAST,[m
+     WEST,[m
+[31m-    BOMB;[m
+[32m+[m[32m    BOMB,[m
+[32m+[m
+[32m+[m[32m    DETONATE;[m
+ [m
+     private ControlKeys oppositeKey;[m
+ [m
+[36m@@ -15,6 +17,8 @@[m [mpublic enum ControlKeys {[m
+         SOUTH.SetOpposite(NORTH);[m
+         EAST.SetOpposite(WEST);[m
+         WEST.SetOpposite(EAST);[m
+[32m+[m[32m        BOMB.SetOpposite(null);[m
+[32m+[m[32m        DETONATE.SetOpposite(null);[m
+     }[m
+ [m
+     void SetOpposite(ControlKeys key) {[m
+[1mdiff --git a/core/src/com/radius/system/objects/blocks/Bonus.java b/core/src/com/radius/system/objects/blocks/Bonus.java[m
+[1mindex 7e3fe9e..de0b514 100644[m
+[1m--- a/core/src/com/radius/system/objects/blocks/Bonus.java[m
+[1m+++ b/core/src/com/radius/system/objects/blocks/Bonus.java[m
+[36m@@ -46,6 +46,10 @@[m [mpublic class Bonus extends Block {[m
+                 break;[m
+             case PIERCE_BOMB:[m
+                 player.ChangeBombType(BombType.PIERCE);[m
+[32m+[m[32m                break;[m
+[32m+[m[32m            case REMOTE_MINE:[m
+[32m+[m[32m                player.ChangeBombType(BombType.REMOTE);[m
+[32m+[m[32m                break;[m
+             case BOMB_STOCK:[m
+             default:[m
+                 player.IncreaseBombStock();[m
+[1mdiff --git a/core/src/com/radius/system/objects/players/Player.java b/core/src/com/radius/system/objects/players/Player.java[m
+[1mindex e70d493..fca1278 100644[m
+[1m--- a/core/src/com/radius/system/objects/players/Player.java[m
+[1m+++ b/core/src/com/radius/system/objects/players/Player.java[m
+[36m@@ -156,7 +156,7 @@[m [mpublic class Player extends BoomGameObject {[m
+ [m
+     private int firePower = 1;[m
+ [m
+[31m-    private BombType bombType = BombType.REMOTE;[m
+[32m+[m[32m    private BombType bombType = BombType.NORMAL;[m
+ [m
+     private final int id;[m
+ [m
+[36m@@ -404,6 +404,10 @@[m [mpublic class Player extends BoomGameObject {[m
+     }[m
+ [m
+     public void ChangeBombType(BombType bombType) {[m
+[32m+[m
+[32m+[m[32m        if (this.bombType == bombType) {[m
+[32m+[m[32m            IncreaseBombStock();[m
+[32m+[m[32m        }[m
+         this.bombType = bombType;[m
+     }[m
+ [m
+[1mdiff --git a/core/src/com/radius/system/stages/GameStage.java b/core/src/com/radius/system/stages/GameStage.java[m
+[1mindex a543140..e0886ec 100644[m
+[1m--- a/core/src/com/radius/system/stages/GameStage.java[m
+[1m+++ b/core/src/com/radius/system/stages/GameStage.java[m
+[36m@@ -123,7 +123,7 @@[m [mpublic class GameStage extends Stage {[m
+     }[m
+ [m
+     private boolean ProcessKeyInput(ControlKeys currentKey, float directionality, boolean isPressed) {[m
+[31m-        if (pressedKeys.get(currentKey.GetOppositeKey())) {[m
+[32m+[m[32m        if (currentKey.GetOppositeKey() != null && pressedKeys.get(currentKey.GetOppositeKey())) {[m
+             return false;[m
+         }[m
+         pressedKeys.put(currentKey, isPressed);[m
+[36m@@ -135,6 +135,10 @@[m [mpublic class GameStage extends Stage {[m
+             case EAST:[m
+             case WEST:[m
+                 return ProcessXKeyInput(directionality, isPressed);[m
+[32m+[m[32m            case BOMB:[m
+[32m+[m[32m                return ProcessButtonInput(isPressed, buttonAListeners);[m
+[32m+[m[32m            case DETONATE:[m
+[32m+[m[32m                return ProcessButtonInput(isPressed, buttonBListeners);[m
+             default:[m
+                 // Do nothing just yet.[m
+         }[m
+[36m@@ -142,6 +146,15 @@[m [mpublic class GameStage extends Stage {[m
+         return true;[m
+     }[m
+ [m
+[32m+[m[32m    private boolean ProcessButtonInput(boolean isPressed, List<ButtonEventListener> listeners) {[m
+[32m+[m[32m        if (!isPressed) {[m
+[32m+[m[32m            return false;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        FireButtonEvent(listeners);[m
+[32m+[m[32m        return true;[m
+[32m+[m[32m    }[m
+[32m+[m
+     private boolean ProcessXKeyInput(float directionality, boolean isPressed) {[m
+         movementX = isPressed ? directionality : 0;[m
+         FireMovementEvent();[m
+[36m@@ -213,6 +226,10 @@[m [mpublic class GameStage extends Stage {[m
+                 return ProcessKeyInput(ControlKeys.NORTH, 1, true);[m
+             case Input.Keys.S:[m
+                 return ProcessKeyInput(ControlKeys.SOUTH, -1, true);[m
+[32m+[m[32m            case Input.Keys.SHIFT_RIGHT:[m
+[32m+[m[32m                return ProcessKeyInput(ControlKeys.BOMB, 0, true);[m
+[32m+[m[32m            case Input.Keys.SLASH:[m
+[32m+[m[32m                return ProcessKeyInput(ControlKeys.DETONATE, 0, true);[m
+         }[m
+ [m
+         return false;[m
+[36m@@ -230,6 +247,10 @@[m [mpublic class GameStage extends Stage {[m
+                 return ProcessKeyInput(ControlKeys.NORTH, 0, false);[m
+             case Input.Keys.S:[m
+                 return ProcessKeyInput(ControlKeys.SOUTH, 0, false);[m
+[32m+[m[32m            case Input.Keys.SHIFT_RIGHT:[m
+[32m+[m[32m                return ProcessKeyInput(ControlKeys.BOMB, 0, false);[m
+[32m+[m[32m            case Input.Keys.SLASH:[m
+[32m+[m[32m                return ProcessKeyInput(ControlKeys.DETONATE, 0, false);[m
+         }[m
+ [m
+         return false;[m
