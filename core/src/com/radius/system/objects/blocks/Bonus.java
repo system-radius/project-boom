@@ -3,6 +3,7 @@ package com.radius.system.objects.blocks;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.radius.system.enums.BoardRep;
+import com.radius.system.enums.BombType;
 import com.radius.system.enums.BonusType;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.players.Player;
@@ -15,15 +16,22 @@ public class Bonus extends Block {
     private static final int BONUS_BLOCKS = 7;
 
     private static final BonusType[] BONUSES = new BonusType[] {
-            BonusType.BOMB_STOCK, BonusType.FIRE_POWER, BonusType.FLASH_FIRE, BonusType.MOVEMENT_SPEED
+            BonusType.BOMB_STOCK,
+            BonusType.FIRE_POWER,
+            BonusType.FLASH_FIRE,
+            BonusType.MOVEMENT_SPEED,
+            BonusType.REMOTE_MINE,
+            BonusType.PIERCE_BOMB
     };
 
-    private final BonusType bonusType;
+    private BonusType bonusType;
 
     public Bonus(float x, float y, float width, float height) {
         super(BoardRep.BONUS, -1, x, y, width, height);
 
-        bonusType = BONUSES[randomizer.nextInt(BONUSES.length)];
+        do{
+            bonusType = BONUSES[randomizer.nextInt(BONUSES.length)];
+        } while (bonusType == BonusType.REMOTE_MINE);
         InitializeBonus();
     }
 
@@ -38,6 +46,8 @@ public class Bonus extends Block {
             case MOVEMENT_SPEED:
                 player.IncreaseMovementSpeed();
                 break;
+            case PIERCE_BOMB:
+                player.ChangeBombType(BombType.PIERCE);
             case BOMB_STOCK:
             default:
                 player.IncreaseBombStock();

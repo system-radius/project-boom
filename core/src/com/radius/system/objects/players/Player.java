@@ -19,6 +19,7 @@ import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
+import com.radius.system.objects.bombs.PierceBomb;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -398,8 +399,8 @@ public class Player extends BoomGameObject {
         speedLevel += 0.1f;
     }
 
-    public void ChangeBombType() {
-
+    public void ChangeBombType(BombType bombType) {
+        this.bombType = bombType;
     }
 
     public void AddCoordinateEventListener(MovementEventListener listener) {
@@ -421,6 +422,7 @@ public class Player extends BoomGameObject {
             case REMOTE:
                 break;
             case PIERCE:
+                bomb = new PierceBomb(this, worldX, worldY, scale, scale, scale);
                 break;
             case IMPACT:
                 break;

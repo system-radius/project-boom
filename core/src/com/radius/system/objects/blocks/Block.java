@@ -58,6 +58,10 @@ public class Block extends BoomGameObject {
         Initialize(fieldIndex);
     }
 
+    public int GetLife() {
+        return life;
+    }
+
     public float GetWidth() {
         return width;
     }
