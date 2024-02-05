@@ -95,7 +95,7 @@ public class GameStage extends Stage {
             public void clicked(InputEvent event, float x, float y) {
                 FireButtonEvent(buttonBListeners);
                 // Remove this from here.
-                joystick.dynamicPosition = !joystick.dynamicPosition;;
+                //joystick.dynamicPosition = !joystick.dynamicPosition;;
             }
         });
 

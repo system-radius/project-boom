@@ -20,6 +20,7 @@ import com.radius.system.objects.BoomGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.bombs.PierceBomb;
+import com.radius.system.objects.bombs.RemoteMine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,7 +156,7 @@ public class Player extends BoomGameObject {
 
     private int firePower = 1;
 
-    private BombType bombType = BombType.NORMAL;
+    private BombType bombType = BombType.REMOTE;
 
     private final int id;
 
@@ -420,6 +421,7 @@ public class Player extends BoomGameObject {
 
         switch (bombType) {
             case REMOTE:
+                bomb = new RemoteMine(this, worldX, worldY, scale, scale, scale);
                 break;
             case PIERCE:
                 bomb = new PierceBomb(this, worldX, worldY, scale, scale, scale);
@@ -438,6 +440,13 @@ public class Player extends BoomGameObject {
         bombs.add(bomb);
 
         return bomb;
+    }
+
+    public void DetonateBomb() {
+        if (bombType != BombType.REMOTE || bombs.size() == 0) {
+            return;
+        }
+        bombs.get(0).Explode();
     }
 
     public void RemoveBomb(Bomb bomb) {

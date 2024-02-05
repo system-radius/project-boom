@@ -92,6 +92,7 @@ public class GameState implements Disposable {
         controller.GetPlayer().AddCoordinateEventListener(camera);
         stage.AddMovementEventListener(controller);
         stage.AddButtonAListener(controller.GetButtonA());
+        stage.AddButtonBListener(controller.GetButtonB());
 
         return controller;
     }

@@ -27,6 +27,10 @@ public abstract class PlayerController implements Disposable {
         boardState.AddBombToBoard(player.PlantBomb(boardState));
     }
 
+    public final void DetonateBomb() {
+        player.DetonateBomb();
+    }
+
     public abstract void Update(float delta);
 
     public abstract void Draw(Batch batch);

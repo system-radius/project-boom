@@ -24,14 +24,12 @@ public class Bonus extends Block {
             BonusType.PIERCE_BOMB
     };
 
-    private BonusType bonusType;
+    private final BonusType bonusType;
 
     public Bonus(float x, float y, float width, float height) {
         super(BoardRep.BONUS, -1, x, y, width, height);
 
-        do{
-            bonusType = BONUSES[randomizer.nextInt(BONUSES.length)];
-        } while (bonusType == BonusType.REMOTE_MINE);
+        bonusType = BONUSES[randomizer.nextInt(BONUSES.length)];
         InitializeBonus();
     }
 
