@@ -330,10 +330,6 @@ public class Player extends BoomGameObject {
         return firePower;
     }
 
-    public int GetBombStock() {
-        return bombStock - bombs.size();
-    }
-
     public Rectangle GetCollisionRect() {
         return collisionRect;
     }
@@ -352,25 +348,32 @@ public class Player extends BoomGameObject {
                 continue;
             }
 
-            float blockX = block.GetX();
-            float blockY = block.GetY();
-            float blockWidth = block.GetWidth();
-            float blockHeight = block.GetHeight();
-
-            if (Intersector.overlaps(blockBounds, northRect)) {
-                this.y = (blockY - (blockHeight / scale));
-            } else if (Intersector.overlaps(blockBounds, southRect)) {
-                this.y = (blockY + (blockHeight / scale));
-            }
-
-            if (Intersector.overlaps(blockBounds, eastRect)) {
-                this.x = (blockX - (blockWidth / scale ));
-            } else if (Intersector.overlaps(blockBounds, westRect)) {
-                this.x = (blockX + (blockWidth / scale));
-            }
+            CollideWithBlock(block);
         }
 
         FireCoordinateEvent();
+    }
+
+    private void CollideWithBlock(Block block) {
+
+        Rectangle blockBounds = block.GetBounds();
+
+        float blockX = block.GetX();
+        float blockY = block.GetY();
+        float blockWidth = block.GetWidth();
+        float blockHeight = block.GetHeight();
+
+        if (Intersector.overlaps(blockBounds, northRect)) {
+            this.y = (blockY - (blockHeight / scale));
+        } else if (Intersector.overlaps(blockBounds, southRect)) {
+            this.y = (blockY + (blockHeight / scale));
+        }
+
+        if (Intersector.overlaps(blockBounds, eastRect)) {
+            this.x = (blockX - (blockWidth / scale ));
+        } else if (Intersector.overlaps(blockBounds, westRect)) {
+            this.x = (blockX + (blockWidth / scale));
+        }
     }
 
     public void IncreaseBombStock() {

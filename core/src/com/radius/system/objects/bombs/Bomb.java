@@ -87,6 +87,8 @@ public class Bomb extends Block {
 
     protected BombState state = BombState.BREATHING;
 
+    protected BombType bombType;
+
     private float preExplosionTime = 0f;
 
     private float explosionTime = 0f;
@@ -102,10 +104,11 @@ public class Bomb extends Block {
         this.range = player.GetFirePower();
         this.scale = scale;
 
-        LoadAssets(bombType);
+        this.bombType = bombType;
+        LoadAssets();
     }
 
-    protected void LoadAssets(BombType bombType) {
+    protected void LoadAssets() {
         breathingAnimation = LoadAnimation(BOMB_REGIONS[bombType.GetType()], FRAME_DURATION_BREATHING, BOMB_REGIONS[bombType.GetType()].length, true);
 
         boolean fireLoop = false;
@@ -239,6 +242,10 @@ public class Bomb extends Block {
                 Intersector.overlaps(fireStreamWestBound, rect) ||
                 Intersector.overlaps(fireStreamNorthBound, rect) ||
                 Intersector.overlaps(fireStreamSouthBound, rect);
+    }
+
+    public BombType GetType() {
+        return bombType;
     }
 
     public void AddPlayerCollision(List<Player> players) {
