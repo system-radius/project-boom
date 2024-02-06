@@ -124,9 +124,9 @@ public class Player extends Entity {
 
     private boolean invulnerable = false, useRespawnPoint = false;
 
-    private int bombStock = 1, firePower = 2;
+    private int bombStock = 1, firePower = 1;
 
-    private BombType bombType = BombType.REMOTE;
+    private BombType bombType = BombType.NORMAL;
 
     private final int id;
 
