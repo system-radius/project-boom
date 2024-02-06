@@ -121,7 +121,7 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
     public void AttemptBurnPlayers(Bomb bomb) {
         for (Player player : players) {
-            Rectangle playerRect = player.GetCollisionRect();
+            Rectangle playerRect = player.GetBurnRect();
 
             if (bomb.HasContact(playerRect)) {
                 player.Burn();

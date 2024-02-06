@@ -72,6 +72,8 @@ public class Bomb extends Block {
 
     protected Rectangle fireStreamEastBound;
 
+    protected Rectangle fireStreamCenterBound;
+
     protected float rangeNorth;
 
     protected float rangeSouth;
@@ -148,9 +150,10 @@ public class Bomb extends Block {
         rangeEast = CheckObstacle(boardState, intXPlus1, intY, Direction.EAST, 1);
 
         fireStreamNorthBound = RefreshRectangle(fireStreamNorthBound, intX, intYPlus1, 1, (rangeNorth - 1));
-        fireStreamSouthBound = RefreshRectangle(fireStreamSouthBound, intX, intYLess1 + 1, 1, -(rangeSouth - 1));
-        fireStreamWestBound = RefreshRectangle(fireStreamWestBound, intXLess1 + 1, intY, -(rangeWest - 1), 1);
+        fireStreamSouthBound = RefreshRectangle(fireStreamSouthBound, intX, intYPlus1 - rangeSouth, 1, (rangeSouth - 1));
+        fireStreamWestBound = RefreshRectangle(fireStreamWestBound, intXPlus1 - rangeWest, intY, (rangeWest - 1), 1);
         fireStreamEastBound = RefreshRectangle(fireStreamEastBound, intXPlus1, intY, (rangeEast - 1), 1);
+        fireStreamCenterBound = RefreshRectangle(fireStreamCenterBound, intX, intY, 1, 1);
     }
 
     protected int CheckObstacle(BoardState boardState, int x, int y, Direction direction, int counter) {
@@ -232,7 +235,8 @@ public class Bomb extends Block {
         return Intersector.overlaps(fireStreamEastBound, rect) ||
                 Intersector.overlaps(fireStreamWestBound, rect) ||
                 Intersector.overlaps(fireStreamNorthBound, rect) ||
-                Intersector.overlaps(fireStreamSouthBound, rect);
+                Intersector.overlaps(fireStreamSouthBound, rect) ||
+                Intersector.overlaps(fireStreamCenterBound, rect);
     }
 
     public BombType GetType() {
@@ -356,9 +360,14 @@ public class Bomb extends Block {
             renderer.setColor(Color.RED);
 
             DrawRect(renderer, fireStreamNorthBound);
+            DrawRect(renderer, fireStreamEastBound);
+
+            renderer.setColor(Color.CYAN);
             DrawRect(renderer, fireStreamSouthBound);
             DrawRect(renderer, fireStreamWestBound);
-            DrawRect(renderer, fireStreamEastBound);
+
+            renderer.setColor(Color.GREEN);
+            DrawRect(renderer, fireStreamCenterBound);
         }
 
     }

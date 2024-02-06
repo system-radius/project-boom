@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.radius.system.board.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
@@ -59,11 +60,15 @@ public class Player extends Entity {
      */
     private static final float DYING_TIMER = 2f;
 
+    private static final float INVULNERABLE_TIMER = 5f;
+
     private final List<Animation<TextureRegion>> animations = new ArrayList<>();
 
     private final List<MovementEventListener> coordEventListeners;
 
     private final List<Bomb> bombs;
+
+    private final Vector2 respawnPoint;
 
     /**
      * The top collision bound.
@@ -93,11 +98,6 @@ public class Player extends Entity {
     protected Rectangle collisionRect;
 
     /**
-     * The animation for when the player is dying.
-     */
-    private Animation<TextureRegion> deathAnim;
-
-    /**
      * The loaded sprite sheet for this player.
      */
     private Texture spriteSheet;
@@ -118,15 +118,15 @@ public class Player extends Entity {
      */
     protected PlayerState state = PlayerState.IDLE;
 
-    private float thinWidth;
+    private float thinWidth, thinHeight;
 
-    private float thinHeight;
+    private float deathTime, respawnTime, invulnerableTime;
 
-    private int bombStock = 1;
+    private boolean invulnerable = false, useRespawnPoint = false;
 
-    private int firePower = 1;
+    private int bombStock = 1, firePower = 2;
 
-    private BombType bombType = BombType.NORMAL;
+    private BombType bombType = BombType.REMOTE;
 
     private final int id;
 
@@ -135,6 +135,7 @@ public class Player extends Entity {
 
         this.id = id;
 
+        respawnPoint = new Vector2(x, y);
         this.scale = scale;
         LoadAsset("img/tokoy_sprite_sheet.png");
 
@@ -142,6 +143,8 @@ public class Player extends Entity {
         bombs = new ArrayList<>();
         movementSpeed = 0.1f;
         FixBounds();
+
+        Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
     }
 
     private void FixBounds() {
@@ -204,7 +207,7 @@ public class Player extends Entity {
     private Animation<TextureRegion> GetActiveAnimation() {
         switch(state) {
             case DYING:
-                return deathAnim;
+                return animations.get(Direction.DEAD.GetIndex());
             case MOVING:
             default:
                 return GetActiveMovingAnimation();
@@ -214,11 +217,31 @@ public class Player extends Entity {
     private TextureRegion GetActiveKeyFrame() {
         switch(state) {
             case DEAD:
-                return deathAnim.getKeyFrames()[3];
+                return animations.get(Direction.DEAD.GetIndex()).getKeyFrames()[3];
             case IDLE:
             default:
                 return GetActiveMovingAnimation().getKeyFrames()[0];
         }
+    }
+
+    public void Respawn() {
+        if (useRespawnPoint) {
+            Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
+        } else {
+            Respawn(position.x, position.y);
+        }
+    }
+
+    public void Respawn(float x, float y) {
+        position.x = x;
+        position.y = y;
+
+        state = PlayerState.IDLE;
+        direction = Direction.SOUTH;
+
+        velocity.x = velocity.y = 0;
+        invulnerableTime = 0f;
+        invulnerable = true;
     }
 
     private void UpdateDirection() {
@@ -244,14 +267,6 @@ public class Player extends Entity {
         }
     }
 
-    private void UpdateState() {
-        if (velocity.x != 0 || velocity.y != 0) {
-            state = PlayerState.MOVING;
-        } else {
-            state = PlayerState.IDLE;
-        }
-    }
-
     private void UpdateBounds() {
 
         float x = position.x;
@@ -269,6 +284,10 @@ public class Player extends Entity {
 
     public int GetFirePower() {
         return firePower;
+    }
+
+    public Rectangle GetBurnRect() {
+        return burnRect;
     }
 
     public Rectangle GetCollisionRect() {
@@ -418,21 +437,72 @@ public class Player extends Entity {
 
     @Override
     public void Burn() {
-        System.out.println("Dead");
+        if (PlayerState.DYING.equals(state) || PlayerState.DEAD.equals(state) || invulnerable) {
+            return;
+        }
+
+        state = PlayerState.DYING;
+        animationElapsedTime = deathTime = respawnTime = 0f;
     }
 
     @Override
     public void Update(float delta) {
         animationElapsedTime += delta;
 
-        UpdateDirection();
-        UpdateState();
+        switch(state) {
+            case MOVING:
+                UpdateMovement(delta);
+            case IDLE:
+                UpdateInvulnerable(delta);
+                UpdateState();
+                break;
+            case DYING:
+                UpdateDying(delta);
+                break;
+            case DEAD:
+                UpdateRespawn(delta);
+        }
+    }
 
+    private void UpdateInvulnerable(float delta) {
+        if (invulnerable) {
+            invulnerableTime += delta;
+            if (invulnerableTime >= INVULNERABLE_TIMER) {
+                invulnerable = false;
+            }
+        }
+    }
+
+    private void UpdateMovement(float delta) {
+        UpdateDirection();
         if (UpdatePosition(delta)) {
             FireCoordinateEvent();
+        } else {
+            state = PlayerState.IDLE;
         }
-
         UpdateBounds();
+    }
+
+    private void UpdateState() {
+        if (velocity.x != 0 || velocity.y != 0) {
+            state = PlayerState.MOVING;
+        } else {
+            state = PlayerState.IDLE;
+        }
+    }
+
+    private void UpdateDying(float delta) {
+        deathTime += delta;
+        if (deathTime >= DYING_TIMER) {
+            state = PlayerState.DEAD;
+        }
+    }
+
+    private void UpdateRespawn(float delta) {
+        respawnTime += delta;
+        if (respawnTime >= DEATH_TIMER) {
+            Respawn();
+        }
     }
 
     @Override
@@ -451,7 +521,7 @@ public class Player extends Entity {
         renderer.setColor(Color.RED);
         renderer.rect(burnRect.x * scale, burnRect.y * scale, burnRect.width * scale, burnRect.height * scale);
 
-        renderer.setColor(Color.CYAN);
+        renderer.setColor(invulnerable ? Color.BLUE : Color.CYAN);
         renderer.rect(collisionRect.x * scale, collisionRect.y * scale, collisionRect.width * scale, collisionRect.height * scale);
 
         renderer.setColor(Color.GREEN);
