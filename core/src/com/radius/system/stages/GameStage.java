@@ -194,7 +194,6 @@ public class GameStage extends Stage {
     public void act(float delta) {
         super.act(delta);
 
-        joystick.Update(delta);
         if (!isTouching) {
             joystick.SetPosition(camera.position.x - (viewport.getWorldWidth() / 2f) + 3f * scale, camera.position.y - (viewport.getWorldHeight() / 2f) + 3f * scale, true);
         }
@@ -301,8 +300,8 @@ public class GameStage extends Stage {
         float modifier = 0.5f;
         float divider = 10f;
 
-        float velX = Math.round(((vector.x - joystick.GetX()) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
-        float velY = Math.round(((vector.y - joystick.GetY()) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
+        float velX = Math.round(((vector.x - joystick.position.x) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
+        float velY = Math.round(((vector.y - joystick.position.y) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
         movementX = velX;
         movementY = velY;
         FireMovementEvent();

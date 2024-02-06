@@ -5,27 +5,23 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.enums.BoardRep;
-import com.radius.system.objects.BoomGameObject;
+import com.radius.system.objects.AnimatedGameObject;
+import com.radius.system.objects.Entity;
 import com.radius.system.objects.players.Player;
 
 import java.util.Random;
 
-public class Block extends BoomGameObject {
+public class Block extends Entity {
 
     public static final Texture BLOCKS_SPRITE_SHEET = new Texture(Gdx.files.internal("img/blocks.png"));
 
     protected static final Random randomizer = new Random(System.currentTimeMillis());
 
     protected static final float DESTROY_TIMER = 1f;
-
-    private final float width;
-
-    private final float height;
 
     protected float burnTimer;
 
@@ -37,8 +33,6 @@ public class Block extends BoomGameObject {
 
     protected boolean destroyed = false;
 
-    protected Animation<TextureRegion> animation;
-
     protected final Rectangle bounds;
 
     protected static final TextureRegion[][] REGIONS =
@@ -49,25 +43,14 @@ public class Block extends BoomGameObject {
     }
 
     public Block(BoardRep rep, int fieldIndex, float x, float y, float width, float height) {
-        super(rep, x, y);
+        super(rep, x, y, width, height);
 
-        this.width = width;
-        this.height = height;
-
-        this.bounds = new Rectangle(this.x, this.y, 1, 1);
+        this.bounds = new Rectangle(position.x, position.y, 1, 1);
         Initialize(fieldIndex);
     }
 
     public int GetLife() {
         return life;
-    }
-
-    public float GetWidth() {
-        return width;
-    }
-
-    public float GetHeight() {
-        return height;
     }
 
     public Rectangle GetBounds() {
@@ -82,7 +65,7 @@ public class Block extends BoomGameObject {
         TextureRegion[] frames = new TextureRegion[1];
         frames[0] = REGIONS[fieldIndex][6];
 
-        animation = new Animation<>(0, frames);
+        activeAnimation = new Animation<>(0, frames);
     }
 
     public boolean HasActiveCollision(Player player) {
@@ -129,16 +112,16 @@ public class Block extends BoomGameObject {
     @Override
     public void Draw(Batch batch) {
         if (!burning) {
-            batch.draw(animation.getKeyFrames()[0], x * width, y * height, width, height);
+            batch.draw(activeAnimation.getKeyFrames()[0], scaledPosition.x, scaledPosition.y, size.x, size.y);
             return;
         }
 
-        batch.draw(animation.getKeyFrame(animationElapsedTime), x * width, y * height, width, height);
+        super.Draw(batch);
     }
 
     @Override
     public void DrawDebug(ShapeRenderer renderer) {
         renderer.setColor(Color.BLUE);
-        renderer.rect(x * width, y * height, width, height);
+        renderer.rect(scaledPosition.x, scaledPosition.y, size.x, size.y);
     }
 }

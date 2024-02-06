@@ -8,9 +8,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
+import com.radius.system.objects.BoomDrawable;
 import com.radius.system.objects.GameObject;
 
-public class Joystick extends GameObject implements Disposable {
+public class Joystick extends GameObject implements BoomDrawable, Disposable {
 
     public boolean dynamicPosition = false;
 
@@ -39,12 +40,12 @@ public class Joystick extends GameObject implements Disposable {
     public void SetPosition(float x, float y, boolean force) {
 
         if (dynamicPosition || force) {
-            this.x = x - innerSizeMultiplier * scale;
-            this.y = y - innerSizeMultiplier * scale;
+            position.x = x - innerSizeMultiplier * scale;
+            position.y = y - innerSizeMultiplier * scale;
         }
 
-        this.innerJoystickPosition.x = this.x + fourthSizeMultiplier * scale;
-        this.innerJoystickPosition.y = this.y + fourthSizeMultiplier * scale;
+        this.innerJoystickPosition.x = position.x + fourthSizeMultiplier * scale;
+        this.innerJoystickPosition.y = position.y + fourthSizeMultiplier * scale;
 
     }
 
@@ -52,8 +53,8 @@ public class Joystick extends GameObject implements Disposable {
         x -= fourthSizeMultiplier * scale;
         y -= fourthSizeMultiplier * scale;
 
-        float dx = (x - this.x) - fourthSizeMultiplier * scale;
-        float dy = (y - this.y) - fourthSizeMultiplier * scale;
+        float dx = (x - position.x) - fourthSizeMultiplier * scale;
+        float dy = (y - position.y) - fourthSizeMultiplier * scale;
 
 
         float dx2 = dx * dx;
@@ -63,8 +64,8 @@ public class Joystick extends GameObject implements Disposable {
         if (c >= innerSizeMultiplier * scale) {
             float tan = MathUtils.atan2(dy, dx);
 
-            this.innerJoystickPosition.x = this.x + (innerSizeMultiplier * scale * MathUtils.cos(tan)) + fourthSizeMultiplier * scale;
-            this.innerJoystickPosition.y = this.y + (innerSizeMultiplier * scale * MathUtils.sin(tan)) + fourthSizeMultiplier * scale;
+            this.innerJoystickPosition.x = position.x + (innerSizeMultiplier * scale * MathUtils.cos(tan)) + fourthSizeMultiplier * scale;
+            this.innerJoystickPosition.y = position.y + (innerSizeMultiplier * scale * MathUtils.sin(tan)) + fourthSizeMultiplier * scale;
         } else {
             this.innerJoystickPosition.x = x;
             this.innerJoystickPosition.y = y;
@@ -78,13 +79,8 @@ public class Joystick extends GameObject implements Disposable {
     }
 
     @Override
-    public void Update(float delta) {
-
-    }
-
-    @Override
     public void Draw(Batch batch) {
-        batch.draw(joystickOuter, x, y, outerSizeMultiplier * scale, outerSizeMultiplier * scale);
+        batch.draw(joystickOuter, position.x, position.y, outerSizeMultiplier * scale, outerSizeMultiplier * scale);
         batch.draw(joystickFill, innerJoystickPosition.x, innerJoystickPosition.y, innerSizeMultiplier * scale, innerSizeMultiplier * scale);
     }
 

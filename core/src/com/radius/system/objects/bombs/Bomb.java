@@ -14,11 +14,10 @@ import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombState;
 import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
-import com.radius.system.objects.BoomGameObject;
+import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.players.Player;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,11 +134,11 @@ public class Bomb extends Block {
 
     public void UpdateBounds(BoardState boardState) {
 
-        int intX = (int) x;
+        int intX = GetWorldX();
         int intXPlus1 = intX + 1;
         int intXLess1 = intX - 1;
 
-        int intY = (int) y;
+        int intY = GetWorldY();
         int intYPlus1 = intY + 1;
         int intYLess1 = intY - 1;
 
@@ -148,18 +147,10 @@ public class Bomb extends Block {
         rangeWest = CheckObstacle(boardState, intXLess1, intY, Direction.WEST, 1);
         rangeEast = CheckObstacle(boardState, intXPlus1, intY, Direction.EAST, 1);
 
-        fireStreamNorthBound = UpdateStreamBound(fireStreamNorthBound, x * scale, intYPlus1 * scale, scale, (rangeNorth - 1) * scale);
-        fireStreamSouthBound = UpdateStreamBound(fireStreamSouthBound, x * scale, intYLess1 * scale, scale, -(rangeSouth - 1) * scale);
-        fireStreamWestBound = UpdateStreamBound(fireStreamWestBound, intXLess1 * scale, y * scale, -(rangeWest - 1) * scale, scale);
-        fireStreamEastBound = UpdateStreamBound(fireStreamEastBound, intXPlus1 * scale, y * scale, (rangeEast - 1) * scale, scale);
-    }
-
-    protected Rectangle UpdateStreamBound(Rectangle rectangle, float x, float y, float width, float height) {
-        if (rectangle == null) {
-            return new Rectangle(x, y, width, height);
-        }
-
-        return rectangle.set(x, y, width, height);
+        fireStreamNorthBound = RefreshRectangle(fireStreamNorthBound, intX, intYPlus1, 1, (rangeNorth - 1));
+        fireStreamSouthBound = RefreshRectangle(fireStreamSouthBound, intX, intYLess1 + 1, 1, -(rangeSouth - 1));
+        fireStreamWestBound = RefreshRectangle(fireStreamWestBound, intXLess1 + 1, intY, -(rangeWest - 1), 1);
+        fireStreamEastBound = RefreshRectangle(fireStreamEastBound, intXPlus1, intY, (rangeEast - 1), 1);
     }
 
     protected int CheckObstacle(BoardState boardState, int x, int y, Direction direction, int counter) {
@@ -196,8 +187,8 @@ public class Bomb extends Block {
             return;
         }
 
-        int x = (int) this.x;
-        int y = (int) this.y;
+        int x = (int) GetWorldX();
+        int y = (int) GetWorldY();
 
         for (int i = 1; i <= range; i++) {
             BurnObject(boardState, i, (int) rangeNorth, x, y + i);
@@ -214,7 +205,7 @@ public class Bomb extends Block {
             return;
         }
 
-        BoomGameObject object = boardState.GetBoardObject(x, y);
+        AnimatedGameObject object = boardState.GetBoardObject(x, y);
         if (object != null && (!burnt || object instanceof Bomb)) {
             object.Burn();
         }
@@ -321,7 +312,7 @@ public class Bomb extends Block {
         switch (state) {
             case BREATHING:
             case SET_TO_EXPLODE:
-                DrawAnimation(batch, breathingAnimation, x * scale, y * scale);
+                DrawAnimation(batch, breathingAnimation, GetWorldX(), GetWorldY());
                 break;
             case EXPLODING:
                 DrawFire(batch);
@@ -330,17 +321,17 @@ public class Bomb extends Block {
     }
 
     private void DrawFire(Batch batch) {
-        int x = (int) this.x;
-        int y = (int) this.y;
+        int x = GetWorldX();
+        int y = GetWorldY();
 
         for (int i = 1; i <= range; i++) {
-            DrawFireDirection(batch, fireStreamV, fireStreamNorth, i, (int) rangeNorth, x * scale, (y + i) * scale);
-            DrawFireDirection(batch, fireStreamV, fireStreamSouth, i, (int) rangeSouth, x * scale, (y - i) * scale);
-            DrawFireDirection(batch, fireStreamH, fireStreamWest, i, (int) rangeWest, (x - i) * scale, y * scale);
-            DrawFireDirection(batch, fireStreamH, fireStreamEast, i, (int) rangeEast, (x + i) * scale, y * scale);
+            DrawFireDirection(batch, fireStreamV, fireStreamNorth, i, (int) rangeNorth, x, (y + i));
+            DrawFireDirection(batch, fireStreamV, fireStreamSouth, i, (int) rangeSouth, x, (y - i));
+            DrawFireDirection(batch, fireStreamH, fireStreamWest, i, (int) rangeWest, (x - i), y);
+            DrawFireDirection(batch, fireStreamH, fireStreamEast, i, (int) rangeEast, (x + i), y);
         }
 
-        DrawAnimation(batch, fireStreamCenter, x * scale, y * scale);
+        DrawAnimation(batch, fireStreamCenter, x, y);
 
     }
 
@@ -355,7 +346,7 @@ public class Bomb extends Block {
     }
 
     private void DrawAnimation(Batch batch, Animation<TextureRegion> animation, float x, float y) {
-        batch.draw(animation.getKeyFrame(animationElapsedTime), x, y, scale, scale);
+        batch.draw(animation.getKeyFrame(animationElapsedTime), x * size.x, y * size.y, size.x, size.y);
     }
 
     @Override
@@ -373,7 +364,7 @@ public class Bomb extends Block {
     }
 
     private void DrawRect(ShapeRenderer renderer, Rectangle rect) {
-        renderer.rect(rect.x, rect.y, rect.width, rect.height);
+        renderer.rect(rect.x * size.x, rect.y * size.y, rect.width * size.x, rect.height * size.y);
     }
 
 }

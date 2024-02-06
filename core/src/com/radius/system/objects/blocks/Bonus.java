@@ -63,7 +63,7 @@ public class Bonus extends Block {
         TextureRegion[] frames = new TextureRegion[1];
         frames[0] = REGIONS[BONUS_BLOCKS][bonusType.GetType()];
 
-        animation = new Animation<>(0, frames);
+        activeAnimation = new Animation<>(0, frames);
     }
 
     @Override

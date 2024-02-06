@@ -1,24 +1,24 @@
 package com.radius.system.enums;
 
-import com.badlogic.gdx.Input;
-
 public enum Direction {
 
-    NORTH (Input.Keys.W),
+    SOUTH (0),
 
-    SOUTH (Input.Keys.D),
+    NORTH (1),
 
-    WEST (Input.Keys.A),
+    WEST (2),
 
-    EAST (Input.Keys.D);
+    EAST (3),
 
-    private final int key;
+    DEAD (4);
 
-    Direction (int keyCode) {
-        this.key = keyCode;
+    private final int index;
+
+    Direction (int index) {
+        this.index = index;
     }
 
-    public int GetKeyCode() {
-        return key;
+    public int GetIndex() {
+        return index;
     }
 }

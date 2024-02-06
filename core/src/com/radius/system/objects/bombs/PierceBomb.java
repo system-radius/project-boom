@@ -4,9 +4,8 @@ import com.radius.system.board.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
-import com.radius.system.objects.BoomGameObject;
+import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
-import com.radius.system.objects.blocks.HardBlock;
 import com.radius.system.objects.players.Player;
 
 public class PierceBomb extends Bomb {
@@ -19,7 +18,7 @@ public class PierceBomb extends Bomb {
         if (counter > range) return 1;
 
         BoardRep rep = boardState.GetBoardEntry(x, y);
-        BoomGameObject object = boardState.GetBoardObject(x, y);
+        AnimatedGameObject object = boardState.GetBoardObject(x, y);
 
         if (BoardRep.PERMANENT_BLOCK.equals(rep)) {
             return 2;

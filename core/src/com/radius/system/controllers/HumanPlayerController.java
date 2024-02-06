@@ -46,8 +46,8 @@ public class HumanPlayerController extends PlayerController implements MovementE
             return;
         }
 
-        player.SetVelX(velX);
-        player.SetVelY(velY);
+        player.MoveAlongX(velX);
+        player.MoveAlongY(velY);
     }
 
     @Override

@@ -4,9 +4,10 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.enums.BoardRep;
+import com.radius.system.objects.BoomDrawable;
+import com.radius.system.objects.BoomUpdatable;
 import com.radius.system.objects.bombs.Bomb;
-import com.radius.system.objects.BoomGameObject;
-import com.radius.system.objects.GameObject;
+import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.players.Player;
@@ -14,9 +15,9 @@ import com.radius.system.objects.players.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoardState extends GameObject {
+public class BoardState implements BoomUpdatable, BoomDrawable {
 
-    private final BoomGameObject[][] board;
+    private final AnimatedGameObject[][] board;
 
     private final BoardRep[][] boardRep;
 
@@ -31,9 +32,8 @@ public class BoardState extends GameObject {
     private final List<Bomb> bombs;
 
     public BoardState(int boardWidth, int boardHeight, int scale) {
-        super(0, 0);
 
-        this.board = new BoomGameObject[boardWidth][boardHeight];
+        this.board = new AnimatedGameObject[boardWidth][boardHeight];
         this.boardRep = new BoardRep[boardWidth][boardHeight];
         this.players = new ArrayList<>();
         this.bombs = new ArrayList<>();
@@ -55,8 +55,8 @@ public class BoardState extends GameObject {
     }
 
     public void AddToBoard(Block block) {
-        int x = (int) block.GetX();
-        int y = (int) block.GetY();
+        int x = block.GetWorldX();
+        int y = block.GetWorldY();
 
         board[x][y] = block;
         boardRep[x][y] = block.GetRep();
@@ -78,8 +78,8 @@ public class BoardState extends GameObject {
     }
 
     public void RemoveFromBoard(Block block) {
-        int x = (int) block.GetX();
-        int y = (int) block.GetY();
+        int x = block.GetWorldX();
+        int y = block.GetWorldY();
 
         if (block.HasBonus()) {
             board[x][y] = new Bonus(x, y, scale, scale);
@@ -99,7 +99,7 @@ public class BoardState extends GameObject {
         return boardRep[x][y];
     }
 
-    public BoomGameObject GetBoardObject(int x, int y) {
+    public AnimatedGameObject GetBoardObject(int x, int y) {
         return board[x][y];
     }
 

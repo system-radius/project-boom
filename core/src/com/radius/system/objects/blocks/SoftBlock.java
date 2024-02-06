@@ -15,7 +15,7 @@ public class SoftBlock extends HardBlock {
         TextureRegion[] frames = new TextureRegion[3];
         System.arraycopy(REGIONS[fieldIndex], 0, frames, 0, frames.length);
 
-        animation = new Animation<>(1f/3f, frames);
+        activeAnimation = new Animation<>(1f/3f, frames);
     }
 
     @Override

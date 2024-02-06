@@ -60,6 +60,8 @@ public class GameScreen extends AbstractScreen {
         InitializeView();
         InitializeStage();
         InitializeGameState();
+
+        debug = true;
     }
 
     private void InitializeStage() {

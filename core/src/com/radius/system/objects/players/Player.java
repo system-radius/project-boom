@@ -15,17 +15,20 @@ import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
 import com.radius.system.events.MovementEventListener;
+import com.radius.system.objects.Entity;
 import com.radius.system.objects.bombs.Bomb;
-import com.radius.system.objects.BoomGameObject;
+import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.bombs.PierceBomb;
 import com.radius.system.objects.bombs.RemoteMine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class Player extends BoomGameObject {
+public class Player extends Entity {
 
     private static final float FRAME_DURATION_MOVING = 1f / 10f;
 
@@ -44,7 +47,7 @@ public class Player extends BoomGameObject {
     /**
      * The maximum speed that a player can have.
      */
-    public static final float SPEED_LIMIT = 3.5f;
+    public static final float SPEED_LIMIT = 0.75f;
 
     /**
      * The timer until the player respawns after dying.
@@ -55,6 +58,8 @@ public class Player extends BoomGameObject {
      * The amount of time to watch the player die.
      */
     private static final float DYING_TIMER = 2f;
+
+    private final List<Animation<TextureRegion>> animations = new ArrayList<>();
 
     private final List<MovementEventListener> coordEventListeners;
 
@@ -83,27 +88,9 @@ public class Player extends BoomGameObject {
     /**
      * The rectangle representing the collision bounds of the player.
      */
+    protected Rectangle burnRect;
+
     protected Rectangle collisionRect;
-
-    /**
-     * The animation frames when going south or pressing "S" key.
-     */
-    private Animation<TextureRegion> sAnim;
-
-    /**
-     * The animation when going north or pressing "W" key.
-     */
-    private Animation<TextureRegion> wAnim;
-
-    /**
-     * The animation when going west or pressing "A" key.
-     */
-    private Animation<TextureRegion> aAnim;
-
-    /**
-     * The animation when going east or pressing "D" key.
-     */
-    private Animation<TextureRegion> dAnim;
 
     /**
      * The animation for when the player is dying.
@@ -114,19 +101,6 @@ public class Player extends BoomGameObject {
      * The loaded sprite sheet for this player.
      */
     private Texture spriteSheet;
-
-    /**
-     * The base speed that will be multiplied with the current speed level to gat the actual speed.
-     * This value is separate from the velocity values because the velocities are reset every
-     * update. When moving the character, the speed is set as either the velocity X or velocity Y.
-     */
-    protected float baseSpeed = 5f;
-
-    /**
-     * The player's current speed level. To avoid having the player jump over walls dues to too
-     * much computation using the velocity values, the maximum speed level is up to 5.
-     */
-    protected float speedLevel = 0.5f;
 
     /**
      * The current scale value, provided on the creation of this object, relevant for the creation
@@ -148,10 +122,6 @@ public class Player extends BoomGameObject {
 
     private float thinHeight;
 
-    private float pastX;
-
-    private float pastY;
-
     private int bombStock = 1;
 
     private int firePower = 1;
@@ -161,51 +131,50 @@ public class Player extends BoomGameObject {
     private final int id;
 
     public Player(int id, float x, float y, float scale) {
-        super(BoardRep.PLAYER, x, y);
+        super(BoardRep.PLAYER, x, y, scale, scale);
 
         this.id = id;
 
         this.scale = scale;
         LoadAsset("img/tokoy_sprite_sheet.png");
-        FixBounds();
 
         coordEventListeners = new ArrayList<>();
         bombs = new ArrayList<>();
+        movementSpeed = 0.1f;
+        FixBounds();
     }
 
     private void FixBounds() {
+        float x = position.x;
+        float y = position.y;
+
         float width = 1f;
         float height = 1f;
 
-        float divider = 1.1f;
+        float divider = (1.1f + SPEED_LIMIT) - movementSpeed;
         thinWidth = (width / (divider * 2));
         thinHeight = (height / (divider * 2));
 
-        collisionRect = RefreshRectangle(collisionRect, x, y, width - thinWidth, height - thinHeight);
+        burnRect = RefreshRectangle(burnRect, x, y, width - thinWidth, height - thinHeight);
+        collisionRect = RefreshRectangle(collisionRect, x, y, width, height);
 
         northRect = RefreshRectangle(northRect, x, y, width - (thinWidth * 2), thinHeight);
         southRect = RefreshRectangle(southRect, x, y, width - (thinWidth * 2), thinHeight);
         westRect = RefreshRectangle(westRect, x, y, thinWidth, height - (thinHeight * 2));
         eastRect = RefreshRectangle(eastRect, x, y, thinWidth, height - (thinHeight * 2));
-    }
 
-    private Rectangle RefreshRectangle (Rectangle rectangle, float x, float y, float width, float height) {
-        if (rectangle == null) {
-            return new Rectangle(x, y, width, height);
-        }
-
-        return rectangle.set(x, y, width, height);
+        UpdateBounds();
     }
 
     private void LoadAsset(String spriteSheetPath) {
         spriteSheet = new Texture(Gdx.files.internal(spriteSheetPath));
         TextureRegion[][] allFrames = TextureRegion.split(spriteSheet, 32, 32);
 
-        sAnim = CreateAnimation(allFrames, 0, FRAME_DURATION_MOVING, true);
-        wAnim = CreateAnimation(allFrames, 1, FRAME_DURATION_MOVING, true);
-        aAnim = CreateAnimation(allFrames, 2, FRAME_DURATION_MOVING, true);
-        dAnim = CreateAnimation(allFrames, 3, FRAME_DURATION_MOVING, true);
-        deathAnim = CreateAnimation(allFrames, 4, FRAME_DURATION_DYING, false);
+        animations.add(CreateAnimation(allFrames, Direction.SOUTH.GetIndex(), FRAME_DURATION_MOVING, true));
+        animations.add(CreateAnimation(allFrames, Direction.NORTH.GetIndex(), FRAME_DURATION_MOVING, true));
+        animations.add(CreateAnimation(allFrames, Direction.WEST.GetIndex(), FRAME_DURATION_MOVING, true));
+        animations.add(CreateAnimation(allFrames, Direction.EAST.GetIndex(), FRAME_DURATION_MOVING, true));
+        animations.add(CreateAnimation(allFrames, Direction.DEAD.GetIndex(), FRAME_DURATION_DYING, false));
     }
 
     private Animation<TextureRegion> CreateAnimation(TextureRegion[][] allFrames, int direction, float frameDuration, boolean enableLoop) {
@@ -229,17 +198,7 @@ public class Player extends BoomGameObject {
     }
 
     private Animation<TextureRegion> GetActiveMovingAnimation() {
-        switch (direction) {
-            case NORTH:
-                return wAnim;
-            case WEST:
-                return aAnim;
-            case EAST:
-                return dAnim;
-            case SOUTH:
-            default:
-                return sAnim;
-        }
+        return animations.get(direction.GetIndex());
     }
 
     private Animation<TextureRegion> GetActiveAnimation() {
@@ -266,27 +225,27 @@ public class Player extends BoomGameObject {
 
         Direction horizontalDirection = null;
         Direction verticalDirection = null;
-        if (velX > 0) {
+        if (velocity.x > 0) {
             horizontalDirection = Direction.EAST;
-        } else if (velX < 0) {
+        } else if (velocity.x < 0) {
             horizontalDirection = Direction.WEST;
         }
 
-        if (velY > 0) {
+        if (velocity.y > 0) {
             verticalDirection = Direction.NORTH;
-        } else if (velY < 0) {
+        } else if (velocity.y < 0) {
             verticalDirection = Direction.SOUTH;
         }
 
         if (horizontalDirection != null && verticalDirection != null) {
-            direction = Math.abs(velX) > Math.abs(velY) ? horizontalDirection : verticalDirection;
+            direction = Math.abs(velocity.x) > Math.abs(velocity.y) ? horizontalDirection : verticalDirection;
         } else if (horizontalDirection != null || verticalDirection != null) {
             direction = horizontalDirection == null ? verticalDirection : horizontalDirection;
         }
     }
 
     private void UpdateState() {
-        if (velX != 0 || velY != 0) {
+        if (velocity.x != 0 || velocity.y != 0) {
             state = PlayerState.MOVING;
         } else {
             state = PlayerState.IDLE;
@@ -295,35 +254,17 @@ public class Player extends BoomGameObject {
 
     private void UpdateBounds() {
 
-        float offset = -speedLevel;
+        float x = position.x;
+        float y = position.y;
+
+        float offset = -movementSpeed;
         northRect.setPosition(x + (thinWidth), (y + 1) - (thinHeight) - (offset / scale));
         southRect.setPosition(x + (thinWidth), y + (offset / scale));
         eastRect.setPosition(x + (1 - (thinWidth)) - (offset / scale), y + (thinHeight));
         westRect.setPosition(x + (offset / scale), y + (thinHeight));
 
-        collisionRect.setPosition(x + thinWidth / 2, y + thinHeight / 2);
-    }
-
-    public void SetVelX(float multiplier) {
-        this.velX = (baseSpeed * speedLevel) * multiplier;
-    }
-
-    public void SetVelY(float multiplier) {
-        this.velY = (baseSpeed * speedLevel) * multiplier;
-    }
-
-    private int GetWorldPosition(float c, float scale) {
-        float excess = (c * scale) % scale >= scale / 2 ? 1 : 0;
-
-        return (int)(c + excess);
-    }
-
-    public int GetWorldX() {
-        return GetWorldPosition(x, scale);
-    }
-
-    public int GetWorldY() {
-        return GetWorldPosition(y, scale);
+        burnRect.setPosition(x + thinWidth / 2, y + thinHeight / 2);
+        collisionRect.setPosition(x, y);
     }
 
     public int GetFirePower() {
@@ -337,9 +278,7 @@ public class Player extends BoomGameObject {
     public void Collide(List<Block> blocks) {
         for (Block block : blocks) {
 
-            Rectangle blockBounds = block.GetBounds();
-
-            if (block instanceof Bonus && Intersector.overlaps(blockBounds, collisionRect)) {
+            if (block instanceof Bonus && (block.GetWorldX() == GetWorldX() && block.GetWorldY() == GetWorldY())) {
                 ((Bonus) block).ApplyBonus(this);
                 continue;
             }
@@ -358,22 +297,24 @@ public class Player extends BoomGameObject {
 
         Rectangle blockBounds = block.GetBounds();
 
-        float blockX = block.GetX();
-        float blockY = block.GetY();
-        float blockWidth = block.GetWidth();
-        float blockHeight = block.GetHeight();
+        float blockX = blockBounds.x;
+        float blockY = blockBounds.y;
+        float blockWidth = blockBounds.width;
+        float blockHeight = blockBounds.height;
 
         if (Intersector.overlaps(blockBounds, northRect)) {
-            this.y = (blockY - (blockHeight / scale));
+            position.y = (blockY - blockHeight);
         } else if (Intersector.overlaps(blockBounds, southRect)) {
-            this.y = (blockY + (blockHeight / scale));
+            position.y = (blockY + blockHeight);
         }
 
         if (Intersector.overlaps(blockBounds, eastRect)) {
-            this.x = (blockX - (blockWidth / scale ));
+            position.x = (blockX - blockWidth);
         } else if (Intersector.overlaps(blockBounds, westRect)) {
-            this.x = (blockX + (blockWidth / scale));
+            position.x = (blockX + blockWidth);
         }
+
+        RefreshScaledPosition();
     }
 
     public void IncreaseBombStock() {
@@ -391,16 +332,17 @@ public class Player extends BoomGameObject {
             return;
         }
 
-        firePower++;
+        firePower += increase;
     }
 
     public void IncreaseMovementSpeed() {
-        if (speedLevel + 0.1f > SPEED_LIMIT) {
-            speedLevel = SPEED_LIMIT;
+        if (movementSpeed + 0.01f > SPEED_LIMIT) {
+            movementSpeed = SPEED_LIMIT;
             return;
         }
 
-        speedLevel += 0.1f;
+        movementSpeed += 0.01f;
+        FixBounds();
     }
 
     public void ChangeBombType(BombType bombType) {
@@ -450,10 +392,19 @@ public class Player extends BoomGameObject {
     }
 
     public void DetonateBomb() {
-        if (bombType != BombType.REMOTE || bombs.size() == 0) {
+
+        if (bombs.size() == 0) {
             return;
         }
-        bombs.get(0).Explode();
+
+        for (int i = 0; i < bombs.size(); i++) {
+            Bomb bomb = bombs.get(i);
+            if (bomb.IsWaiting() && BombType.REMOTE.equals(bomb.GetType())) {
+                bombs.get(i).Explode();
+                break;
+            }
+        }
+
     }
 
     public void RemoveBomb(Bomb bomb) {
@@ -467,7 +418,7 @@ public class Player extends BoomGameObject {
 
     @Override
     public void Burn() {
-
+        System.out.println("Dead");
     }
 
     @Override
@@ -477,13 +428,8 @@ public class Player extends BoomGameObject {
         UpdateDirection();
         UpdateState();
 
-        this.x += velX * delta;
-        this.y += velY * delta;
-
-        if (pastX != x || pastY != y) {
+        if (UpdatePosition(delta)) {
             FireCoordinateEvent();
-            pastX = x;
-            pastY = y;
         }
 
         UpdateBounds();
@@ -493,15 +439,19 @@ public class Player extends BoomGameObject {
     public void Draw(Batch batch) {
 
         if (state == PlayerState.MOVING || state == PlayerState.DYING) {
-            batch.draw(GetActiveAnimation().getKeyFrame(animationElapsedTime), x * scale, y * scale, scale, scale);
+            activeAnimation = GetActiveAnimation();
+            batch.draw(activeAnimation.getKeyFrame(animationElapsedTime), position.x * size.x, position.y * size.y, size.x, size.y);
         } else {
-            batch.draw(GetActiveKeyFrame(), x * scale, y * scale, scale, scale);
+            batch.draw(GetActiveKeyFrame(), scaledPosition.x, scaledPosition.y, size.x, size.y);
         }
     }
 
     @Override
     public void DrawDebug(ShapeRenderer renderer) {
         renderer.setColor(Color.RED);
+        renderer.rect(burnRect.x * scale, burnRect.y * scale, burnRect.width * scale, burnRect.height * scale);
+
+        renderer.setColor(Color.CYAN);
         renderer.rect(collisionRect.x * scale, collisionRect.y * scale, collisionRect.width * scale, collisionRect.height * scale);
 
         renderer.setColor(Color.GREEN);
@@ -513,7 +463,7 @@ public class Player extends BoomGameObject {
 
     private void FireCoordinateEvent() {
         for (MovementEventListener listener : coordEventListeners) {
-            listener.OnMove(id, x, y);
+            listener.OnMove(id, position.x, position.y);
         }
     }
 }
