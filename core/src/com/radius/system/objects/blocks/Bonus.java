@@ -21,7 +21,8 @@ public class Bonus extends Block {
             BonusType.FLASH_FIRE,
             BonusType.MOVEMENT_SPEED,
             BonusType.REMOTE_MINE,
-            BonusType.PIERCE_BOMB
+            BonusType.PIERCE_BOMB,
+            BonusType.IMPACT_BOMB
     };
 
     private final BonusType bonusType;
@@ -49,6 +50,9 @@ public class Bonus extends Block {
                 break;
             case REMOTE_MINE:
                 player.ChangeBombType(BombType.REMOTE);
+                break;
+            case IMPACT_BOMB:
+                player.ChangeBombType(BombType.IMPACT);
                 break;
             case BOMB_STOCK:
             default:
