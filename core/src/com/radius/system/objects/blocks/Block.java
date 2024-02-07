@@ -33,7 +33,7 @@ public class Block extends Entity {
 
     protected boolean destroyed = false;
 
-    protected final Rectangle bounds;
+    protected Rectangle bounds;
 
     protected static final TextureRegion[][] REGIONS =
             TextureRegion.split(BLOCKS_SPRITE_SHEET, 32, 32);

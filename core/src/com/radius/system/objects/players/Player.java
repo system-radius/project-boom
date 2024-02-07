@@ -153,7 +153,7 @@ public class Player extends Entity {
 
         coordEventListeners = new ArrayList<>();
         bombs = new ArrayList<>();
-        movementSpeed = 7.5f;
+        movementSpeed = 1.5f;
         FixBounds();
 
         Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));

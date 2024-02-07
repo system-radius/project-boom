@@ -119,6 +119,8 @@ public class Bomb extends Block {
 
     private float thinWidth, thinHeight;
 
+    private final float boundsOffset = 0.01f;
+
     public Bomb(Player player, float x, float y, float width, float height, float scale) {
         this(BombType.NORMAL, player, x, y, width, height, scale);
     }
@@ -176,6 +178,8 @@ public class Bomb extends Block {
         westRect = RefreshRectangle(westRect, x, y, thinWidth / fixedDividerOffset, height - (thinHeight * fixedDividerOffset));
         eastRect = RefreshRectangle(eastRect, x, y, thinWidth / fixedDividerOffset, height - (thinHeight * fixedDividerOffset));
 
+        bounds = RefreshRectangle(bounds, x + boundsOffset / 2, y + boundsOffset / 2, 1 - boundsOffset, 1 - boundsOffset);
+
         UpdateCollisionBounds();
 
     }
@@ -189,6 +193,8 @@ public class Bomb extends Block {
         southRect.setPosition(x + (thinWidth), y + (offset / scale));
         eastRect.setPosition(x + (1 - (thinWidth / fixedDividerOffset)) - (offset / scale), y + (thinHeight));
         westRect.setPosition(x + (offset / scale), y + (thinHeight));
+
+        bounds.setPosition(x + boundsOffset / 2, y + boundsOffset / 2);
     }
 
     public void UpdateBounds(BoardState boardState) {
@@ -497,7 +503,7 @@ public class Bomb extends Block {
         DrawRect(renderer, southRect);
         DrawRect(renderer, westRect);
         DrawRect(renderer, eastRect);
-        DrawRect(renderer, fireStreamCenterBound);
+        DrawRect(renderer, bounds);
 
         if (IsExploding()) {
             renderer.setColor(Color.RED);
@@ -510,6 +516,7 @@ public class Bomb extends Block {
             DrawRect(renderer, fireStreamWestBound);
 
             renderer.setColor(Color.GREEN);
+            DrawRect(renderer, fireStreamCenterBound);
         }
 
     }
