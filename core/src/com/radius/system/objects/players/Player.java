@@ -486,7 +486,7 @@ public class Player extends Entity {
 
     public void DetonateBomb() {
 
-        if (bombs.size() == 0) {
+        if (bombs.size() == 0 || state == PlayerState.DEAD || state == PlayerState.DYING) {
             return;
         }
 
