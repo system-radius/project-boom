@@ -5,11 +5,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.radius.system.board.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
@@ -24,6 +26,7 @@ import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.bombs.ImpactBomb;
 import com.radius.system.objects.bombs.PierceBomb;
 import com.radius.system.objects.bombs.RemoteMine;
+import com.radius.system.utils.FontUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +52,7 @@ public class Player extends Entity {
     /**
      * The maximum speed that a player can have.
      */
-    public static final float SPEED_LIMIT = 0.75f;
+    public static final float SPEED_LIMIT = 7.5f;
 
     /**
      * The timer until the player respawns after dying.
@@ -129,14 +132,20 @@ public class Player extends Entity {
 
     private int bombStock = 1, firePower = 1;
 
-    private BombType bombType = BombType.NORMAL;
+    private BombType bombType = BombType.REMOTE;
 
     private final int id;
+
+    private final String name;
+
+    private final BitmapFont font;
 
     public Player(int id, float x, float y, float scale) {
         super(BoardRep.PLAYER, x, y, scale, scale);
 
         this.id = id;
+        this.name = "Player" + id;
+        font = FontUtils.GetFont((int)scale / 4, Color.WHITE, 1, Color.BLACK);
 
         respawnPoint = new Vector2(x, y);
         this.scale = scale;
@@ -144,7 +153,7 @@ public class Player extends Entity {
 
         coordEventListeners = new ArrayList<>();
         bombs = new ArrayList<>();
-        movementSpeed = 0.1f;
+        movementSpeed = 7.5f;
         FixBounds();
 
         Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
@@ -396,12 +405,12 @@ public class Player extends Entity {
     }
 
     public void IncreaseMovementSpeed() {
-        if (movementSpeed + 0.01f > SPEED_LIMIT) {
+        if (movementSpeed + 0.5f > SPEED_LIMIT) {
             movementSpeed = SPEED_LIMIT;
             return;
         }
 
-        movementSpeed += 0.01f;
+        movementSpeed += 0.5f;
         FixBounds();
     }
 
@@ -556,6 +565,8 @@ public class Player extends Entity {
         } else {
             batch.draw(GetActiveKeyFrame(), scaledPosition.x, scaledPosition.y, size.x, size.y);
         }
+
+        font.draw(batch, name, position.x * size.x, position.y * size.y, scale, Align.center, false);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.radius.system.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -16,6 +17,7 @@ import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.players.Player;
 import com.radius.system.stages.GameStage;
 import com.radius.system.states.GameState;
+import com.radius.system.utils.FontUtils;
 
 public class GameScreen extends AbstractScreen {
 
@@ -27,7 +29,7 @@ public class GameScreen extends AbstractScreen {
 
     private final float VIEWPORT_HEIGHT = 9f;
 
-    private final float WORLD_SCALE = 20f;
+    private final float WORLD_SCALE = 64f;
 
     //private final float ZOOM = 0.25785f;
     private final float ZOOM = 0.5f;
@@ -55,13 +57,13 @@ public class GameScreen extends AbstractScreen {
     private boolean maxZoomOut = false;
 
     public GameScreen() {
-        font = new BitmapFont();
+        font = FontUtils.GetFont((int) WORLD_SCALE, Color.WHITE, 1, Color.BLACK);
 
         InitializeView();
         InitializeStage();
         InitializeGameState();
 
-        debug = false;
+        debug = true;
     }
 
     private void InitializeStage() {
@@ -165,8 +167,8 @@ public class GameScreen extends AbstractScreen {
         float x = (uiCamera.position.x - uiViewport.getWorldWidth() / 2f);
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
-        font.draw(spriteBatch, "(" + mainViewport.getWorldWidth() + ", " + mainViewport.getWorldHeight() + ")" , x, y);
-        font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
+        //font.draw(spriteBatch, "(" + mainViewport.getWorldWidth() + ", " + mainViewport.getWorldHeight() + ")" , x, y);
+        //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
         //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
 
         spriteBatch.end();
@@ -191,5 +193,6 @@ public class GameScreen extends AbstractScreen {
         font.dispose();
         stage.dispose();
         gameState.dispose();
+        FontUtils.Dispose();
     }
 }

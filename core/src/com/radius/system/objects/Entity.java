@@ -31,11 +31,11 @@ public abstract class Entity extends AnimatedGameObject {
     }
 
     public void MoveAlongX(float multiplier) {
-        velocity.x = (size.x * movementSpeed) * multiplier;
+        velocity.x = movementSpeed * multiplier;
     }
 
     public void MoveAlongY(float multiplier) {
-        velocity.y = (size.y * movementSpeed) * multiplier;
+        velocity.y = movementSpeed * multiplier;
     }
 
     public void RefreshScaledPosition() {

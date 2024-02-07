@@ -497,6 +497,7 @@ public class Bomb extends Block {
         DrawRect(renderer, southRect);
         DrawRect(renderer, westRect);
         DrawRect(renderer, eastRect);
+        DrawRect(renderer, fireStreamCenterBound);
 
         if (IsExploding()) {
             renderer.setColor(Color.RED);
@@ -509,7 +510,6 @@ public class Bomb extends Block {
             DrawRect(renderer, fireStreamWestBound);
 
             renderer.setColor(Color.GREEN);
-            DrawRect(renderer, fireStreamCenterBound);
         }
 
     }
