@@ -118,7 +118,9 @@ public class Player extends Entity {
      */
     protected PlayerState state = PlayerState.IDLE;
 
-    private float thinWidth, thinHeight;
+    private final float fixedDividerCoordinator = 8f, fixedDividerOffset = 2f;
+
+    private float thinWidth, thinHeight, fixedThinWidth, fixedThinHeight;
 
     private float deathTime, respawnTime, invulnerableTime;
 
@@ -158,13 +160,17 @@ public class Player extends Entity {
         thinWidth = (width / (divider * 2));
         thinHeight = (height / (divider * 2));
 
-        burnRect = RefreshRectangle(burnRect, x, y, width - thinWidth, height - thinHeight);
-        collisionRect = RefreshRectangle(collisionRect, x, y, width, height);
+        float fixedDivider = 1.1f;
+        fixedThinWidth = (width / (fixedDivider * fixedDividerOffset));
+        fixedThinHeight = (height / (fixedDivider * fixedDividerOffset));
 
-        northRect = RefreshRectangle(northRect, x, y, width - (thinWidth * 2), thinHeight);
-        southRect = RefreshRectangle(southRect, x, y, width - (thinWidth * 2), thinHeight);
-        westRect = RefreshRectangle(westRect, x, y, thinWidth, height - (thinHeight * 2));
-        eastRect = RefreshRectangle(eastRect, x, y, thinWidth, height - (thinHeight * 2));
+        burnRect = RefreshRectangle(burnRect, x, y, width - thinWidth, height - thinHeight);
+        collisionRect = RefreshRectangle(collisionRect, x, y, width + fixedThinWidth / fixedDividerCoordinator, height + fixedThinHeight / fixedDividerCoordinator);
+
+        northRect = RefreshRectangle(northRect, x, y, width - (thinWidth * fixedDividerOffset), thinHeight / fixedDividerOffset);
+        southRect = RefreshRectangle(southRect, x, y, width - (thinWidth * fixedDividerOffset), thinHeight / fixedDividerOffset);
+        westRect = RefreshRectangle(westRect, x, y, thinWidth / fixedDividerOffset, height - (thinHeight * fixedDividerOffset));
+        eastRect = RefreshRectangle(eastRect, x, y, thinWidth / fixedDividerOffset, height - (thinHeight * fixedDividerOffset));
 
         UpdateBounds();
     }
@@ -272,14 +278,14 @@ public class Player extends Entity {
         float x = position.x;
         float y = position.y;
 
-        float offset = -movementSpeed;
-        northRect.setPosition(x + (thinWidth), (y + 1) - (thinHeight) - (offset / scale));
+        float offset = 0;
+        northRect.setPosition(x + (thinWidth), (y + 1) - (thinHeight/fixedDividerOffset) - (offset / scale));
         southRect.setPosition(x + (thinWidth), y + (offset / scale));
-        eastRect.setPosition(x + (1 - (thinWidth)) - (offset / scale), y + (thinHeight));
+        eastRect.setPosition(x + (1 - (thinWidth / fixedDividerOffset)) - (offset / scale), y + (thinHeight));
         westRect.setPosition(x + (offset / scale), y + (thinHeight));
 
-        burnRect.setPosition(x + thinWidth / 2, y + thinHeight / 2);
-        collisionRect.setPosition(x, y);
+        burnRect.setPosition(x + thinWidth / fixedDividerOffset, y + thinHeight / fixedDividerOffset);
+        collisionRect.setPosition(x - fixedThinWidth / (fixedDividerCoordinator * fixedDividerOffset), y - fixedThinHeight / (fixedDividerCoordinator * fixedDividerOffset));
     }
 
     public int GetFirePower() {
@@ -306,14 +312,18 @@ public class Player extends Entity {
                 continue;
             }
 
-            CollideWithBlock(block);
+            boolean hasCollision = CollideWithBlock(block);
+            if (hasCollision && block instanceof Bomb) {
+                System.out.println("Collided with bomb!");
+            }
         }
 
         FireCoordinateEvent();
     }
 
-    private void CollideWithBlock(Block block) {
+    private boolean CollideWithBlock(Block block) {
 
+        boolean hasCollision = false;
         Rectangle blockBounds = block.GetBounds();
 
         float blockX = blockBounds.x;
@@ -323,17 +333,22 @@ public class Player extends Entity {
 
         if (Intersector.overlaps(blockBounds, northRect)) {
             position.y = (blockY - blockHeight);
+            hasCollision = true;
         } else if (Intersector.overlaps(blockBounds, southRect)) {
             position.y = (blockY + blockHeight);
+            hasCollision = true;
         }
 
         if (Intersector.overlaps(blockBounds, eastRect)) {
             position.x = (blockX - blockWidth);
+            hasCollision = true;
         } else if (Intersector.overlaps(blockBounds, westRect)) {
             position.x = (blockX + blockWidth);
+            hasCollision = true;
         }
 
         RefreshScaledPosition();
+        return hasCollision;
     }
 
     public void IncreaseBombStock() {
