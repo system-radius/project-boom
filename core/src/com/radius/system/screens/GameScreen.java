@@ -10,12 +10,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.radius.system.controllers.HumanPlayerController;
-import com.radius.system.board.BoardState;
-import com.radius.system.controllers.PlayerController;
-import com.radius.system.objects.blocks.Block;
-import com.radius.system.objects.players.Player;
-import com.radius.system.stages.GameStage;
+import com.radius.system.screens.ui.GameCamera;
+import com.radius.system.screens.ui.GameStage;
 import com.radius.system.states.GameState;
 import com.radius.system.utils.FontUtils;
 
@@ -57,13 +53,13 @@ public class GameScreen extends AbstractScreen {
     private boolean maxZoomOut = false;
 
     public GameScreen() {
-        font = FontUtils.GetFont((int) WORLD_SCALE, Color.WHITE, 1, Color.BLACK);
+        font = FontUtils.GetFont((int) WORLD_SCALE / 2, Color.WHITE, 1, Color.BLACK);
 
         InitializeView();
         InitializeStage();
         InitializeGameState();
 
-        debug = false;
+        debug = true;
     }
 
     private void InitializeStage() {
@@ -123,7 +119,7 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void show() {
-        stage.RepositionButtons();
+        stage.RepositionUI();
     }
 
     @Override
@@ -131,7 +127,7 @@ public class GameScreen extends AbstractScreen {
         stage.getViewport().update(width, height, true);
         mainViewport.update(width, height);
         mainCamera.update();
-        stage.RepositionButtons();
+        stage.RepositionUI();
     }
 
     @Override
@@ -168,7 +164,7 @@ public class GameScreen extends AbstractScreen {
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
         //font.draw(spriteBatch, "(" + mainViewport.getWorldWidth() + ", " + mainViewport.getWorldHeight() + ")" , x, y);
-        //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
+        //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
         //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
 
         spriteBatch.end();

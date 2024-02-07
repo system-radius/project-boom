@@ -1,4 +1,4 @@
-package com.radius.system.screens;
+package com.radius.system.screens.ui;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;

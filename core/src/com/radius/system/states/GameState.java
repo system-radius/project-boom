@@ -10,8 +10,8 @@ import com.radius.system.enums.BoardRep;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.HardBlock;
 import com.radius.system.objects.blocks.SoftBlock;
-import com.radius.system.screens.GameCamera;
-import com.radius.system.stages.GameStage;
+import com.radius.system.screens.ui.GameCamera;
+import com.radius.system.screens.ui.GameStage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +90,7 @@ public class GameState implements Disposable {
     private PlayerController CreateHumanPlayerController(int id, GameStage stage, GameCamera camera) {
         HumanPlayerController controller = new HumanPlayerController(id, boardState, WORLD_SCALE);
         controller.GetPlayer().AddCoordinateEventListener(camera);
+        controller.GetPlayer().AddStatChangeListener(stage);
         stage.AddMovementEventListener(controller);
         stage.AddButtonAListener(controller.GetButtonA());
         stage.AddButtonBListener(controller.GetButtonB());

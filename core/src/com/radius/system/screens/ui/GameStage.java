@@ -1,10 +1,11 @@
-package com.radius.system.stages;
+package com.radius.system.screens.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -12,9 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.controllers.Joystick;
+import com.radius.system.enums.BonusType;
 import com.radius.system.enums.ControlKeys;
 import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.MovementEventListener;
+import com.radius.system.events.StatChangeListener;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.bombs.Bomb;
 
@@ -23,11 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GameStage extends Stage {
+public class GameStage extends Stage implements StatChangeListener {
 
     private final Texture aTexture = new Texture(Gdx.files.internal("img/A.png"));
 
     private final Texture bTexture = new Texture(Gdx.files.internal("img/B.png"));
+
+    private final ShapeRenderer stageRenderer = new ShapeRenderer();
 
     private final Map<ControlKeys, Boolean> pressedKeys = new HashMap<>();
 
@@ -37,7 +42,7 @@ public class GameStage extends Stage {
 
     private final List<ButtonEventListener> buttonBListeners = new ArrayList<>();
 
-    private final Vector3 vector;
+    private final Vector3 touchVector;
 
     private final float scale;
 
@@ -61,15 +66,19 @@ public class GameStage extends Stage {
 
     private int joystickPointer = -1;
 
+    private HeadsUpDisplay hud;
+
     public GameStage(int id, Viewport viewport, float scale) {
         super(viewport);
         this.id = id;
         float buttonSize = 2f * scale;
         this.scale = scale;
-        this.vector = new Vector3();
+        this.touchVector = new Vector3();
 
         this.viewport = viewport;
         this.camera = viewport.getCamera();
+
+        this.hud = new HeadsUpDisplay(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight() / 9f, scale);
 
         joystick = new Joystick(camera.position.x - (Gdx.graphics.getWidth() / 2f), camera.position.y - (Gdx.graphics.getHeight() / 2f), scale);
 
@@ -99,6 +108,7 @@ public class GameStage extends Stage {
             }
         });
 
+        this.addActor(hud);
         this.addActor(aButton);
         this.addActor(bButton);
 
@@ -173,9 +183,14 @@ public class GameStage extends Stage {
         }
     }
 
-    public void RepositionButtons() {
-        aButton.setPosition(getViewport().getWorldWidth() - 2.5f * scale, aButton.getY());
-        bButton.setPosition(getViewport().getWorldWidth() - 5f * scale, bButton.getY());
+    public void RepositionUI() {
+
+        float width = viewport.getWorldWidth();
+
+        aButton.setPosition(width - 2.5f * scale, aButton.getY());
+        bButton.setPosition(width - 5f * scale, bButton.getY());
+        hud.setPosition(hud.getX(), viewport.getWorldHeight() - hud.getHeight());
+        hud.setWidth(width);
     }
 
     public void AddMovementEventListener(MovementEventListener listener) {
@@ -202,7 +217,11 @@ public class GameStage extends Stage {
     @Override
     public void draw() {
         super.draw();
+        DrawHeadsUpDisplay();
+        DrawJoystick();
+    }
 
+    private void DrawJoystick() {
         Batch batch = getBatch();
         batch.setProjectionMatrix(camera.combined);
 
@@ -211,6 +230,10 @@ public class GameStage extends Stage {
         joystick.Draw(batch);
         batch.setColor(1, 1, 1, 1f);
         batch.end();
+    }
+
+    private void DrawHeadsUpDisplay() {
+
     }
 
     @Override
@@ -257,12 +280,12 @@ public class GameStage extends Stage {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        vector.x = screenX;
-        vector.y = screenY;
-        vector.set(camera.unproject(vector));
+        touchVector.x = screenX;
+        touchVector.y = screenY;
+        touchVector.set(camera.unproject(touchVector));
 
         if (screenX < Gdx.graphics.getWidth() / 3f && joystickPointer < 0) {
-            joystick.SetPosition(vector.x, vector.y, false);
+            joystick.SetPosition(touchVector.x, touchVector.y, false);
             isTouching = true;
             joystickPointer = pointer;
             return true;
@@ -290,18 +313,18 @@ public class GameStage extends Stage {
             return super.touchDragged(screenX, screenY, pointer);
         }
 
-        vector.x = screenX;
-        vector.y = screenY;
-        vector.set(camera.unproject(vector));
+        touchVector.x = screenX;
+        touchVector.y = screenY;
+        touchVector.set(camera.unproject(touchVector));
 
         // Get new vector coordinates for joystick drag.
-        vector.set(joystick.SetDragPosition(vector.x, vector.y));
+        touchVector.set(joystick.SetDragPosition(touchVector.x, touchVector.y));
 
         float modifier = 0.5f;
         float divider = 10f;
 
-        float velX = Math.round(((vector.x - joystick.position.x) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
-        float velY = Math.round(((vector.y - joystick.position.y) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
+        float velX = Math.round(((touchVector.x - joystick.position.x) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
+        float velY = Math.round(((touchVector.y - joystick.position.y) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
         movementX = velX;
         movementY = velY;
         FireMovementEvent();
@@ -317,7 +340,12 @@ public class GameStage extends Stage {
         Block.BLOCKS_SPRITE_SHEET.dispose();
         Bomb.BOMB_TEXTURE.dispose();
         Bomb.FIRE_TEXTURE.dispose();
+        stageRenderer.dispose();
         super.dispose();
     }
 
+    @Override
+    public void OnStatChange(BonusType type, int value) {
+        hud.SetValue(type, value);
+    }
 }

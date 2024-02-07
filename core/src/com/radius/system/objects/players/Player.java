@@ -15,9 +15,11 @@ import com.badlogic.gdx.utils.Align;
 import com.radius.system.board.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
+import com.radius.system.enums.BonusType;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
 import com.radius.system.events.MovementEventListener;
+import com.radius.system.events.StatChangeListener;
 import com.radius.system.objects.Entity;
 import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.AnimatedGameObject;
@@ -69,6 +71,8 @@ public class Player extends Entity {
     private final List<Animation<TextureRegion>> animations = new ArrayList<>();
 
     private final List<MovementEventListener> coordEventListeners;
+
+    private final List<StatChangeListener> statChangeListeners;
 
     private final List<Bomb> bombs;
 
@@ -130,7 +134,9 @@ public class Player extends Entity {
 
     private boolean invulnerable = false, useRespawnPoint = false;
 
-    private int bombStock = 1, firePower = 1;
+    private int bombStock = 0, firePower = 0, speedLevel = 0;
+
+    private final float baseSpeedIncrease = 0.5f, baseSpeed = 1.5f;
 
     private BombType bombType = BombType.NORMAL;
 
@@ -138,24 +144,28 @@ public class Player extends Entity {
 
     private final String name;
 
-    private final BitmapFont font;
+    private final BitmapFont playerNameFont;
 
     public Player(int id, float x, float y, float scale) {
         super(BoardRep.PLAYER, x, y, scale, scale);
 
         this.id = id;
         this.name = "Player" + id;
-        font = FontUtils.GetFont((int)scale / 4, Color.WHITE, 1, Color.BLACK);
+        playerNameFont = FontUtils.GetFont((int)scale / 4, Color.WHITE, 1, Color.BLACK);
 
         respawnPoint = new Vector2(x, y);
         this.scale = scale;
         LoadAsset("img/tokoy_sprite_sheet.png");
 
         coordEventListeners = new ArrayList<>();
+        statChangeListeners = new ArrayList<>();
         bombs = new ArrayList<>();
-        movementSpeed = 1.5f;
-        FixBounds();
+        movementSpeed = 1f;
 
+        IncreaseBombStock();
+        IncreaseFirePower(1);
+        IncreaseMovementSpeed();
+        System.out.println("Initial ms: " + movementSpeed);
         Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
     }
 
@@ -393,6 +403,7 @@ public class Player extends Entity {
         }
 
         bombStock++;
+        FireStatChange(BonusType.BOMB_STOCK, bombStock - bombs.size());
     }
 
     public void IncreaseFirePower(int increase) {
@@ -402,16 +413,19 @@ public class Player extends Entity {
         }
 
         firePower += increase;
+        FireStatChange(BonusType.FIRE_POWER, firePower);
     }
 
     public void IncreaseMovementSpeed() {
-        if (movementSpeed + 0.5f > SPEED_LIMIT) {
+        if (baseSpeed + (baseSpeedIncrease * (speedLevel + 1)) > SPEED_LIMIT) {
             movementSpeed = SPEED_LIMIT;
             return;
         }
 
-        movementSpeed += 0.5f;
+        speedLevel += 1f;
+        movementSpeed = baseSpeed + (baseSpeedIncrease * speedLevel);
         FixBounds();
+        FireStatChange(BonusType.MOVEMENT_SPEED, speedLevel);
     }
 
     public void ChangeBombType(BombType bombType) {
@@ -425,6 +439,14 @@ public class Player extends Entity {
     public void AddCoordinateEventListener(MovementEventListener listener) {
         if (coordEventListeners.contains(listener)) return;
         coordEventListeners.add(listener);
+    }
+
+    public void AddStatChangeListener(StatChangeListener listener) {
+        if (statChangeListeners.contains(listener)) return;
+        statChangeListeners.add(listener);
+        FireStatChange(BonusType.BOMB_STOCK, bombStock);
+        FireStatChange(BonusType.FIRE_POWER, firePower);
+        FireStatChange(BonusType.MOVEMENT_SPEED, speedLevel);
     }
 
     public Bomb PlantBomb(BoardState boardState) {
@@ -458,6 +480,7 @@ public class Player extends Entity {
         }
 
         bombs.add(bomb);
+        FireStatChange(BonusType.BOMB_STOCK, bombStock - bombs.size());
         return bomb;
     }
 
@@ -479,6 +502,7 @@ public class Player extends Entity {
 
     public void RemoveBomb(Bomb bomb) {
         bombs.remove(bomb);
+        FireStatChange(BonusType.BOMB_STOCK, bombStock - bombs.size());
     }
 
     @Override
@@ -566,7 +590,7 @@ public class Player extends Entity {
             batch.draw(GetActiveKeyFrame(), scaledPosition.x, scaledPosition.y, size.x, size.y);
         }
 
-        font.draw(batch, name, position.x * size.x, position.y * size.y, scale, Align.center, false);
+        playerNameFont.draw(batch, name, position.x * size.x, position.y * size.y, scale, Align.center, false);
     }
 
     @Override
@@ -587,6 +611,12 @@ public class Player extends Entity {
     private void FireCoordinateEvent() {
         for (MovementEventListener listener : coordEventListeners) {
             listener.OnMove(id, position.x, position.y);
+        }
+    }
+
+    private void FireStatChange(BonusType type, int value) {
+        for (StatChangeListener listener : statChangeListeners) {
+            listener.OnStatChange(type, value);
         }
     }
 }
