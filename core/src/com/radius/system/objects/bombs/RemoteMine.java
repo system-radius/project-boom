@@ -10,6 +10,11 @@ public class RemoteMine extends Bomb {
     }
 
     @Override
+    public void Move(float x, float y) {
+        // Do nothing, remote mines do not move.
+    }
+
+    @Override
     protected void UpdateBreathing(float delta) {
         if (state == BombState.SET_TO_EXPLODE) {
             super.UpdateBreathing(delta);
