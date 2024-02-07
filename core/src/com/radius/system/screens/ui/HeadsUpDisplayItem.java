@@ -49,7 +49,6 @@ public class HeadsUpDisplayItem extends Actor implements Disposable {
 
         ones = SYMBOLS[0][onesValue];
         tens = SYMBOLS[0][tensValue];
-        System.out.println("Type[" + type.toString() + "]: (" + value + ") -> " + tensValue + " " + onesValue);
     }
 
     public void SetValue(int value) {
@@ -58,11 +57,6 @@ public class HeadsUpDisplayItem extends Actor implements Disposable {
 
     @Override
     public void draw(Batch batch, float alpha) {
-        /*
-        batch.draw(icon, getX(), getY(), getWidth(), getHeight());
-        batch.draw(tens, getX() + getWidth(), getY(), getWidth(), getHeight());
-        batch.draw(ones, getX() + getWidth() * 2, getY(), getWidth(), getHeight());
-        */
         batch.draw(icon, getX(), getY(), getWidth(), getHeight());
         DrawItem(batch, colon, 1);
         DrawItem(batch, tens, 2);

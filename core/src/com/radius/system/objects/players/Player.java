@@ -165,7 +165,6 @@ public class Player extends Entity {
         IncreaseBombStock();
         IncreaseFirePower(1);
         IncreaseMovementSpeed();
-        System.out.println("Initial ms: " + movementSpeed);
         Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
     }
 
