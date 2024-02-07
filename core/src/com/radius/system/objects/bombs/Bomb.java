@@ -16,6 +16,7 @@ import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
 import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
+import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.players.Player;
 
 import java.util.HashMap;
@@ -64,6 +65,26 @@ public class Bomb extends Block {
 
     protected Animation<TextureRegion> fireStreamCenter;
 
+    /**
+     * The top collision bound.
+     */
+    private Rectangle northRect;
+
+    /**
+     * The bottom collision bound.
+     */
+    private Rectangle southRect;
+
+    /**
+     * The left collision bound.
+     */
+    private Rectangle westRect;
+
+    /**
+     * The right collision bound.
+     */
+    private Rectangle eastRect;
+
     protected Rectangle fireStreamNorthBound;
 
     protected Rectangle fireStreamSouthBound;
@@ -94,6 +115,10 @@ public class Bomb extends Block {
 
     private float explosionTime = 0f;
 
+    private final float fixedDividerOffset = 2f;
+
+    private float thinWidth, thinHeight;
+
     public Bomb(Player player, float x, float y, float width, float height, float scale) {
         this(BombType.NORMAL, player, x, y, width, height, scale);
     }
@@ -107,6 +132,7 @@ public class Bomb extends Block {
 
         this.bombType = bombType;
         LoadAssets();
+        FixBounds();
     }
 
     protected void LoadAssets() {
@@ -132,6 +158,37 @@ public class Bomb extends Block {
         }
 
         return animation;
+    }
+
+    private void FixBounds() {
+        float x = position.x;
+        float y = position.y;
+
+        float width = 1f;
+        float height = 1f;
+
+        float divider = 1.1f;
+        thinWidth = (width / (divider * 2));
+        thinHeight = (height / (divider * 2));
+
+        northRect = RefreshRectangle(northRect, x, y, width - (thinWidth * fixedDividerOffset), thinHeight / fixedDividerOffset);
+        southRect = RefreshRectangle(southRect, x, y, width - (thinWidth * fixedDividerOffset), thinHeight / fixedDividerOffset);
+        westRect = RefreshRectangle(westRect, x, y, thinWidth / fixedDividerOffset, height - (thinHeight * fixedDividerOffset));
+        eastRect = RefreshRectangle(eastRect, x, y, thinWidth / fixedDividerOffset, height - (thinHeight * fixedDividerOffset));
+
+        UpdateCollisionBounds();
+
+    }
+
+    public void UpdateCollisionBounds() {
+        float x = position.x;
+        float y = position.y;
+
+        float offset = 0;
+        northRect.setPosition(x + (thinWidth), (y + 1) - (thinHeight / fixedDividerOffset) - (offset / scale));
+        southRect.setPosition(x + (thinWidth), y + (offset / scale));
+        eastRect.setPosition(x + (1 - (thinWidth / fixedDividerOffset)) - (offset / scale), y + (thinHeight));
+        westRect.setPosition(x + (offset / scale), y + (thinHeight));
     }
 
     public void UpdateBounds(BoardState boardState) {
@@ -160,6 +217,10 @@ public class Bomb extends Block {
         if (counter > range) return 1;
 
         BoardRep rep = boardState.GetBoardEntry(x, y);
+
+        if (rep == null) {
+            return 1;
+        }
 
         switch (rep) {
             case PERMANENT_BLOCK:
@@ -214,13 +275,69 @@ public class Bomb extends Block {
         }
     }
 
+    public boolean Collide(List<Block> blocks) {
+        for (Block block : blocks) {
+
+            if (block.equals(this)) {
+                continue;
+            }
+
+             if (CollideWithBlock(block)) {
+                 return true;
+             }
+        }
+
+        return false;
+    }
+
+    private boolean CollideWithBlock(Block block) {
+
+        boolean hasCollision = false;
+        Rectangle blockBounds = block.GetBounds();
+
+        float blockX = blockBounds.x;
+        float blockY = blockBounds.y;
+        float blockWidth = blockBounds.width;
+        float blockHeight = blockBounds.height;
+
+        if (Intersector.overlaps(blockBounds, northRect)) {
+            position.y = (blockY - blockHeight);
+            hasCollision = true;
+            System.out.println("Collided up!");
+        } else if (Intersector.overlaps(blockBounds, southRect)) {
+            position.y = (blockY + blockHeight);
+            hasCollision = true;
+            System.out.println("Collided down!");
+        }
+
+        if (Intersector.overlaps(blockBounds, eastRect)) {
+            position.x = (blockX - blockWidth);
+            hasCollision = true;
+            System.out.println("Collided right!");
+        } else if (Intersector.overlaps(blockBounds, westRect)) {
+            position.x = (blockX + blockWidth);
+            hasCollision = true;
+            System.out.println("Collided left!");
+        }
+
+        RefreshScaledPosition();
+        return hasCollision;
+    }
+
     public void Explode() {
         state = BombState.EXPLODING;
         animationElapsedTime = 0;
+        velocity.x = velocity.y = 0;
+        position.x = GetWorldX();
+        position.y = GetWorldY();
     }
 
     public boolean IsWaiting() {
         return state == BombState.BREATHING || state == BombState.SET_TO_EXPLODE ;
+    }
+
+    public BombState GetState() {
+        return state;
     }
 
     public boolean IsExploding() {
@@ -259,6 +376,18 @@ public class Bomb extends Block {
         }
     }
 
+
+    @Override
+    public void Move(float x, float y) {
+
+        if (state == BombState.MOVING) {
+            return;
+        }
+
+        super.Move(Math.round(x), Math.round(y));
+        state = BombState.MOVING;
+    }
+
     @Override
     public boolean HasActiveCollision(Player player) {
         return playerCollisions.get(player);
@@ -280,6 +409,7 @@ public class Bomb extends Block {
         animationElapsedTime += delta;
 
         switch(state) {
+            case MOVING:
             case BREATHING:
             case SET_TO_EXPLODE:
                 UpdateBreathing(delta);
@@ -314,9 +444,10 @@ public class Bomb extends Block {
     public void Draw(Batch batch) {
 
         switch (state) {
+            case MOVING:
             case BREATHING:
             case SET_TO_EXPLODE:
-                DrawAnimation(batch, breathingAnimation, GetWorldX(), GetWorldY());
+                DrawAnimation(batch, breathingAnimation, position.x, position.y);
                 break;
             case EXPLODING:
                 DrawFire(batch);
@@ -355,6 +486,12 @@ public class Bomb extends Block {
 
     @Override
     public void DrawDebug(ShapeRenderer renderer) {
+
+        renderer.setColor(Color.GREEN);
+        DrawRect(renderer, northRect);
+        DrawRect(renderer, southRect);
+        DrawRect(renderer, westRect);
+        DrawRect(renderer, eastRect);
 
         if (IsExploding()) {
             renderer.setColor(Color.RED);

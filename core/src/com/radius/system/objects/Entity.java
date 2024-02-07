@@ -43,6 +43,14 @@ public abstract class Entity extends AnimatedGameObject {
         scaledPosition.y = position.y * size.y;
     }
 
+    public int GetPastX() {
+        return GetWorldPosition(past.x, size.x);
+    }
+
+    public int GetPastY() {
+        return GetWorldPosition(past.y, size.y);
+    }
+
     public boolean UpdatePosition(float delta) {
         position.x += velocity.x * delta;
         position.y += velocity.y * delta;

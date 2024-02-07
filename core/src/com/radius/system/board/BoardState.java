@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.objects.BoomDrawable;
 import com.radius.system.objects.BoomUpdatable;
+import com.radius.system.objects.GameObject;
 import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
@@ -77,6 +78,15 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         players.add(player);
     }
 
+    public void MoveItemInBoard(int srcX, int srcY, int dstX, int dstY) {
+
+        board[dstX][dstY] = board[srcX][srcY];
+        board[srcX][srcY] = null;
+
+        boardRep[dstX][dstY] = boardRep[srcX][srcY];
+        boardRep[srcX][srcY] = BoardRep.EMPTY;
+    }
+
     public void RemoveFromBoard(Block block) {
         int x = block.GetWorldX();
         int y = block.GetWorldY();
@@ -96,6 +106,11 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
     }
 
     public BoardRep GetBoardEntry(int x, int y) {
+
+        if (x < 0 || y < 0 || x >= boardWidth || y >= boardHeight) {
+            return null;
+        }
+
         return boardRep[x][y];
     }
 
@@ -131,20 +146,44 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
     @Override
     public void Update(float delta) {
-        UpdateBombs();
+        UpdateBombs(delta);
         UpdateBoard(delta);
     }
 
-    private void UpdateBombs() {
+    private void UpdateBombs(float delta) {
         for (int i = 0; i < bombs.size(); i++) {
             Bomb bomb = bombs.get(i);
-            if (bomb.IsWaiting()) {
-                bomb.UpdateBounds(this);
-            } else if (bomb.IsExploding()) {
-                AttemptBurnPlayers(bomb);
-                bomb.BurnObjects(this);
-            } else if (bomb.IsExploded()) {
-                RemoveBombFromBoard(bomb);
+            int srcX = bomb.GetPastX();
+            int srcY = bomb.GetPastY();
+
+            switch(bomb.GetState()) {
+                case MOVING:
+                    boolean hasCollision = bomb.Collide(GetSurroundingBlocks(srcX, srcY));
+                    if (bomb.UpdatePosition(delta)) {
+                        int dstX = bomb.GetWorldX();
+                        int dstY = bomb.GetWorldY();
+
+                        MoveItemInBoard(srcX, srcY, dstX, dstY);
+                        System.out.println("Updated position!");
+
+                    }
+                    if (hasCollision) {
+                        bomb.velocity.x = 0;
+                        bomb.velocity.y = 0;
+                        bomb.Explode();
+                    }
+                case BREATHING:
+                case SET_TO_EXPLODE:
+                    //System.out.println("(" + bomb.velocity.x + ", " + bomb.velocity.y + ")");
+                    bomb.UpdateCollisionBounds();
+                    bomb.UpdateBounds(this);
+                    break;
+                case EXPLODING:
+                    AttemptBurnPlayers(bomb);
+                    bomb.BurnObjects(this);
+                    break;
+                case EXPLODED:
+                    RemoveBombFromBoard(bomb);
             }
         }
     }

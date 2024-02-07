@@ -128,7 +128,7 @@ public class Player extends Entity {
 
     private int bombStock = 1, firePower = 1;
 
-    private BombType bombType = BombType.NORMAL;
+    private BombType bombType = BombType.REMOTE;
 
     private final int id;
 
@@ -314,7 +314,7 @@ public class Player extends Entity {
 
             boolean hasCollision = CollideWithBlock(block);
             if (hasCollision && block instanceof Bomb) {
-                System.out.println("Collided with bomb!");
+                block.Move(velocity.x, velocity.y);
             }
         }
 
