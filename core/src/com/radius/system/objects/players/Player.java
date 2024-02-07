@@ -313,23 +313,18 @@ public class Player extends Entity {
                 continue;
             }
 
-            boolean hasCollision = CollideWithBlock(block);
-            if (hasCollision && block instanceof Bomb) {
-                if (!((Bomb)block).IsMoving() && BombType.IMPACT == bombType) {
-                    block.Move(velocity.x, velocity.y);
-                }
-            }
+            CollideWithBlock(block);
         }
 
         FireCoordinateEvent();
     }
 
-    private boolean CollideWithBlock(Block block) {
+    private void CollideWithBlock(Block block) {
 
         boolean hasCollision = false;
 
         if (block instanceof Bomb && ((Bomb) block).IsMoving()) {
-            return hasCollision;
+            return;
         }
 
         Rectangle blockBounds = block.GetBounds();
@@ -339,24 +334,47 @@ public class Player extends Entity {
         float blockWidth = blockBounds.width;
         float blockHeight = blockBounds.height;
 
+        boolean collideX = false, collideY = false;
+
         if (Intersector.overlaps(blockBounds, northRect)) {
             position.y = (blockY - blockHeight);
-            hasCollision = true;
+            collideY = hasCollision = true;
         } else if (Intersector.overlaps(blockBounds, southRect)) {
             position.y = (blockY + blockHeight);
-            hasCollision = true;
+            collideY = hasCollision = true;
         }
 
         if (Intersector.overlaps(blockBounds, eastRect)) {
             position.x = (blockX - blockWidth);
-            hasCollision = true;
+            collideX = hasCollision = true;
         } else if (Intersector.overlaps(blockBounds, westRect)) {
             position.x = (blockX + blockWidth);
-            hasCollision = true;
+            collideX = hasCollision = true;
+        }
+
+        if (hasCollision && block instanceof Bomb) {
+            ResolveCollision((Bomb) block, collideX, collideY);
         }
 
         RefreshScaledPosition();
-        return hasCollision;
+    }
+
+    private void ResolveCollision(Bomb bomb, boolean collideX, boolean collideY) {
+        if (bombType != BombType.IMPACT) {
+            return;
+        }
+
+        if (collideX && collideY) {
+            if (Math.abs(velocity.x) > Math.abs(velocity.y)) {
+                bomb.Move(velocity.x, 0);
+            } else {
+                bomb.Move(0, velocity.y);
+            }
+        } else if (collideX) {
+            bomb.Move(velocity.x, 0);
+        } else if (collideY) {
+            bomb.Move(0, velocity.y);
+        }
     }
 
     public void IncreaseBombStock() {
