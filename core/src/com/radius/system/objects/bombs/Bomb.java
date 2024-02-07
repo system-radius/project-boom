@@ -303,21 +303,17 @@ public class Bomb extends Block {
         if (Intersector.overlaps(blockBounds, northRect)) {
             position.y = (blockY - blockHeight);
             hasCollision = true;
-            System.out.println("Collided up!");
         } else if (Intersector.overlaps(blockBounds, southRect)) {
             position.y = (blockY + blockHeight);
             hasCollision = true;
-            System.out.println("Collided down!");
         }
 
         if (Intersector.overlaps(blockBounds, eastRect)) {
             position.x = (blockX - blockWidth);
             hasCollision = true;
-            System.out.println("Collided right!");
         } else if (Intersector.overlaps(blockBounds, westRect)) {
             position.x = (blockX + blockWidth);
             hasCollision = true;
-            System.out.println("Collided left!");
         }
 
         RefreshScaledPosition();
@@ -325,6 +321,11 @@ public class Bomb extends Block {
     }
 
     public void Explode() {
+
+        if (IsExploding()) {
+            return;
+        }
+
         state = BombState.EXPLODING;
         animationElapsedTime = 0;
         velocity.x = velocity.y = 0;
@@ -338,6 +339,10 @@ public class Bomb extends Block {
 
     public BombState GetState() {
         return state;
+    }
+
+    public boolean IsMoving() {
+        return state == BombState.MOVING;
     }
 
     public boolean IsExploding() {

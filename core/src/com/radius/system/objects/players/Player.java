@@ -314,7 +314,9 @@ public class Player extends Entity {
 
             boolean hasCollision = CollideWithBlock(block);
             if (hasCollision && block instanceof Bomb) {
-                block.Move(velocity.x, velocity.y);
+                if (!((Bomb)block).IsMoving()) {
+                    block.Move(velocity.x, velocity.y);
+                }
             }
         }
 
@@ -324,6 +326,11 @@ public class Player extends Entity {
     private boolean CollideWithBlock(Block block) {
 
         boolean hasCollision = false;
+
+        if (block instanceof Bomb && ((Bomb) block).IsMoving()) {
+            return hasCollision;
+        }
+
         Rectangle blockBounds = block.GetBounds();
 
         float blockX = blockBounds.x;
