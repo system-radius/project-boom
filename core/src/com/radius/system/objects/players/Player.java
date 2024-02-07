@@ -401,6 +401,11 @@ public class Player extends Entity {
     }
 
     public Bomb PlantBomb(BoardState boardState) {
+
+        if (state == PlayerState.DEAD || state == PlayerState.DYING) {
+            return null;
+        }
+
         int worldX = GetWorldX();
         int worldY = GetWorldY();
 
