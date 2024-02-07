@@ -165,7 +165,7 @@ public class Player extends Entity {
         fixedThinWidth = (width / (fixedDivider * fixedDividerOffset));
         fixedThinHeight = (height / (fixedDivider * fixedDividerOffset));
 
-        burnRect = RefreshRectangle(burnRect, x, y, width - thinWidth, height - thinHeight);
+        burnRect = RefreshRectangle(burnRect, x, y, width - fixedThinWidth, height - fixedThinHeight);
         collisionRect = RefreshRectangle(collisionRect, x, y, width + fixedThinWidth / fixedDividerCoordinator, height + fixedThinHeight / fixedDividerCoordinator);
 
         northRect = RefreshRectangle(northRect, x, y, width - (thinWidth * fixedDividerOffset), thinHeight / fixedDividerOffset);
@@ -285,7 +285,7 @@ public class Player extends Entity {
         eastRect.setPosition(x + (1 - (thinWidth / fixedDividerOffset)) - (offset / scale), y + (thinHeight));
         westRect.setPosition(x + (offset / scale), y + (thinHeight));
 
-        burnRect.setPosition(x + thinWidth / fixedDividerOffset, y + thinHeight / fixedDividerOffset);
+        burnRect.setPosition(x + fixedThinWidth / fixedDividerOffset, y + fixedThinHeight / fixedDividerOffset);
         collisionRect.setPosition(x - fixedThinWidth / (fixedDividerCoordinator * fixedDividerOffset), y - fixedThinHeight / (fixedDividerCoordinator * fixedDividerOffset));
     }
 
