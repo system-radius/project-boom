@@ -21,6 +21,7 @@ import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
+import com.radius.system.objects.bombs.ImpactBomb;
 import com.radius.system.objects.bombs.PierceBomb;
 import com.radius.system.objects.bombs.RemoteMine;
 
@@ -314,7 +315,7 @@ public class Player extends Entity {
 
             boolean hasCollision = CollideWithBlock(block);
             if (hasCollision && block instanceof Bomb) {
-                if (!((Bomb)block).IsMoving()) {
+                if (!((Bomb)block).IsMoving() && BombType.IMPACT == bombType) {
                     block.Move(velocity.x, velocity.y);
                 }
             }
@@ -407,7 +408,7 @@ public class Player extends Entity {
             return null;
         }
 
-        Bomb bomb = null;
+        Bomb bomb;
 
         switch (bombType) {
             case REMOTE:
@@ -417,18 +418,14 @@ public class Player extends Entity {
                 bomb = new PierceBomb(this, worldX, worldY, scale, scale, scale);
                 break;
             case IMPACT:
+                bomb = new ImpactBomb(this, worldX, worldY, scale, scale, scale);
                 break;
             case NORMAL:
             default:
                 bomb = new Bomb(this, worldX, worldY, scale, scale, scale);
         }
 
-        if (bomb == null) {
-            return null;
-        }
-
         bombs.add(bomb);
-
         return bomb;
     }
 
