@@ -126,7 +126,7 @@ public class Player extends Entity {
      */
     protected PlayerState state = PlayerState.IDLE;
 
-    private final float fixedDividerCoordinator = 8f, fixedDividerOffset = 2f;
+    private final float fixedDividerCoordinator = 8f, fixedDividerOffset = 2f, verticalDivider = 0.75f;
 
     private float thinWidth, thinHeight, fixedThinWidth, fixedThinHeight;
 
@@ -175,11 +175,12 @@ public class Player extends Entity {
         float width = 1f;
         float height = 1f;
 
-        float divider = (1.1f + SPEED_LIMIT) - movementSpeed;
-        thinWidth = (width / (divider * 2));
-        thinHeight = (height / (divider * 2));
-
         float fixedDivider = 1.1f;
+        //float divider = (1.1f + SPEED_LIMIT) - movementSpeed;
+
+        thinWidth = (width / (fixedDivider * 2));
+        thinHeight = (height / (fixedDivider * 2));
+
         fixedThinWidth = (width / (fixedDivider * fixedDividerOffset));
         fixedThinHeight = (height / (fixedDivider * fixedDividerOffset));
 
@@ -188,8 +189,8 @@ public class Player extends Entity {
 
         northRect = RefreshRectangle(northRect, x, y, width - (thinWidth * fixedDividerOffset), thinHeight / fixedDividerOffset);
         southRect = RefreshRectangle(southRect, x, y, width - (thinWidth * fixedDividerOffset), thinHeight / fixedDividerOffset);
-        westRect = RefreshRectangle(westRect, x, y, thinWidth / fixedDividerOffset, height - (thinHeight * fixedDividerOffset));
-        eastRect = RefreshRectangle(eastRect, x, y, thinWidth / fixedDividerOffset, height - (thinHeight * fixedDividerOffset));
+        westRect = RefreshRectangle(westRect, x, y, thinWidth / fixedDividerOffset, height - fixedThinHeight / verticalDivider);
+        eastRect = RefreshRectangle(eastRect, x, y, thinWidth / fixedDividerOffset, height - fixedThinHeight / verticalDivider);
 
         UpdateBounds();
     }
@@ -297,11 +298,10 @@ public class Player extends Entity {
         float x = position.x;
         float y = position.y;
 
-        float offset = 0;
-        northRect.setPosition(x + (thinWidth), (y + 1) - (thinHeight/fixedDividerOffset) - (offset / scale));
-        southRect.setPosition(x + (thinWidth), y + (offset / scale));
-        eastRect.setPosition(x + (1 - (thinWidth / fixedDividerOffset)) - (offset / scale), y + (thinHeight));
-        westRect.setPosition(x + (offset / scale), y + (thinHeight));
+        northRect.setPosition(x + (thinWidth), (y + 1) - (thinHeight/fixedDividerOffset));
+        southRect.setPosition(x + (thinWidth), y);
+        eastRect.setPosition(x + (1 - (thinWidth / fixedDividerOffset)), y + (fixedThinHeight / fixedDividerOffset) / verticalDivider);
+        westRect.setPosition(x, y + (fixedThinHeight / fixedDividerOffset) / verticalDivider);
 
         burnRect.setPosition(x + fixedThinWidth / fixedDividerOffset, y + fixedThinHeight / fixedDividerOffset);
         collisionRect.setPosition(x - fixedThinWidth / (fixedDividerCoordinator * fixedDividerOffset), y - fixedThinHeight / (fixedDividerCoordinator * fixedDividerOffset));
