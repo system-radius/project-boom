@@ -341,6 +341,7 @@ public class GameStage extends Stage implements StatChangeListener {
         Bomb.BOMB_TEXTURE.dispose();
         Bomb.FIRE_TEXTURE.dispose();
         stageRenderer.dispose();
+        HeadsUpDisplayItem.SYMBOLS_TEXTURE.dispose();
         super.dispose();
     }
 

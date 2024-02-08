@@ -15,7 +15,7 @@ import com.radius.system.utils.FontUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HeadsUpDisplayItem extends Actor implements Disposable {
+public class HeadsUpDisplayItem extends Actor {
 
     public static final Texture SYMBOLS_TEXTURE = new Texture(Gdx.files.internal("img/Lettering.png"));
 
@@ -23,16 +23,11 @@ public class HeadsUpDisplayItem extends Actor implements Disposable {
 
     protected static final TextureRegion[] ICONS = TextureRegion.split(Block.BLOCKS_SPRITE_SHEET, 32, 32)[7];
 
-    private final List<TextureRegion> rendering = new ArrayList<>();
-
     private final TextureRegion icon, colon;
 
     private TextureRegion tens, ones;
 
-    private BonusType type;
-
     public HeadsUpDisplayItem(BonusType type, float x, float y, float width, float height) {
-        this.type = type;
         this.icon = ICONS[type.GetType()];
         this.colon = SYMBOLS[5][0];
         setX(x);
@@ -65,10 +60,5 @@ public class HeadsUpDisplayItem extends Actor implements Disposable {
 
     private void DrawItem(Batch batch, TextureRegion texture, int index) {
         batch.draw(texture, getX() + (getWidth() * index) / 1.5f, getY(), getWidth(), getHeight());
-    }
-
-    @Override
-    public void dispose() {
-
     }
 }
