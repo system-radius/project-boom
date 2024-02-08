@@ -91,6 +91,7 @@ public class GameState implements Disposable {
         HumanPlayerController controller = new HumanPlayerController(id, boardState, WORLD_SCALE);
         controller.GetPlayer().AddCoordinateEventListener(camera);
         controller.GetPlayer().AddStatChangeListener(stage);
+        controller.GetPlayer().AddBombTypeChangeListener(stage);
         stage.AddMovementEventListener(controller);
         stage.AddButtonAListener(controller.GetButtonA());
         stage.AddButtonBListener(controller.GetButtonB());

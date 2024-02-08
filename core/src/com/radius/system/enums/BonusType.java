@@ -14,7 +14,9 @@ public enum BonusType {
 
     PIERCE_BOMB(5),
 
-    IMPACT_BOMB(6);
+    IMPACT_BOMB(6),
+
+    EMPTY(7);
 
     private int type;
 

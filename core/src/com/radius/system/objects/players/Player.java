@@ -18,6 +18,7 @@ import com.radius.system.enums.BombType;
 import com.radius.system.enums.BonusType;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
+import com.radius.system.events.BombTypeChangeListener;
 import com.radius.system.events.MovementEventListener;
 import com.radius.system.events.StatChangeListener;
 import com.radius.system.objects.Entity;
@@ -70,9 +71,11 @@ public class Player extends Entity {
 
     private final List<Animation<TextureRegion>> animations = new ArrayList<>();
 
-    private final List<MovementEventListener> coordEventListeners;
+    private final List<MovementEventListener> coordEventListeners = new ArrayList<>();
 
-    private final List<StatChangeListener> statChangeListeners;
+    private final List<StatChangeListener> statChangeListeners = new ArrayList<>();
+
+    private final List<BombTypeChangeListener> bombTypeChangeListeners = new ArrayList<>();
 
     private final List<Bomb> bombs;
 
@@ -157,8 +160,6 @@ public class Player extends Entity {
         this.scale = scale;
         LoadAsset("img/tokoy_sprite_sheet.png");
 
-        coordEventListeners = new ArrayList<>();
-        statChangeListeners = new ArrayList<>();
         bombs = new ArrayList<>();
         movementSpeed = 1f;
 
@@ -433,6 +434,7 @@ public class Player extends Entity {
             IncreaseBombStock();
         }
         this.bombType = bombType;
+        FireBombChangeEvent();
     }
 
     public void AddCoordinateEventListener(MovementEventListener listener) {
@@ -446,6 +448,11 @@ public class Player extends Entity {
         FireStatChange(BonusType.BOMB_STOCK, bombStock);
         FireStatChange(BonusType.FIRE_POWER, firePower);
         FireStatChange(BonusType.MOVEMENT_SPEED, speedLevel);
+    }
+
+    public void AddBombTypeChangeListener(BombTypeChangeListener listener) {
+        if (bombTypeChangeListeners.contains(listener)) return;
+        bombTypeChangeListeners.add(listener);
     }
 
     public Bomb PlantBomb(BoardState boardState) {
@@ -616,6 +623,12 @@ public class Player extends Entity {
     private void FireStatChange(BonusType type, int value) {
         for (StatChangeListener listener : statChangeListeners) {
             listener.OnStatChange(type, value);
+        }
+    }
+
+    private void FireBombChangeEvent() {
+        for (BombTypeChangeListener listener : bombTypeChangeListeners) {
+            listener.OnBombTypeChange(bombType);
         }
     }
 }

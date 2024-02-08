@@ -23,7 +23,11 @@ public class HeadsUpDisplayItem extends Actor {
 
     protected static final TextureRegion[] ICONS = TextureRegion.split(Block.BLOCKS_SPRITE_SHEET, 32, 32)[7];
 
-    private final TextureRegion icon, colon;
+    protected final TextureRegion icon;
+
+    private final TextureRegion colon;
+
+    protected boolean disabled, disableCount = false;
 
     private TextureRegion tens, ones;
 
@@ -46,16 +50,34 @@ public class HeadsUpDisplayItem extends Actor {
         tens = SYMBOLS[0][tensValue];
     }
 
+    public HeadsUpDisplayItem EnableCount() {
+        disableCount = false;
+        return this;
+    }
+
+    public HeadsUpDisplayItem DisableCount() {
+        disableCount = true;
+        return this;
+    }
+
     public void SetValue(int value) {
-        DeriveDisplay(value);
+        if (!disableCount) {
+            DeriveDisplay(value);
+        }
     }
 
     @Override
     public void draw(Batch batch, float alpha) {
+        if (disabled) {
+            return;
+        }
         batch.draw(icon, getX(), getY(), getWidth(), getHeight());
-        DrawItem(batch, colon, 1);
-        DrawItem(batch, tens, 2);
-        DrawItem(batch, ones, 3);
+
+        if (!disableCount) {
+            DrawItem(batch, colon, 1);
+            DrawItem(batch, tens, 2);
+            DrawItem(batch, ones, 3);
+        }
     }
 
     private void DrawItem(Batch batch, TextureRegion texture, int index) {

@@ -13,8 +13,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.controllers.Joystick;
+import com.radius.system.enums.BombType;
 import com.radius.system.enums.BonusType;
 import com.radius.system.enums.ControlKeys;
+import com.radius.system.events.BombTypeChangeListener;
 import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.MovementEventListener;
 import com.radius.system.events.StatChangeListener;
@@ -26,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GameStage extends Stage implements StatChangeListener {
+public class GameStage extends Stage implements StatChangeListener, BombTypeChangeListener {
 
     private final Texture aTexture = new Texture(Gdx.files.internal("img/A.png"));
 
@@ -348,5 +350,10 @@ public class GameStage extends Stage implements StatChangeListener {
     @Override
     public void OnStatChange(BonusType type, int value) {
         hud.SetValue(type, value);
+    }
+
+    @Override
+    public void OnBombTypeChange(BombType newBombType) {
+        hud.SetBombType(newBombType);
     }
 }

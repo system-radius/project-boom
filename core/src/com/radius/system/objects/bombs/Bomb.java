@@ -29,7 +29,7 @@ public class Bomb extends Block {
 
     public static final Texture FIRE_TEXTURE = new Texture(Gdx.files.internal("img/spiralingFire.png"));
 
-    protected static final TextureRegion[][] BOMB_REGIONS =
+    public static final TextureRegion[][] BOMB_REGIONS =
             TextureRegion.split(BOMB_TEXTURE, 32, 32);
 
     protected static final TextureRegion[][] FIRE_REGIONS =
