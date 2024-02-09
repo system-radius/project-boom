@@ -26,6 +26,7 @@ import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
+import com.radius.system.objects.bombs.GodBomb;
 import com.radius.system.objects.bombs.ImpactBomb;
 import com.radius.system.objects.bombs.PierceBomb;
 import com.radius.system.objects.bombs.RemoteMine;
@@ -45,12 +46,12 @@ public class Player extends Entity {
     /**
      * The maximum amount of bombs that a player can have.
      */
-    public static final int BOMB_STOCK_LIMIT = 20;
+    public static final int BOMB_STOCK_LIMIT = 99;
 
     /**
      * THe maximum range for the fire power of the player.
      */
-    public static final int FIRE_POWER_LIMIT = 100;
+    public static final int FIRE_POWER_LIMIT = 99;
 
     /**
      * The maximum speed that a player can have.
@@ -149,6 +150,8 @@ public class Player extends Entity {
 
     private final BitmapFont playerNameFont;
 
+    private final boolean godmode = true;
+
     public Player(int id, float x, float y, float scale) {
         super(BoardRep.PLAYER, x, y, scale, scale);
 
@@ -165,18 +168,27 @@ public class Player extends Entity {
 
     public void Reset() {
 
-        bombStock = 0;
-        firePower = 0;
+        bombStock = 1;
+        firePower = 1;
         movementSpeed = 1f;
-        speedLevel = 0;
+        speedLevel = 1;
         bombType = BombType.NORMAL;
-        FireBombChangeEvent();
-
+        if (godmode) {
+            bombStock = BOMB_STOCK_LIMIT;
+            firePower = FIRE_POWER_LIMIT;
+            speedLevel = (int)(SPEED_LIMIT / baseSpeedIncrease);
+            movementSpeed = baseSpeed + speedLevel * baseSpeedIncrease;
+            bombType = BombType.GODMODE;
+        }
         bombs.clear();
 
-        IncreaseBombStock();
-        IncreaseFirePower(1);
-        IncreaseMovementSpeed();
+        FireStatChange(BonusType.BOMB_STOCK, bombStock);
+        FireStatChange(BonusType.FIRE_POWER, firePower);
+        FireStatChange(BonusType.MOVEMENT_SPEED, speedLevel);
+        FireBombChangeEvent();
+
+        FixBounds();
+
         Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
     }
 
@@ -390,7 +402,7 @@ public class Player extends Entity {
     }
 
     private void ResolveCollision(Bomb bomb, boolean collideX, boolean collideY) {
-        if (bombType != BombType.IMPACT) {
+        if (bombType != BombType.IMPACT && bombType != BombType.GODMODE) {
             return;
         }
 
@@ -441,6 +453,10 @@ public class Player extends Entity {
 
     public void ChangeBombType(BombType bombType) {
 
+        if (this.bombType == BombType.GODMODE) {
+            return;
+        }
+
         if (this.bombType == bombType) {
             IncreaseBombStock();
         }
@@ -482,6 +498,9 @@ public class Player extends Entity {
         Bomb bomb;
 
         switch (bombType) {
+            case GODMODE:
+                bomb = new GodBomb(this, worldX, worldY, scale, scale, scale);
+                break;
             case REMOTE:
                 bomb = new RemoteMine(this, worldX, worldY, scale, scale, scale);
                 break;
@@ -509,7 +528,7 @@ public class Player extends Entity {
 
         for (int i = 0; i < bombs.size(); i++) {
             Bomb bomb = bombs.get(i);
-            if (bomb.IsWaiting() && BombType.REMOTE.equals(bomb.GetType())) {
+            if (bomb.IsWaiting() && (BombType.REMOTE.equals(bomb.GetType()) || BombType.GODMODE.equals(bomb.GetType()))) {
                 bombs.get(i).Explode();
                 break;
             }
@@ -559,7 +578,7 @@ public class Player extends Entity {
     private void UpdateInvulnerable(float delta) {
         if (invulnerable) {
             invulnerableTime += delta;
-            if (invulnerableTime >= INVULNERABLE_TIMER) {
+            if (invulnerableTime >= INVULNERABLE_TIMER && !godmode) {
                 invulnerable = false;
             }
         }

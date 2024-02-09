@@ -5,7 +5,9 @@ public enum BombType {
     NORMAL(0),
     REMOTE(1),
     PIERCE(2),
-    IMPACT(3);
+    IMPACT(3),
+
+    GODMODE(0);
 
     private final int type;
 
