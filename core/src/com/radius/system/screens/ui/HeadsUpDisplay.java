@@ -18,15 +18,11 @@ import com.radius.system.objects.bombs.Bomb;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HeadsUpDisplay extends Group implements Disposable, TimerEventListener {
+public class HeadsUpDisplay extends Group implements Disposable {
 
     private final Texture pauseTexture = new Texture(Gdx.files.internal("img/pause.png"));
 
-    private final Texture playTexture = new Texture(Gdx.files.internal("img/play.png"));
-
     private final Image pauseButton;
-
-    private final Image playButton;
 
     private final Texture background;
 
@@ -73,12 +69,6 @@ public class HeadsUpDisplay extends Group implements Disposable, TimerEventListe
         pauseButton.setSize(size, size);
         pauseButton.setPosition(getWidth() - scale, positionY);
         addActor(pauseButton);
-
-        playButton = new Image(playTexture);
-        playButton.setSize(size, size);
-        playButton.setPosition(pauseButton.getX(), pauseButton.getY());
-        addActor(playButton);
-        playButton.setVisible(false);
     }
 
     public void RepositionUI() {
@@ -105,7 +95,7 @@ public class HeadsUpDisplay extends Group implements Disposable, TimerEventListe
 
         Texture texture = new Texture(map);
         map.dispose();
-        
+
         return texture;
     }
 
@@ -136,10 +126,6 @@ public class HeadsUpDisplay extends Group implements Disposable, TimerEventListe
         return pauseButton;
     }
 
-    public Image GetPlayButton() {
-        return playButton;
-    }
-
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.setColor(1, 1, 1, 0.5f);
@@ -152,23 +138,5 @@ public class HeadsUpDisplay extends Group implements Disposable, TimerEventListe
     public void dispose() {
         background.dispose();
         pauseTexture.dispose();
-        playTexture.dispose();
-    }
-
-    @Override
-    public void StartTimer(float totalTime) {
-        // Do nothing.
-    }
-
-    @Override
-    public void PauseTimer() {
-        pauseButton.setVisible(false);
-        playButton.setVisible(true);
-    }
-
-    @Override
-    public void ResumeTimer() {
-        playButton.setVisible(false);
-        pauseButton.setVisible(true);
     }
 }

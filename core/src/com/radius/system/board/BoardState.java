@@ -164,8 +164,6 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
                         int dstY = bomb.GetWorldY();
 
                         MoveItemInBoard(srcX, srcY, dstX, dstY);
-                        System.out.println("Updated position!");
-
                     }
                     if (hasCollision) {
                         bomb.velocity.x = 0;
