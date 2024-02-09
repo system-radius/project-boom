@@ -150,7 +150,7 @@ public class Player extends Entity {
 
     private final BitmapFont playerNameFont;
 
-    private final boolean godmode = true;
+    private final boolean godmode = false;
 
     public Player(int id, float x, float y, float scale) {
         super(BoardRep.PLAYER, x, y, scale, scale);
