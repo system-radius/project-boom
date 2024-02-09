@@ -445,10 +445,10 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         touchVector.set(joystick.SetDragPosition(touchVector.x, touchVector.y));
 
         float modifier = 0.5f;
-        float divider = 10f;
+        float sensitivity = 2f;
 
-        float velX = Math.round(((touchVector.x - joystick.position.x) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
-        float velY = Math.round(((touchVector.y - joystick.position.y) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * divider)/divider;
+        float velX = Math.round(((touchVector.x - joystick.position.x) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * sensitivity)/sensitivity;
+        float velY = Math.round(((touchVector.y - joystick.position.y) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * sensitivity)/sensitivity;
         movementX = velX;
         movementY = velY;
         FireMovementEvent();
