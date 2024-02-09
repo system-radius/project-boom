@@ -132,6 +132,9 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void Update(float delta) {
+        if (stage.IsPaused()) {
+            return;
+        }
         gameState.Update(delta);
         stage.act(delta);
     }

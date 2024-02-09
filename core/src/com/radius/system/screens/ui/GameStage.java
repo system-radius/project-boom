@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -19,7 +20,9 @@ import com.radius.system.enums.ControlKeys;
 import com.radius.system.events.BombTypeChangeListener;
 import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.MovementEventListener;
+import com.radius.system.events.OverTimeListener;
 import com.radius.system.events.StatChangeListener;
+import com.radius.system.events.TimerEventListener;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.bombs.Bomb;
 
@@ -28,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GameStage extends Stage implements StatChangeListener, BombTypeChangeListener {
+public class GameStage extends Stage implements StatChangeListener, BombTypeChangeListener, OverTimeListener {
 
     private final Texture aTexture = new Texture(Gdx.files.internal("img/A.png"));
 
@@ -43,6 +46,8 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
     private final List<ButtonEventListener> buttonAListeners = new ArrayList<>();
 
     private final List<ButtonEventListener> buttonBListeners = new ArrayList<>();
+
+    private final List<TimerEventListener> timerEventListeners = new ArrayList<>();
 
     private final Vector3 touchVector;
 
@@ -70,6 +75,8 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
 
     private HeadsUpDisplay hud;
 
+    private boolean paused;
+
     public GameStage(int id, Viewport viewport, float scale) {
         super(viewport);
         this.id = id;
@@ -81,6 +88,25 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         this.camera = viewport.getCamera();
 
         this.hud = new HeadsUpDisplay(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight() / 9f, scale);
+        hud.GetPauseButton().addListener(new ClickListener() {
+           @Override
+           public void clicked(InputEvent event, float x, float y) {
+               if (!paused) {
+                   FireTimePause();
+                   paused = true;
+               }
+           }
+        });
+
+        hud.GetPlayButton().addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (paused) {
+                    FireTimeResume();
+                    paused = false;
+                }
+            }
+        });
 
         joystick = new Joystick(camera.position.x - (Gdx.graphics.getWidth() / 2f), camera.position.y - (Gdx.graphics.getHeight() / 2f), scale);
 
@@ -109,6 +135,8 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
                 //joystick.dynamicPosition = !joystick.dynamicPosition;;
             }
         });
+        AddTimerEventListener(hud.GetTimer());
+        AddTimerEventListener(hud);
 
         this.addActor(hud);
         this.addActor(aButton);
@@ -117,6 +145,8 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         for (ControlKeys key: ControlKeys.values()) {
             pressedKeys.put(key, false);
         }
+
+        FireTimeStart(300);
     }
 
     private Image CreateButton(Texture texture, float x, float y, float width, float height) {
@@ -193,18 +223,49 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         bButton.setPosition(width - 5f * scale, bButton.getY());
         hud.setPosition(hud.getX(), viewport.getWorldHeight() - hud.getHeight());
         hud.setWidth(width);
+        hud.RepositionUI();
     }
 
     public void AddMovementEventListener(MovementEventListener listener) {
+        if (movementListeners.contains(listener)) return;
         movementListeners.add(listener);
     }
 
     public void AddButtonAListener(ButtonEventListener listener) {
+        if (buttonAListeners.contains(listener)) return;
         buttonAListeners.add(listener);
     }
 
     public void AddButtonBListener(ButtonEventListener listener) {
+        if (buttonBListeners.contains(listener)) return;
         buttonBListeners.add(listener);
+    }
+
+    public void AddTimerEventListener(TimerEventListener listener) {
+        if (timerEventListeners.contains(listener)) return;
+        timerEventListeners.add(listener);
+    }
+
+    public void FireTimeStart(float time) {
+        for (TimerEventListener listener : timerEventListeners) {
+            listener.StartTimer(time);
+        }
+    }
+
+    public void FireTimePause() {
+        for (TimerEventListener listener : timerEventListeners) {
+            listener.PauseTimer();
+        }
+    }
+
+    public void FireTimeResume() {
+        for (TimerEventListener listener : timerEventListeners) {
+            listener.ResumeTimer();
+        }
+    }
+
+    public boolean IsPaused() {
+        return paused;
     }
 
     @Override
@@ -355,5 +416,10 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
     @Override
     public void OnBombTypeChange(BombType newBombType) {
         hud.SetBombType(newBombType);
+    }
+
+    @Override
+    public void OverTime() {
+
     }
 }

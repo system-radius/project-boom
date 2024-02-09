@@ -1,21 +1,32 @@
 package com.radius.system.screens.ui;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Disposable;
 import com.radius.system.enums.BombType;
 import com.radius.system.enums.BonusType;
+import com.radius.system.events.TimerEventListener;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.bombs.Bomb;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class HeadsUpDisplay extends Group implements Disposable {
+public class HeadsUpDisplay extends Group implements Disposable, TimerEventListener {
+
+    private final Texture pauseTexture = new Texture(Gdx.files.internal("img/pause.png"));
+
+    private final Texture playTexture = new Texture(Gdx.files.internal("img/play.png"));
+
+    private final Image pauseButton;
+
+    private final Image playButton;
 
     private final Texture background;
 
@@ -25,6 +36,10 @@ public class HeadsUpDisplay extends Group implements Disposable {
 
     private BombType bombType = BombType.NORMAL;
 
+    private TimerDisplay timer;
+
+    private float scale;
+
     public HeadsUpDisplay(float x, float y, float width, float height, float scale) {
         background = CreateTexture((int)width, (int)height);
         setX(x);
@@ -32,6 +47,7 @@ public class HeadsUpDisplay extends Group implements Disposable {
         setWidth(width);
         setHeight(height);
 
+        this.scale = scale;
         float size = scale / 1.5f;
         float positionY = height / 2 - size / 2;
 
@@ -49,6 +65,25 @@ public class HeadsUpDisplay extends Group implements Disposable {
 
         AddItemsAsActors(items);
         AddBombsAsActors(bombs);
+
+        timer = new TimerDisplay(getWidth() - scale * 5, positionY, size, size);
+        addActor(timer);
+
+        pauseButton = new Image(pauseTexture);
+        pauseButton.setSize(size, size);
+        pauseButton.setPosition(getWidth() - scale, positionY);
+        addActor(pauseButton);
+
+        playButton = new Image(playTexture);
+        playButton.setSize(size, size);
+        playButton.setPosition(pauseButton.getX(), pauseButton.getY());
+        addActor(playButton);
+        playButton.setVisible(false);
+    }
+
+    public void RepositionUI() {
+        timer.setX(getWidth() - scale * 5);
+        pauseButton.setX(getWidth() - scale);
     }
 
     private void AddItemsAsActors(Map<BonusType, HeadsUpDisplayItem> map) {
@@ -93,6 +128,18 @@ public class HeadsUpDisplay extends Group implements Disposable {
         items.get(type).SetValue(value);
     }
 
+    public TimerDisplay GetTimer() {
+        return timer;
+    }
+
+    public Image GetPauseButton() {
+        return pauseButton;
+    }
+
+    public Image GetPlayButton() {
+        return playButton;
+    }
+
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.setColor(1, 1, 1, 0.5f);
@@ -104,6 +151,24 @@ public class HeadsUpDisplay extends Group implements Disposable {
     @Override
     public void dispose() {
         background.dispose();
+        pauseTexture.dispose();
+        playTexture.dispose();
     }
 
+    @Override
+    public void StartTimer(float totalTime) {
+        // Do nothing.
+    }
+
+    @Override
+    public void PauseTimer() {
+        pauseButton.setVisible(false);
+        playButton.setVisible(true);
+    }
+
+    @Override
+    public void ResumeTimer() {
+        playButton.setVisible(false);
+        pauseButton.setVisible(true);
+    }
 }

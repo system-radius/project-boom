@@ -19,7 +19,7 @@ public class HeadsUpDisplayItem extends Actor {
 
     public static final Texture SYMBOLS_TEXTURE = new Texture(Gdx.files.internal("img/Lettering.png"));
 
-    protected static final TextureRegion[][] SYMBOLS = TextureRegion.split(SYMBOLS_TEXTURE, 20, 20);
+    public static final TextureRegion[][] SYMBOLS = TextureRegion.split(SYMBOLS_TEXTURE, 20, 20);
 
     protected static final TextureRegion[] ICONS = TextureRegion.split(Block.BLOCKS_SPRITE_SHEET, 32, 32)[7];
 
