@@ -7,6 +7,7 @@ import com.radius.system.board.BoardState;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.controllers.PlayerController;
 import com.radius.system.enums.BoardRep;
+import com.radius.system.events.RestartEventListener;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.HardBlock;
 import com.radius.system.objects.blocks.SoftBlock;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class GameState implements Disposable {
+public class GameState implements Disposable, RestartEventListener {
 
     private final float WORLD_WIDTH;
 
@@ -29,6 +30,8 @@ public class GameState implements Disposable {
 
     private List<PlayerController> controllers;
 
+    private final int mainPlayer = 0;
+
     public GameState(float worldWidth, float worldHeight, float scale, GameStage stage, GameCamera camera) {
         this.WORLD_WIDTH = worldWidth;
         this.WORLD_HEIGHT = worldHeight;
@@ -39,10 +42,15 @@ public class GameState implements Disposable {
     }
 
     private void InitializeField() {
+        boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT, (int) WORLD_SCALE);
+    }
+
+    public void RestartField() {
+
+        boardState.ClearBoard();
+        controllers.get(mainPlayer).GetPlayer().Reset();
 
         float spacing = 2f; // Allows for leaving spaces when generating hard blocks.
-        boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT, (int) WORLD_SCALE);
-
         int fieldIndex = new Random(System.currentTimeMillis()).nextInt(7);
 
         for(int x = 0; x < WORLD_WIDTH; x++) {
@@ -125,5 +133,10 @@ public class GameState implements Disposable {
         for (PlayerController controller : controllers) {
             controller.dispose();
         }
+    }
+
+    @Override
+    public void OnRestart() {
+        RestartField();
     }
 }

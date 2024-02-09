@@ -59,6 +59,8 @@ public class GameScreen extends AbstractScreen {
         InitializeStage();
         InitializeGameState();
 
+        stage.AddRestartEventListener(gameState);
+
         debug = false;
     }
 

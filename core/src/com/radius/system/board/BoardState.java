@@ -53,6 +53,7 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
                 board[x][y] = null;
             }
         }
+        bombs.clear();
     }
 
     public void AddToBoard(Block block) {

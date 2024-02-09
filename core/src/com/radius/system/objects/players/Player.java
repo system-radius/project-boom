@@ -161,7 +161,18 @@ public class Player extends Entity {
         LoadAsset("img/tokoy_sprite_sheet.png");
 
         bombs = new ArrayList<>();
+    }
+
+    public void Reset() {
+
+        bombStock = 0;
+        firePower = 0;
         movementSpeed = 1f;
+        speedLevel = 0;
+        bombType = BombType.NORMAL;
+        FireBombChangeEvent();
+
+        bombs.clear();
 
         IncreaseBombStock();
         IncreaseFirePower(1);

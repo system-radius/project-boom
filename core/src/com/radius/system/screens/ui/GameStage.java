@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -24,6 +23,7 @@ import com.radius.system.events.BombTypeChangeListener;
 import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.MovementEventListener;
 import com.radius.system.events.OverTimeListener;
+import com.radius.system.events.RestartEventListener;
 import com.radius.system.events.StatChangeListener;
 import com.radius.system.events.TimerEventListener;
 import com.radius.system.objects.blocks.Block;
@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 
 public class GameStage extends Stage implements StatChangeListener, BombTypeChangeListener, OverTimeListener {
 
@@ -43,7 +42,11 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
 
     private final Texture playTexture = new Texture(Gdx.files.internal("img/play.png"));
 
+    private final Texture restartTexture = new Texture(Gdx.files.internal("img/restart.png"));
+
     private final Image playButton;
+
+    private final Image restartButton;
 
     private final Texture pauseScreen;
 
@@ -58,6 +61,8 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
     private final List<ButtonEventListener> buttonBListeners = new ArrayList<>();
 
     private final List<TimerEventListener> timerEventListeners = new ArrayList<>();
+
+    private final List<RestartEventListener> restartEventListeners = new ArrayList<>();
 
     private final Vector3 touchVector;
 
@@ -104,9 +109,20 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
 
         joystick = new Joystick(camera.position.x - (Gdx.graphics.getWidth() / 2f), camera.position.y - (Gdx.graphics.getHeight() / 2f), scale);
 
-        playButton = CreateButton(playTexture, viewport.getWorldWidth() / 2 - scale * 2, viewport.getWorldHeight() / 2 - scale * 2, scale * 4, scale * 4, 1);
+        float pauseButtonSize = scale * 4;
+
+        playButton = CreateButton(playTexture, viewport.getWorldWidth() / 2 - (pauseButtonSize + scale), viewport.getWorldHeight() / 2 - pauseButtonSize / 2, pauseButtonSize, pauseButtonSize, 1);
         AddPauseButtonEvent(playButton);
         playButton.setVisible(false);
+
+        restartButton = CreateButton(restartTexture, viewport.getWorldWidth() / 2 + scale, viewport.getWorldHeight() / 2 - pauseButtonSize / 2, pauseButtonSize, pauseButtonSize, 1);
+        restartButton.setVisible(false);
+        restartButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                FireRestartEvent();
+            }
+        });
 
         aButton = CreateButton(aTexture, camera.position.x + viewport.getWorldWidth(), camera.position.y - viewport.getWorldHeight() / 3.5f, buttonSize, buttonSize, 0.5f);
         AddGameButtonEvent(aButton, buttonAListeners);
@@ -115,6 +131,7 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         AddGameButtonEvent(bButton, buttonBListeners);
 
         this.addActor(playButton);
+        this.addActor(restartButton);
         this.addActor(hud);
         this.addActor(aButton);
         this.addActor(bButton);
@@ -124,8 +141,6 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         }
 
         pauseScreen = CreateTexture(viewport.getScreenWidth(), viewport.getScreenHeight());
-
-        FireTimeEvent(TimeState.START, 5);
     }
 
     private Texture CreateTexture(int width, int height) {
@@ -167,12 +182,17 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
                     FireTimeEvent(TimeState.RESUME, 0);
                 }
                 paused = !paused;
-                playButton.setVisible(paused);
-                aButton.setVisible(!paused);
-                bButton.setVisible(!paused);
-                hud.GetPauseButton().setVisible(!paused);
+                SetButtonState();
             }
         });
+    }
+
+    private void SetButtonState() {
+        playButton.setVisible(paused);
+        restartButton.setVisible(paused);
+        aButton.setVisible(!paused);
+        bButton.setVisible(!paused);
+        hud.GetPauseButton().setVisible(!paused);
     }
 
     private void FireButtonEvent(List<ButtonEventListener> listeners) {
@@ -263,6 +283,12 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         timerEventListeners.add(listener);
     }
 
+    public void AddRestartEventListener(RestartEventListener listener) {
+        if (restartEventListeners.contains(listener)) return;
+        restartEventListeners.add(listener);
+        FireRestartEvent();
+    }
+
     public void FireTimeEvent(TimeState state, float time) {
         for (TimerEventListener listener : timerEventListeners) {
             switch (state) {
@@ -277,6 +303,15 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
                     break;
             }
         }
+    }
+
+    public void FireRestartEvent() {
+        for (RestartEventListener listener : restartEventListeners) {
+            listener.OnRestart();
+        }
+        FireTimeEvent(TimeState.START, 300);
+        paused = false;
+        SetButtonState();
     }
 
     public boolean IsPaused() {
@@ -426,6 +461,7 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         aTexture.dispose();
         bTexture.dispose();
         joystick.dispose();
+        playTexture.dispose();
         Block.BLOCKS_SPRITE_SHEET.dispose();
         Bomb.BOMB_TEXTURE.dispose();
         Bomb.FIRE_TEXTURE.dispose();
