@@ -2,7 +2,8 @@ package com.radius.system.screens.ui;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
-import com.radius.system.events.MovementEventListener;
+import com.radius.system.events.listeners.MovementEventListener;
+import com.radius.system.events.parameters.MovementEvent;
 
 public class GameCamera extends OrthographicCamera implements MovementEventListener {
 
@@ -34,9 +35,9 @@ public class GameCamera extends OrthographicCamera implements MovementEventListe
     }
 
     @Override
-    public void OnMove(int id, float x, float y) {
+    public void OnActivate(MovementEvent event) {
 
-        if (watchId != id) {
+        if (watchId != event.playerId) {
             return;
         }
 
@@ -44,14 +45,16 @@ public class GameCamera extends OrthographicCamera implements MovementEventListe
             return;
         }
 
-        x *= scale;
-        y *= scale;
+        float eventX = event.x, eventY = event.y;
+
+        eventX *= scale;
+        eventY *= scale;
 
         float effectiveViewportWidth = this.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER;
         float effectiveViewportHeight = this.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER;
 
-        this.position.x = MathUtils.clamp(x, effectiveViewportWidth, (worldWidth * scale) - effectiveViewportWidth);
-        this.position.y = MathUtils.clamp(y, effectiveViewportHeight, (worldHeight * scale) - effectiveViewportHeight);
+        this.position.x = MathUtils.clamp(eventX, effectiveViewportWidth, (worldWidth * scale) - effectiveViewportWidth);
+        this.position.y = MathUtils.clamp(eventY, effectiveViewportHeight, (worldHeight * scale) - effectiveViewportHeight);
 
         this.update();
     }

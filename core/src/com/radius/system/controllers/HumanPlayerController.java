@@ -5,7 +5,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.radius.system.board.BoardState;
 import com.radius.system.enums.ButtonType;
 import com.radius.system.events.ButtonEventListener;
-import com.radius.system.events.MovementEventListener;
+import com.radius.system.events.listeners.MovementEventListener;
+import com.radius.system.events.parameters.MovementEvent;
 import com.radius.system.objects.players.Player;
 
 public class HumanPlayerController extends PlayerController implements MovementEventListener, ButtonEventListener {
@@ -41,13 +42,13 @@ public class HumanPlayerController extends PlayerController implements MovementE
     }
 
     @Override
-    public void OnMove(int id, float velX, float velY) {
-        if (this.id != id) {
+    public void OnActivate(MovementEvent event) {
+        if (event.playerId != id) {
             return;
         }
 
-        player.MoveAlongX(velX);
-        player.MoveAlongY(velY);
+        player.MoveAlongX(event.x);
+        player.MoveAlongY(event.y);
     }
 
     @Override

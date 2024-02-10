@@ -21,11 +21,12 @@ import com.radius.system.enums.ControlKeys;
 import com.radius.system.enums.TimeState;
 import com.radius.system.events.BombTypeChangeListener;
 import com.radius.system.events.ButtonEventListener;
-import com.radius.system.events.MovementEventListener;
+import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.OverTimeListener;
 import com.radius.system.events.RestartEventListener;
 import com.radius.system.events.StatChangeListener;
 import com.radius.system.events.TimerEventListener;
+import com.radius.system.events.parameters.MovementEvent;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.bombs.Bomb;
 
@@ -56,6 +57,8 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
 
     private final List<MovementEventListener> movementListeners = new ArrayList<>();
 
+    private MovementEvent movementEvent;
+
     private final List<ButtonEventListener> buttonAListeners = new ArrayList<>();
 
     private final List<ButtonEventListener> buttonBListeners = new ArrayList<>();
@@ -79,10 +82,6 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
     private Joystick joystick;
 
     private boolean isTouching;
-
-    private float movementX;
-
-    private float movementY;
 
     private int id;
 
@@ -141,6 +140,7 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         }
 
         pauseScreen = CreateTexture(viewport.getScreenWidth(), viewport.getScreenHeight());
+        InitializeEventParameters(id);
     }
 
     private Texture CreateTexture(int width, int height) {
@@ -161,6 +161,10 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
         image.getColor().a = alpha;
 
         return image;
+    }
+
+    private void InitializeEventParameters(int playerId) {
+        movementEvent = new MovementEvent(playerId, 0, 0);
     }
 
     private void AddGameButtonEvent(Image button, List<ButtonEventListener> listeners) {
@@ -235,20 +239,20 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
     }
 
     private boolean ProcessXKeyInput(float directionality, boolean isPressed) {
-        movementX = isPressed ? directionality : 0;
+        movementEvent.x = isPressed ? directionality : 0;
         FireMovementEvent();
         return true;
     }
 
     private boolean ProcessYKeyInput(float directionality, boolean isPressed) {
-        movementY = isPressed ? directionality : 0;
+        movementEvent.y = isPressed ? directionality : 0;
         FireMovementEvent();
         return true;
     }
 
     private void FireMovementEvent() {
         for (MovementEventListener listener : movementListeners) {
-            listener.OnMove(id, movementX, movementY);
+            listener.OnActivate(movementEvent);
         }
     }
 
@@ -422,8 +426,8 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (isTouching && pointer == joystickPointer) {
             joystickPointer = -1;
-            movementX = 0;
-            movementY = 0;
+            movementEvent.x = 0;
+            movementEvent.y = 0;
             FireMovementEvent();
             isTouching = false;
         }
@@ -449,8 +453,8 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
 
         float velX = Math.round(((touchVector.x - joystick.position.x) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * sensitivity)/sensitivity;
         float velY = Math.round(((touchVector.y - joystick.position.y) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * sensitivity)/sensitivity;
-        movementX = velX;
-        movementY = velY;
+        movementEvent.x = velX;
+        movementEvent.y = velY;
         FireMovementEvent();
 
         return true;

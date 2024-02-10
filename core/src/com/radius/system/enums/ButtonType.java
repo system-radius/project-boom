@@ -4,9 +4,12 @@ import java.awt.Button;
 
 public enum ButtonType {
     A(0),
-    B(1);
+    B(1),
+    PAUSE(2),
+    PLAY(3),
+    RESTART(4);
 
-    private int id;
+    private final int id;
 
     ButtonType(int id) {
         this.id = id;

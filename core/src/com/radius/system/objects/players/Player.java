@@ -19,11 +19,11 @@ import com.radius.system.enums.BonusType;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
 import com.radius.system.events.BombTypeChangeListener;
-import com.radius.system.events.MovementEventListener;
+import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.StatChangeListener;
+import com.radius.system.events.parameters.MovementEvent;
 import com.radius.system.objects.Entity;
 import com.radius.system.objects.bombs.Bomb;
-import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.bombs.GodBomb;
@@ -33,9 +33,7 @@ import com.radius.system.objects.bombs.RemoteMine;
 import com.radius.system.utils.FontUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Player extends Entity {
 
@@ -72,7 +70,9 @@ public class Player extends Entity {
 
     private final List<Animation<TextureRegion>> animations = new ArrayList<>();
 
-    private final List<MovementEventListener> coordEventListeners = new ArrayList<>();
+    private final List<MovementEventListener> movementEventListeners = new ArrayList<>();
+
+    private final MovementEvent movementEvent;
 
     private final List<StatChangeListener> statChangeListeners = new ArrayList<>();
 
@@ -164,6 +164,7 @@ public class Player extends Entity {
         LoadAsset("img/tokoy_sprite_sheet.png");
 
         bombs = new ArrayList<>();
+        movementEvent = new MovementEvent(id, x, y);
     }
 
     public void Reset() {
@@ -465,8 +466,8 @@ public class Player extends Entity {
     }
 
     public void AddCoordinateEventListener(MovementEventListener listener) {
-        if (coordEventListeners.contains(listener)) return;
-        coordEventListeners.add(listener);
+        if (movementEventListeners.contains(listener)) return;
+        movementEventListeners.add(listener);
     }
 
     public void AddStatChangeListener(StatChangeListener listener) {
@@ -645,8 +646,10 @@ public class Player extends Entity {
     }
 
     private void FireCoordinateEvent() {
-        for (MovementEventListener listener : coordEventListeners) {
-            listener.OnMove(id, position.x, position.y);
+        movementEvent.x = position.x;
+        movementEvent.y = position.y;
+        for (MovementEventListener listener : movementEventListeners) {
+            listener.OnActivate(movementEvent);
         }
     }
 
