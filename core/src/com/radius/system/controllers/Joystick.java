@@ -13,7 +13,7 @@ import com.radius.system.objects.GameObject;
 
 public class Joystick extends GameObject implements BoomDrawable, Disposable {
 
-    public boolean dynamicPosition = true;
+    public boolean dynamicPosition = false;
 
     private final Texture joystickOuter;
 

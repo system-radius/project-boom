@@ -170,8 +170,8 @@ public class Player extends Entity {
 
         bombStock = 1;
         firePower = 1;
-        movementSpeed = 1f;
         speedLevel = 1;
+        movementSpeed = baseSpeed + speedLevel * baseSpeedIncrease;
         bombType = BombType.NORMAL;
         if (godmode) {
             bombStock = BOMB_STOCK_LIMIT;
