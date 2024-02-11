@@ -24,9 +24,10 @@ import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.OverTimeListener;
 import com.radius.system.events.RestartEventListener;
-import com.radius.system.events.StatChangeListener;
+import com.radius.system.events.listeners.StatChangeListener;
 import com.radius.system.events.TimerEventListener;
 import com.radius.system.events.parameters.MovementEvent;
+import com.radius.system.events.parameters.StatChangeEvent;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.bombs.Bomb;
 
@@ -475,11 +476,6 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
     }
 
     @Override
-    public void OnStatChange(BonusType type, int value) {
-        hud.SetValue(type, value);
-    }
-
-    @Override
     public void OnBombTypeChange(BombType newBombType) {
         hud.SetBombType(newBombType);
     }
@@ -487,5 +483,14 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
     @Override
     public void OverTime() {
         System.out.println("Game over!");
+    }
+
+    @Override
+    public void OnActivate(StatChangeEvent event) {
+        if (event.playerId != id) {
+            return;
+        }
+
+        hud.SetValue(event.bonus, event.value);
     }
 }

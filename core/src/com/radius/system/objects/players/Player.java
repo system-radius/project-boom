@@ -20,8 +20,9 @@ import com.radius.system.enums.Direction;
 import com.radius.system.enums.PlayerState;
 import com.radius.system.events.BombTypeChangeListener;
 import com.radius.system.events.listeners.MovementEventListener;
-import com.radius.system.events.StatChangeListener;
+import com.radius.system.events.listeners.StatChangeListener;
 import com.radius.system.events.parameters.MovementEvent;
+import com.radius.system.events.parameters.StatChangeEvent;
 import com.radius.system.objects.Entity;
 import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.blocks.Block;
@@ -75,6 +76,8 @@ public class Player extends Entity {
     private final MovementEvent movementEvent;
 
     private final List<StatChangeListener> statChangeListeners = new ArrayList<>();
+
+    private final StatChangeEvent statChangeEvent;
 
     private final List<BombTypeChangeListener> bombTypeChangeListeners = new ArrayList<>();
 
@@ -165,6 +168,7 @@ public class Player extends Entity {
 
         bombs = new ArrayList<>();
         movementEvent = new MovementEvent(id, x, y);
+        statChangeEvent = new StatChangeEvent(id);
     }
 
     public void Reset() {
@@ -654,8 +658,10 @@ public class Player extends Entity {
     }
 
     private void FireStatChange(BonusType type, int value) {
+        statChangeEvent.bonus = type;
+        statChangeEvent.value = value;
         for (StatChangeListener listener : statChangeListeners) {
-            listener.OnStatChange(type, value);
+            listener.OnActivate(statChangeEvent);
         }
     }
 
