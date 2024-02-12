@@ -658,7 +658,7 @@ public class Player extends Entity {
     }
 
     private void FireStatChange(BonusType type, int value) {
-        statChangeEvent.bonus = type;
+        statChangeEvent.bonusType = type;
         statChangeEvent.value = value;
         for (StatChangeListener listener : statChangeListeners) {
             listener.OnActivate(statChangeEvent);

@@ -10,8 +10,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.radius.system.screens.ui.BoomGameStage;
 import com.radius.system.screens.ui.GameCamera;
-import com.radius.system.screens.ui.GameStage;
 import com.radius.system.states.GameState;
 import com.radius.system.utils.FontUtils;
 
@@ -36,7 +36,7 @@ public class GameScreen extends AbstractScreen {
 
     private final float scaledWorldHeight = WORLD_HEIGHT * WORLD_SCALE;
 
-    private GameStage stage;
+    private BoomGameStage stage;
 
     private GameCamera mainCamera;
 
@@ -50,7 +50,7 @@ public class GameScreen extends AbstractScreen {
 
     private BitmapFont font;
 
-    private boolean maxZoomOut = false;
+    private boolean maxZoomOut = true;
 
     public GameScreen() {
         font = FontUtils.GetFont((int) WORLD_SCALE / 2, Color.WHITE, 1, Color.BLACK);
@@ -60,12 +60,14 @@ public class GameScreen extends AbstractScreen {
         InitializeGameState();
 
         stage.AddRestartEventListener(gameState);
+        gameState.RestartField();
 
         debug = false;
     }
 
     private void InitializeStage() {
-        stage = new GameStage(0, uiViewport, WORLD_SCALE);;
+        //stage = new GameStage(0, uiViewport, WORLD_SCALE);;
+        stage = new BoomGameStage(0, uiViewport, WORLD_SCALE);
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
@@ -116,12 +118,12 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void InitializeGameState() {
-        gameState = new GameState(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE, stage, mainCamera);
+        gameState = new GameState(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE, null, mainCamera);
     }
 
     @Override
     public void show() {
-        stage.RepositionUI();
+        stage.Resize();
     }
 
     @Override
@@ -129,7 +131,7 @@ public class GameScreen extends AbstractScreen {
         stage.getViewport().update(width, height, true);
         mainViewport.update(width, height);
         mainCamera.update();
-        stage.RepositionUI();
+        stage.Resize();
     }
 
     @Override
@@ -168,9 +170,9 @@ public class GameScreen extends AbstractScreen {
         float x = (uiCamera.position.x - uiViewport.getWorldWidth() / 2f);
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
-        //font.draw(spriteBatch, "(" + mainViewport.getWorldWidth() + ", " + mainViewport.getWorldHeight() + ")" , x, y);
+        font.draw(spriteBatch, "(" + mainViewport.getWorldWidth() + ", " + mainViewport.getWorldHeight() + ")" , x, y);
         //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
-        //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
+        font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
 
         spriteBatch.end();
     }

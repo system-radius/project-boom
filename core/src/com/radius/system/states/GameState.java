@@ -98,11 +98,13 @@ public class GameState implements Disposable, RestartEventListener {
     private PlayerController CreateHumanPlayerController(int id, GameStage stage, GameCamera camera) {
         HumanPlayerController controller = new HumanPlayerController(id, boardState, WORLD_SCALE);
         controller.GetPlayer().AddCoordinateEventListener(camera);
-        controller.GetPlayer().AddStatChangeListener(stage);
-        controller.GetPlayer().AddBombTypeChangeListener(stage);
-        stage.AddMovementEventListener(controller);
-        stage.AddButtonAListener(controller.GetButtonA());
-        stage.AddButtonBListener(controller.GetButtonB());
+        if (stage != null) {
+            controller.GetPlayer().AddStatChangeListener(stage);
+            controller.GetPlayer().AddBombTypeChangeListener(stage);
+            stage.AddMovementEventListener(controller);
+            stage.AddButtonAListener(controller.GetButtonA());
+            stage.AddButtonBListener(controller.GetButtonB());
+        }
 
         return controller;
     }

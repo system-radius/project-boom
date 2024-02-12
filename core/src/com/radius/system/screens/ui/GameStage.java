@@ -475,6 +475,6 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
             return;
         }
 
-        hud.SetValue(event.bonus, event.value);
+        hud.SetValue(event.bonusType, event.value);
     }
 }
