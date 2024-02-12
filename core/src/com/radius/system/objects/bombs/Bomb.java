@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
+import com.radius.system.assets.GlobalAssets;
 import com.radius.system.board.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombState;
@@ -16,7 +17,6 @@ import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
 import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
-import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.players.Player;
 
 import java.util.HashMap;
@@ -24,16 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Bomb extends Block {
-
-    public static final Texture BOMB_TEXTURE = new Texture(Gdx.files.internal("img/bomb.png"));
-
-    public static final Texture FIRE_TEXTURE = new Texture(Gdx.files.internal("img/spiralingFire.png"));
-
-    public static final TextureRegion[][] BOMB_REGIONS =
-            TextureRegion.split(BOMB_TEXTURE, 32, 32);
-
-    protected static final TextureRegion[][] FIRE_REGIONS =
-            TextureRegion.split(FIRE_TEXTURE, 64, 64);
 
     protected static final float FRAME_DURATION_BREATHING = 1f / 5f;
 
@@ -138,16 +128,19 @@ public class Bomb extends Block {
     }
 
     protected void LoadAssets() {
-        breathingAnimation = LoadAnimation(BOMB_REGIONS[bombType.GetType()], FRAME_DURATION_BREATHING, BOMB_REGIONS[bombType.GetType()].length, true);
 
+        TextureRegion[][] bombFrameRegions = GlobalAssets.LoadTextureRegion(GlobalAssets.BOMB_TEXTURE_PATH, GlobalAssets.BOMB_TEXTURE_REGION_SIZE, GlobalAssets.BOMB_TEXTURE_REGION_SIZE);
+        breathingAnimation = LoadAnimation(bombFrameRegions[bombType.GetType()], FRAME_DURATION_BREATHING, bombFrameRegions[bombType.GetType()].length, true);
+
+        TextureRegion[][] fireFrameRegions = GlobalAssets.LoadTextureRegion(GlobalAssets.FIRE_TEXTURE_PATH, GlobalAssets.FIRE_TEXTURE_REGION_SIZE, GlobalAssets.FIRE_TEXTURE_REGION_SIZE);
         boolean fireLoop = false;
-        fireStreamNorth = LoadAnimation(FIRE_REGIONS[0], FRAME_DURATION_FIRE, FIRE_REGIONS[0].length, fireLoop);
-        fireStreamSouth = LoadAnimation(FIRE_REGIONS[1], FRAME_DURATION_FIRE, FIRE_REGIONS[1].length, fireLoop);
-        fireStreamCenter = LoadAnimation(FIRE_REGIONS[2], FRAME_DURATION_FIRE, FIRE_REGIONS[2].length, fireLoop);
-        fireStreamWest = LoadAnimation(FIRE_REGIONS[3], FRAME_DURATION_FIRE, FIRE_REGIONS[3].length, fireLoop);
-        fireStreamEast = LoadAnimation(FIRE_REGIONS[4], FRAME_DURATION_FIRE, FIRE_REGIONS[4].length, fireLoop);
-        fireStreamV = LoadAnimation(FIRE_REGIONS[5], FRAME_DURATION_FIRE, FIRE_REGIONS[5].length, fireLoop);
-        fireStreamH = LoadAnimation(FIRE_REGIONS[6], FRAME_DURATION_FIRE, FIRE_REGIONS[6].length, fireLoop);
+        fireStreamNorth = LoadAnimation(fireFrameRegions[0], FRAME_DURATION_FIRE, fireFrameRegions[0].length, fireLoop);
+        fireStreamSouth = LoadAnimation(fireFrameRegions[1], FRAME_DURATION_FIRE, fireFrameRegions[1].length, fireLoop);
+        fireStreamCenter = LoadAnimation(fireFrameRegions[2], FRAME_DURATION_FIRE, fireFrameRegions[2].length, fireLoop);
+        fireStreamWest = LoadAnimation(fireFrameRegions[3], FRAME_DURATION_FIRE, fireFrameRegions[3].length, fireLoop);
+        fireStreamEast = LoadAnimation(fireFrameRegions[4], FRAME_DURATION_FIRE, fireFrameRegions[4].length, fireLoop);
+        fireStreamV = LoadAnimation(fireFrameRegions[5], FRAME_DURATION_FIRE, fireFrameRegions[5].length, fireLoop);
+        fireStreamH = LoadAnimation(fireFrameRegions[6], FRAME_DURATION_FIRE, fireFrameRegions[6].length, fireLoop);
     }
 
     protected Animation<TextureRegion> LoadAnimation(TextureRegion[] frames, float frameDuration, int length, boolean isLooping) {

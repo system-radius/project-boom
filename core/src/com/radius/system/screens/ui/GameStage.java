@@ -14,9 +14,9 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.radius.system.assets.GlobalAssets;
 import com.radius.system.controllers.Joystick;
 import com.radius.system.enums.BombType;
-import com.radius.system.enums.BonusType;
 import com.radius.system.enums.ControlKeys;
 import com.radius.system.enums.TimeState;
 import com.radius.system.events.BombTypeChangeListener;
@@ -28,8 +28,6 @@ import com.radius.system.events.listeners.StatChangeListener;
 import com.radius.system.events.TimerEventListener;
 import com.radius.system.events.parameters.MovementEvent;
 import com.radius.system.events.parameters.StatChangeEvent;
-import com.radius.system.objects.blocks.Block;
-import com.radius.system.objects.bombs.Bomb;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,14 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 public class GameStage extends Stage implements StatChangeListener, BombTypeChangeListener, OverTimeListener {
-
-    private final Texture aTexture = new Texture(Gdx.files.internal("img/A.png"));
-
-    private final Texture bTexture = new Texture(Gdx.files.internal("img/B.png"));
-
-    private final Texture playTexture = new Texture(Gdx.files.internal("img/play.png"));
-
-    private final Texture restartTexture = new Texture(Gdx.files.internal("img/restart.png"));
 
     private final Image playButton;
 
@@ -111,11 +101,11 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
 
         float pauseButtonSize = scale * 4;
 
-        playButton = CreateButton(playTexture, viewport.getWorldWidth() / 2 - (pauseButtonSize + scale), viewport.getWorldHeight() / 2 - pauseButtonSize / 2, pauseButtonSize, pauseButtonSize, 1);
+        playButton = CreateButton(GlobalAssets.LoadTexture(GlobalAssets.BUTTON_PLAY_TEXTURE_PATH), viewport.getWorldWidth() / 2 - (pauseButtonSize + scale), viewport.getWorldHeight() / 2 - pauseButtonSize / 2, pauseButtonSize, pauseButtonSize, 1);
         AddPauseButtonEvent(playButton);
         playButton.setVisible(false);
 
-        restartButton = CreateButton(restartTexture, viewport.getWorldWidth() / 2 + scale, viewport.getWorldHeight() / 2 - pauseButtonSize / 2, pauseButtonSize, pauseButtonSize, 1);
+        restartButton = CreateButton(GlobalAssets.LoadTexture(GlobalAssets.BUTTON_RESTART_TEXTURE_PATH), viewport.getWorldWidth() / 2 + scale, viewport.getWorldHeight() / 2 - pauseButtonSize / 2, pauseButtonSize, pauseButtonSize, 1);
         restartButton.setVisible(false);
         restartButton.addListener(new ClickListener() {
             @Override
@@ -124,10 +114,10 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
             }
         });
 
-        aButton = CreateButton(aTexture, camera.position.x + viewport.getWorldWidth(), camera.position.y - viewport.getWorldHeight() / 3.5f, buttonSize, buttonSize, 0.5f);
+        aButton = CreateButton(GlobalAssets.LoadTexture(GlobalAssets.BUTTON_A_TEXTURE_PATH), camera.position.x + viewport.getWorldWidth(), camera.position.y - viewport.getWorldHeight() / 3.5f, buttonSize, buttonSize, 0.5f);
         AddGameButtonEvent(aButton, buttonAListeners);
 
-        bButton = CreateButton(bTexture, camera.position.x + viewport.getWorldWidth() - 15.5f * scale, camera.position.y - viewport.getWorldHeight() / 3f, buttonSize, buttonSize, 0.5f);
+        bButton = CreateButton(GlobalAssets.LoadTexture(GlobalAssets.BUTTON_B_TEXTURE_PATH), camera.position.x + viewport.getWorldWidth() - 15.5f * scale, camera.position.y - viewport.getWorldHeight() / 3f, buttonSize, buttonSize, 0.5f);
         AddGameButtonEvent(bButton, buttonBListeners);
 
         this.addActor(playButton);
@@ -463,15 +453,9 @@ public class GameStage extends Stage implements StatChangeListener, BombTypeChan
 
     @Override
     public void dispose() {
-        aTexture.dispose();
-        bTexture.dispose();
         joystick.dispose();
-        playTexture.dispose();
-        Block.BLOCKS_SPRITE_SHEET.dispose();
-        Bomb.BOMB_TEXTURE.dispose();
-        Bomb.FIRE_TEXTURE.dispose();
         stageRenderer.dispose();
-        HeadsUpDisplayItem.SYMBOLS_TEXTURE.dispose();
+        GlobalAssets.Dispose();
         super.dispose();
     }
 

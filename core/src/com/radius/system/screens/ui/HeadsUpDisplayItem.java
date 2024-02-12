@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
+import com.radius.system.assets.GlobalAssets;
 import com.radius.system.enums.BonusType;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.utils.FontUtils;
@@ -17,11 +18,9 @@ import java.util.List;
 
 public class HeadsUpDisplayItem extends Actor {
 
-    public static final Texture SYMBOLS_TEXTURE = new Texture(Gdx.files.internal("img/Lettering.png"));
+    public static final TextureRegion[][] SYMBOLS = GlobalAssets.LoadTextureRegion(GlobalAssets.SYMBOLS_TEXTURE_PATH, GlobalAssets.SYMBOLS_TEXTURE_REGION_SIZE, GlobalAssets.SYMBOLS_TEXTURE_REGION_SIZE);
 
-    public static final TextureRegion[][] SYMBOLS = TextureRegion.split(SYMBOLS_TEXTURE, 20, 20);
-
-    protected static final TextureRegion[] ICONS = TextureRegion.split(Block.BLOCKS_SPRITE_SHEET, 32, 32)[7];
+    protected static final TextureRegion[] ICONS = GlobalAssets.GetFrames(GlobalAssets.BLOCKS_TEXTURE_PATH, GlobalAssets.BLOCKS_TEXTURE_REGION_SIZE, GlobalAssets.BLOCKS_TEXTURE_REGION_SIZE, 7);
 
     protected final TextureRegion icon;
 
