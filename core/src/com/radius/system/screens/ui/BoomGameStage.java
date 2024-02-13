@@ -46,6 +46,8 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final GameButton aButton, bButton, pauseButton, playButton, restartButton;
 
+    private final TimerDisplay timer;
+
     private final Joystick joystick;
 
     private final float scale, buttonPositionMultiplier = 5f, gameButtonSize, pauseButtonSize;
@@ -69,12 +71,11 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         gameButtonSize = 2 * scale;
         pauseButtonSize = 4 * scale;
 
-        Camera camera = viewport.getCamera();
-
-        joystick = new Joystick(camera.position.x - (Gdx.graphics.getWidth() / 2f), camera.position.y - (Gdx.graphics.getHeight() / 2f), scale);
+        joystick = new Joystick(0, 0, scale);
         pauseScreen = GlobalAssets.LoadTexture(GlobalAssets.BACKGROUND_TEXTURE_PATH);
 
         this.addActor(hud);
+        this.addActor(timer = new TimerDisplay(0, 0, scale / 1.5f, scale / 1.5f));
         this.addActor(pauseButton = CreateGameButton(GlobalAssets.BUTTON_PAUSE_TEXTURE_PATH, ButtonType.PAUSE, 0, 0, scale / 1.5f, 1));
         this.addActor(aButton = CreateGameButton(GlobalAssets.BUTTON_B_TEXTURE_PATH, ButtonType.A, 0, viewport.getWorldHeight() / BUTTON_POSITION_Y_DIVIDER, gameButtonSize, 0.5f));
         this.addActor(bButton = CreateGameButton(GlobalAssets.BUTTON_B_TEXTURE_PATH, ButtonType.B, 0, viewport.getWorldHeight() / BUTTON_POSITION_Y_DIVIDER, gameButtonSize, 0.5f));
@@ -82,6 +83,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         this.addActor(restartButton = CreateGameButton(GlobalAssets.BUTTON_RESTART_TEXTURE_PATH, ButtonType.RESTART, 0, 0, pauseButtonSize, 1));
 
         SetButtonStates();
+        timer.StartTimer(600);
     }
 
     private GameButton CreateGameButton(String texturePath, ButtonType type, float x, float y, float size, float alpha) {
@@ -99,6 +101,8 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
         hud.setPosition(hud.getX(), viewport.getWorldHeight() - hud.getHeight());
         hud.setWidth(width);
+
+        timer.setPosition(width - timer.getWidth() * 6, height - hud.getHeight() / 2 - timer.getHeight() / 2);
 
         pauseButton.setPosition(width - scale, height - hud.getHeight() / 2 - pauseButton.getHeight() / 2);
         playButton.setPosition(width / 2 - pauseButtonSize - pauseButtonsOffset, height / 2 - pauseButtonSize / 2);
