@@ -3,6 +3,7 @@ package com.radius.system.screens.ui;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.radius.system.assets.GlobalAssets;
 import com.radius.system.events.OverTimeListener;
 import com.radius.system.events.TimerEventListener;
 
@@ -11,11 +12,13 @@ import java.util.List;
 
 public class TimerDisplay extends Actor implements TimerEventListener {
 
-    public static final TextureRegion[][] SYMBOLS = HeadsUpDisplayItem.SYMBOLS;
+    private static final TextureRegion[][] SYMBOLS = GlobalAssets.LoadTextureRegion(GlobalAssets.SYMBOLS_TEXTURE_PATH, GlobalAssets.SYMBOLS_TEXTURE_REGION_SIZE, GlobalAssets.SYMBOLS_TEXTURE_REGION_SIZE);
 
     private final List<OverTimeListener> overtimeListeners = new ArrayList<>();
 
-    private TextureRegion tensMinutes, onesMinutes, colon, tensSeconds, onesSeconds;
+    private final TextureRegion colon;
+
+    private TextureRegion tensMinutes, onesMinutes, tensSeconds, onesSeconds;
 
     private float totalTime;
 
@@ -98,12 +101,10 @@ public class TimerDisplay extends Actor implements TimerEventListener {
         ResumeTimer();
     }
 
-    @Override
     public void PauseTimer() {
         paused = true;
     }
 
-    @Override
     public void ResumeTimer() {
         paused = false;
     }

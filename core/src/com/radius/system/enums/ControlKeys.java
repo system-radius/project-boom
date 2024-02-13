@@ -7,7 +7,6 @@ public enum ControlKeys {
     EAST,
     WEST,
     BOMB,
-
     DETONATE;
 
     private ControlKeys oppositeKey;

@@ -1,10 +1,10 @@
 package com.radius.system.events.parameters;
 
-public abstract class AbstractEvent {
+public abstract class AbstractPlayerEvent {
 
     public final int playerId;
 
-    public AbstractEvent(int id) {
+    public AbstractPlayerEvent(int id) {
         playerId = id;
     }
 

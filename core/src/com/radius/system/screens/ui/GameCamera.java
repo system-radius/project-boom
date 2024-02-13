@@ -28,6 +28,7 @@ public class GameCamera extends OrthographicCamera implements MovementEventListe
 
     public void SetZoom(float zoom) {
         this.zoom = zoom;
+        this.update();
     }
 
     public void SetWatchId(int watchId) {
@@ -35,7 +36,7 @@ public class GameCamera extends OrthographicCamera implements MovementEventListe
     }
 
     @Override
-    public void OnActivate(MovementEvent event) {
+    public void OnMove(MovementEvent event) {
 
         if (watchId != event.playerId) {
             return;

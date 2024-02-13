@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.radius.system.assets.GlobalAssets;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.Entity;
@@ -16,8 +17,6 @@ import com.radius.system.objects.players.Player;
 import java.util.Random;
 
 public class Block extends Entity {
-
-    public static final Texture BLOCKS_SPRITE_SHEET = new Texture(Gdx.files.internal("img/blocks.png"));
 
     protected static final Random randomizer = new Random(System.currentTimeMillis());
 
@@ -35,8 +34,7 @@ public class Block extends Entity {
 
     protected Rectangle bounds;
 
-    protected static final TextureRegion[][] REGIONS =
-            TextureRegion.split(BLOCKS_SPRITE_SHEET, 32, 32);
+    protected TextureRegion[][] frames;
 
     public Block(int fieldIndex, float x, float y, float width, float height) {
         this(BoardRep.PERMANENT_BLOCK, fieldIndex, x, y, width, height);
@@ -46,6 +44,7 @@ public class Block extends Entity {
         super(rep, x, y, width, height);
 
         this.bounds = new Rectangle(position.x, position.y, 1, 1);
+        frames = GlobalAssets.LoadTextureRegion(GlobalAssets.BLOCKS_TEXTURE_PATH, GlobalAssets.BLOCKS_TEXTURE_REGION_SIZE, GlobalAssets.BLOCKS_TEXTURE_REGION_SIZE);
         Initialize(fieldIndex);
     }
 
@@ -63,7 +62,7 @@ public class Block extends Entity {
         }
 
         TextureRegion[] frames = new TextureRegion[1];
-        frames[0] = REGIONS[fieldIndex][6];
+        frames[0] = this.frames[fieldIndex][6];
 
         activeAnimation = new Animation<>(0, frames);
     }

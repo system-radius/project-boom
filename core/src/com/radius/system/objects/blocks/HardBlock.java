@@ -19,7 +19,7 @@ public class HardBlock extends Block {
     @Override
     protected void Initialize(int fieldIndex) {
         TextureRegion[] frames = new TextureRegion[3];
-        System.arraycopy(REGIONS[fieldIndex], 3, frames, 0, frames.length);
+        System.arraycopy(this.frames[fieldIndex], 3, frames, 0, frames.length);
 
         activeAnimation = new Animation<>(1f/3f, frames);
     }

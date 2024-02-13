@@ -1,6 +1,6 @@
 package com.radius.system.events.parameters;
 
-public class MovementEvent extends AbstractEvent {
+public class MovementEvent extends AbstractPlayerEvent {
 
     public float x, y;
 

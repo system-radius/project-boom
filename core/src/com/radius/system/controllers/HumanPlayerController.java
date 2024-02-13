@@ -2,48 +2,41 @@ package com.radius.system.controllers;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.radius.system.board.BoardState;
 import com.radius.system.enums.ButtonType;
 import com.radius.system.events.ButtonEventListener;
+import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.MovementEventListener;
+import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.events.parameters.MovementEvent;
 import com.radius.system.objects.players.Player;
+import com.radius.system.objects.players.PlayerConfig;
 
-public class HumanPlayerController extends PlayerController implements MovementEventListener, ButtonEventListener {
+public class HumanPlayerController extends BoomPlayerController implements MovementEventListener, ButtonPressListener {
 
     private final int id;
 
-    private final ButtonPressTrigger buttonA;
-
-    private final ButtonPressTrigger buttonB;
-
-    public HumanPlayerController(int id, BoardState boardState, float scale) {
-        super(boardState, new Player(id, 1, 1, scale));
+    public HumanPlayerController(int id, BoardState boardState, PlayerConfig config, float scale) {
+        super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
         this.id = id;
-        buttonA = new ButtonPressTrigger(id, ButtonType.A, this);
-        buttonB = new ButtonPressTrigger(id, ButtonType.B, this);
-    }
-
-    public ButtonPressTrigger GetButtonA() {
-        return buttonA;
-    }
-
-    public ButtonPressTrigger GetButtonB() {
-        return buttonB;
     }
 
     @Override
-    public void OnButtonPress(int id) {
-        if (id == ButtonType.A.GetID()) {
-            PlantBomb();
-        } else if (id == ButtonType.B.GetID()) {
-            DetonateBomb();
+    public final void OnButtonPress(ButtonPressEvent event) {
+        switch (event.buttonType) {
+            case A:
+                PlantBomb();
+                break;
+            case B:
+                DetonateBomb();
+                break;
         }
     }
 
     @Override
-    public void OnActivate(MovementEvent event) {
-        if (event.playerId != id) {
+    public void OnMove(MovementEvent event) {
+        if (event.playerId >= 0 && event.playerId != id) {
             return;
         }
 

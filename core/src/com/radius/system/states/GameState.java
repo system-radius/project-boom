@@ -3,16 +3,17 @@ package com.radius.system.states;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Disposable;
+import com.radius.system.assets.GlobalConstants;
 import com.radius.system.board.BoardState;
 import com.radius.system.controllers.HumanPlayerController;
-import com.radius.system.controllers.PlayerController;
+import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.events.RestartEventListener;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.HardBlock;
 import com.radius.system.objects.blocks.SoftBlock;
-import com.radius.system.screens.ui.GameCamera;
-import com.radius.system.screens.ui.GameStage;
+import com.radius.system.objects.players.Player;
+import com.radius.system.objects.players.PlayerConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,35 +21,57 @@ import java.util.Random;
 
 public class GameState implements Disposable, RestartEventListener {
 
-    private final float WORLD_WIDTH;
+    private final float WORLD_WIDTH = GlobalConstants.WORLD_WIDTH;
 
-    private final float WORLD_HEIGHT;
+    private final float WORLD_HEIGHT = GlobalConstants.WORLD_HEIGHT;
 
-    private final float WORLD_SCALE;
+    private final float WORLD_SCALE = GlobalConstants.WORLD_SCALE;
 
-    private BoardState boardState;
+    private final BoardState boardState;
 
-    private List<PlayerController> controllers;
+    private final List<BoomPlayerController> controllers = new ArrayList<>();
 
-    private final int mainPlayer = 0;
+    private int mainPlayer = -1;
 
-    public GameState(float worldWidth, float worldHeight, float scale, GameStage stage, GameCamera camera) {
-        this.WORLD_WIDTH = worldWidth;
-        this.WORLD_HEIGHT = worldHeight;
-        this.WORLD_SCALE = scale;
-
-        InitializeField();
-        InitializeControllers(stage, camera);
+    public GameState() {
+        boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT, (int) WORLD_SCALE);
     }
 
-    private void InitializeField() {
-        boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT, (int) WORLD_SCALE);
+    public void AddPlayers(List<PlayerConfig> configs) {
+
+        for (int i = 0; i < configs.size(); i++) {
+            PlayerConfig config = configs.get(i);
+            if (config.isHuman) {
+                controllers.add(new HumanPlayerController(i, boardState, config, WORLD_SCALE));
+                mainPlayer = i;
+            } else {
+                // Supposed to be adding AI controller.
+                controllers.add(new HumanPlayerController(i, boardState, config, WORLD_SCALE));
+            }
+        }
+
+    }
+
+    public HumanPlayerController GetMainController() {
+        if (mainPlayer < 0) {
+            return null;
+        }
+
+        System.out.println("MainController: " + mainPlayer);
+        return (HumanPlayerController) controllers.get(mainPlayer);
+    }
+
+    public List<BoomPlayerController> GetControllers() {
+        return controllers;
     }
 
     public void RestartField() {
 
         boardState.ClearBoard();
-        controllers.get(mainPlayer).GetPlayer().Reset();
+
+        for (BoomPlayerController controller : controllers) {
+            controller.GetPlayer().Reset();
+        }
 
         float spacing = 2f; // Allows for leaving spaces when generating hard blocks.
         int fieldIndex = new Random(System.currentTimeMillis()).nextInt(7);
@@ -89,48 +112,30 @@ public class GameState implements Disposable, RestartEventListener {
         return ((x >= WORLD_WIDTH - 3 || x <= 2) && (y >= WORLD_HEIGHT - 3 || y <= 2));
     }
 
-    private void InitializeControllers(GameStage stage, GameCamera camera) {
-        controllers = new ArrayList<>();
-        controllers.add(CreateHumanPlayerController(0, stage, camera));
-
-    }
-
-    private PlayerController CreateHumanPlayerController(int id, GameStage stage, GameCamera camera) {
-        HumanPlayerController controller = new HumanPlayerController(id, boardState, WORLD_SCALE);
-        controller.GetPlayer().AddCoordinateEventListener(camera);
-        controller.GetPlayer().AddStatChangeListener(stage);
-        controller.GetPlayer().AddBombTypeChangeListener(stage);
-        stage.AddMovementEventListener(controller);
-        stage.AddButtonAListener(controller.GetButtonA());
-        stage.AddButtonBListener(controller.GetButtonB());
-
-        return controller;
-    }
-
     public void Update(float delta) {
         boardState.Update(delta);
-        for (PlayerController controller : controllers) {
+        for (BoomPlayerController controller : controllers) {
             controller.Update(delta);
         }
     }
 
     public void Draw(Batch batch) {
         boardState.Draw(batch);
-        for (PlayerController controller : controllers) {
+        for (BoomPlayerController controller : controllers) {
             controller.Draw(batch);
         }
     }
 
     public void DrawDebug(ShapeRenderer renderer) {
         boardState.DrawDebug(renderer);
-        for (PlayerController controller : controllers) {
+        for (BoomPlayerController controller : controllers) {
             controller.DrawDebug(renderer);
         }
     }
 
     @Override
     public void dispose() {
-        for (PlayerController controller : controllers) {
+        for (BoomPlayerController controller : controllers) {
             controller.dispose();
         }
     }

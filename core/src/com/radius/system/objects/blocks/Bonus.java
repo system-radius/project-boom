@@ -65,7 +65,7 @@ public class Bonus extends Block {
     private void InitializeBonus() {
 
         TextureRegion[] frames = new TextureRegion[1];
-        frames[0] = REGIONS[BONUS_BLOCKS][bonusType.GetType()];
+        frames[0] = this.frames[BONUS_BLOCKS][bonusType.GetType()];
 
         activeAnimation = new Animation<>(0, frames);
     }

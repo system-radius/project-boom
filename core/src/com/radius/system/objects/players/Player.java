@@ -147,7 +147,7 @@ public class Player extends Entity {
 
     private BombType bombType = BombType.NORMAL;
 
-    private final int id;
+    public final int id;
 
     private final String name;
 
@@ -155,19 +155,19 @@ public class Player extends Entity {
 
     private final boolean godmode = false;
 
-    public Player(int id, float x, float y, float scale) {
-        super(BoardRep.PLAYER, x, y, scale, scale);
+    public Player(int id, Vector2 respawnPoint, String spritePath, float scale) {
+        super(BoardRep.PLAYER, respawnPoint.x, respawnPoint.y, scale, scale);
 
         this.id = id;
-        this.name = "Player" + id;
+        this.name = "Player" + (id + 1);
         playerNameFont = FontUtils.GetFont((int)scale / 4, Color.WHITE, 1, Color.BLACK);
 
-        respawnPoint = new Vector2(x, y);
+        this.respawnPoint = respawnPoint;
         this.scale = scale;
-        LoadAsset("img/tokoy_sprite_sheet.png");
+        LoadAsset(spritePath);
 
         bombs = new ArrayList<>();
-        movementEvent = new MovementEvent(id, x, y);
+        movementEvent = new MovementEvent(id, respawnPoint.x, respawnPoint.y);
         statChangeEvent = new StatChangeEvent(id);
     }
 
@@ -474,17 +474,15 @@ public class Player extends Entity {
         movementEventListeners.add(listener);
     }
 
+    public void AddStatChangeListeners(List<StatChangeListener> listeners) {
+        for (StatChangeListener listener : listeners) {
+            AddStatChangeListener(listener);
+        }
+    }
+
     public void AddStatChangeListener(StatChangeListener listener) {
         if (statChangeListeners.contains(listener)) return;
         statChangeListeners.add(listener);
-        FireStatChange(BonusType.BOMB_STOCK, bombStock);
-        FireStatChange(BonusType.FIRE_POWER, firePower);
-        FireStatChange(BonusType.MOVEMENT_SPEED, speedLevel);
-    }
-
-    public void AddBombTypeChangeListener(BombTypeChangeListener listener) {
-        if (bombTypeChangeListeners.contains(listener)) return;
-        bombTypeChangeListeners.add(listener);
     }
 
     public Bomb PlantBomb(BoardState boardState) {
@@ -653,15 +651,15 @@ public class Player extends Entity {
         movementEvent.x = position.x;
         movementEvent.y = position.y;
         for (MovementEventListener listener : movementEventListeners) {
-            listener.OnActivate(movementEvent);
+            listener.OnMove(movementEvent);
         }
     }
 
     private void FireStatChange(BonusType type, int value) {
-        statChangeEvent.bonus = type;
+        statChangeEvent.bonusType = type;
         statChangeEvent.value = value;
         for (StatChangeListener listener : statChangeListeners) {
-            listener.OnActivate(statChangeEvent);
+            listener.OnStatChange(statChangeEvent);
         }
     }
 
