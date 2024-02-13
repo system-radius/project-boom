@@ -23,7 +23,7 @@ public class GameButton extends Image {
         setX(x); setY(y); setWidth(width); setHeight(height);
         getColor().a = alpha;
 
-        event = new ButtonPressEvent(0);
+        event = new ButtonPressEvent();
         event.buttonType = buttonType;
 
         this.addListener(new ClickListener(){
@@ -41,7 +41,7 @@ public class GameButton extends Image {
 
     public void FireButtonEvent() {
         for (ButtonPressListener listener : buttonPressListeners) {
-            listener.OnActivate(event);
+            listener.OnButtonPress(event);
         }
     }
 

@@ -22,12 +22,16 @@ import com.radius.system.events.RestartEventListener;
 import com.radius.system.events.TimerEventListener;
 import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.MovementEventListener;
+import com.radius.system.events.listeners.StatChangeListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
+import com.radius.system.events.parameters.MovementEvent;
 import com.radius.system.screens.ui.buttons.GameButton;
 import com.radius.system.screens.ui.hud.BoomHUD;
 import com.radius.system.utils.FontUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BoomGameStage extends Stage implements ButtonPressListener {
@@ -36,11 +40,11 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final Map<ControlKeys, Boolean> pressedKeys = new HashMap<>();
 
+    private final List<ButtonPressListener> buttonPressListeners = new ArrayList<>();
+
+    private final List<MovementEventListener> movementEventListeners = new ArrayList<>();
+
     private final Vector3 touchVector;
-
-    private boolean isTouching, paused;
-
-    private int joystickPointer = -1;
 
     private final BoomHUD hud;
 
@@ -50,13 +54,21 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final Joystick joystick;
 
-    private final float scale, buttonPositionMultiplier = 5f, gameButtonSize, pauseButtonSize;
-
     private final Texture pauseScreen;
 
     private final BitmapFont debugFont;
 
-    public BoomGameStage(int id, Viewport viewport, float scale) {
+    private final MovementEvent movementEvent;
+
+    private final ButtonPressEvent buttonPressEvent;
+
+    private final float scale, buttonPositionMultiplier = 5f, gameButtonSize, pauseButtonSize;
+
+    private boolean isTouching, paused;
+
+    private int joystickPointer = -1;
+
+    public BoomGameStage(Viewport viewport, float scale) {
         super(viewport);
         this.scale = scale;
         this.touchVector = new Vector3(0, 0, 0);
@@ -82,7 +94,13 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         this.addActor(playButton = CreateGameButton(GlobalAssets.BUTTON_PLAY_TEXTURE_PATH, ButtonType.PLAY, 0, 0, pauseButtonSize, 1));
         this.addActor(restartButton = CreateGameButton(GlobalAssets.BUTTON_RESTART_TEXTURE_PATH, ButtonType.RESTART, 0, 0, pauseButtonSize, 1));
 
+        for (ControlKeys key: ControlKeys.values()) {
+            pressedKeys.put(key, false);
+        }
+
         SetButtonStates();
+        movementEvent = new MovementEvent(-1, 0, 0);
+        buttonPressEvent = new ButtonPressEvent();
         timer.StartTimer(600);
     }
 
@@ -110,7 +128,6 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
         aButton.setPosition(width - buttonPositionMultiplier / 2 * scale, aButton.getY());
         bButton.setPosition(width - buttonPositionMultiplier * scale, bButton.getY());
-        //hud.Resize();
 
         joystick.SetPosition( 2.5f * scale, 2.5f * scale, true);
     }
@@ -129,6 +146,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
             return false;
         }
         pressedKeys.put(currentKey, isPressed);
+        boolean buttonActivate = false;
 
         switch (currentKey) {
             case NORTH:
@@ -137,74 +155,49 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
             case EAST:
             case WEST:
                 return ProcessXKeyInput(directionality, isPressed);
+            case BOMB:
+                buttonPressEvent.buttonType = ButtonType.A;
+                buttonActivate = true;
+                break;
+            case DETONATE:
+                buttonPressEvent.buttonType = ButtonType.B;
+                buttonActivate = true;
+                break;
             default:
                 // Do nothing just yet.
+        }
+
+        if (isPressed && buttonActivate) {
+            FireButtonEvent(buttonPressEvent);
         }
 
         return true;
     }
 
     private boolean ProcessXKeyInput(float directionality, boolean isPressed) {
-        //movementEvent.x = isPressed ? directionality : 0;
+        movementEvent.x = isPressed ? directionality : 0;
         FireMovementEvent();
         return true;
     }
 
     private boolean ProcessYKeyInput(float directionality, boolean isPressed) {
-        //movementEvent.y = isPressed ? directionality : 0;
+        movementEvent.y = isPressed ? directionality : 0;
         FireMovementEvent();
         return true;
     }
 
-    private void FireMovementEvent() {
-        /*
-        for (MovementEventListener listener : movementListeners) {
-            listener.OnActivate(movementEvent);
-        }
-         */
-    }
-
     public void AddMovementEventListener(MovementEventListener listener) {
-        /*
-        if (movementListeners.contains(listener)) return;
-        movementListeners.add(listener);
-         */
+        if (movementEventListeners.contains(listener)) return;
+        movementEventListeners.add(listener);
     }
 
-    public void AddButtonAListener(ButtonEventListener listener) {
+    public void AddButtonPressListener(ButtonPressListener listener) {
+        if (buttonPressListeners.contains(listener)) return;
+        buttonPressListeners.add(listener);
     }
 
-    public void AddButtonBListener(ButtonEventListener listener) {
-    }
-
-    public void AddTimerEventListener(TimerEventListener listener) {
-        /*
-        if (timerEventListeners.contains(listener)) return;
-        timerEventListeners.add(listener);
-
-         */
-    }
-
-    public void AddRestartEventListener(RestartEventListener listener) {
-    }
-
-    public void FireTimeEvent(TimeState state, float time) {
-        /*
-        for (TimerEventListener listener : timerEventListeners) {
-            switch (state) {
-                case START:
-                    listener.StartTimer(time);
-                    break;
-                case PAUSE:
-                    listener.PauseTimer();
-                    break;
-                case RESUME:
-                    listener.ResumeTimer();
-                    break;
-            }
-        }
-
-         */
+    public List<StatChangeListener> GetStatChangeListeners() {
+        return hud.GetStatChangeListeners();
     }
 
     public boolean IsPaused() {
@@ -316,8 +309,8 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (isTouching && pointer == joystickPointer) {
             joystickPointer = -1;
-            //movementEvent.x = 0;
-            //movementEvent.y = 0;
+            movementEvent.x = 0;
+            movementEvent.y = 0;
             FireMovementEvent();
             isTouching = false;
         }
@@ -343,8 +336,8 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
         float velX = Math.round(((touchVector.x - joystick.position.x) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * sensitivity)/sensitivity;
         float velY = Math.round(((touchVector.y - joystick.position.y) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * sensitivity)/sensitivity;
-        //movementEvent.x = velX;
-        //movementEvent.y = velY;
+        movementEvent.x = velX;
+        movementEvent.y = velY;
         touchVector.x = velX;
         touchVector.y = velY;
 
@@ -361,28 +354,35 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
     }
 
     @Override
-    public void OnActivate(ButtonPressEvent event) {
+    public void OnButtonPress(ButtonPressEvent event) {
         switch (event.buttonType) {
-            case A:
-                System.out.println("Button A pressed!");
-                break;
-            case B:
-                System.out.println("Button B pressed!");
-                break;
             case PAUSE:
                 paused = true;
-                System.out.println("Pause button pressed!");
                 SetButtonStates();
                 break;
             case PLAY:
                 paused = false;
-                System.out.println("Play button pressed!");
                 SetButtonStates();
                 break;
             case RESTART:
                 System.out.println("Restart button pressed!");
                 break;
+            case A:
+            case B:
             default:
+                FireButtonEvent(event);
+        }
+    }
+
+    private void FireButtonEvent(ButtonPressEvent event) {
+        for (ButtonPressListener listener : buttonPressListeners) {
+            listener.OnButtonPress(event);
+        }
+    }
+
+    private void FireMovementEvent() {
+        for (MovementEventListener listener : movementEventListeners) {
+            listener.OnMove(movementEvent);
         }
     }
 }

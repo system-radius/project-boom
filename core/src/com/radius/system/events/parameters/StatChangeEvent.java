@@ -2,7 +2,7 @@ package com.radius.system.events.parameters;
 
 import com.radius.system.enums.BonusType;
 
-public class StatChangeEvent extends AbstractEvent {
+public class StatChangeEvent extends AbstractPlayerEvent {
 
     public BonusType bonusType;
 

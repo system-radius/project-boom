@@ -19,7 +19,7 @@ public class BombDisplayIcon extends HeadsUpDisplayIcon {
     }
 
     @Override
-    public void OnActivate(StatChangeEvent event) {
+    public void OnStatChange(StatChangeEvent event) {
         if (event.bonusType.GetType() <= BonusType.MOVEMENT_SPEED.GetType()) {
             return;
         }

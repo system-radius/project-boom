@@ -101,12 +101,10 @@ public class TimerDisplay extends Actor implements TimerEventListener {
         ResumeTimer();
     }
 
-    @Override
     public void PauseTimer() {
         paused = true;
     }
 
-    @Override
     public void ResumeTimer() {
         paused = false;
     }

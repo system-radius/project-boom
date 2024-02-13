@@ -17,7 +17,7 @@ public class BoomHUDValue extends HeadsUpValueDisplay {
     }
 
     @Override
-    public void OnActivate(StatChangeEvent event) {
+    public void OnStatChange(StatChangeEvent event) {
         if (!event.bonusType.equals(bonusType)) {
             return;
         }

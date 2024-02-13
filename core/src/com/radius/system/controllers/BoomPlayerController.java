@@ -4,15 +4,17 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Disposable;
 import com.radius.system.board.BoardState;
+import com.radius.system.events.listeners.ButtonPressListener;
+import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.objects.players.Player;
 
-public abstract class PlayerController implements Disposable {
+public abstract class BoomPlayerController implements Disposable {
 
     protected final BoardState boardState;
 
     protected final Player player;
 
-    public PlayerController(BoardState boardState, Player player) {
+    public BoomPlayerController(BoardState boardState, Player player) {
         this.boardState = boardState;
         this.player = player;
 

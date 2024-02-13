@@ -10,31 +10,35 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.radius.system.assets.GlobalConstants;
+import com.radius.system.controllers.HumanPlayerController;
+import com.radius.system.events.listeners.StatChangeListener;
+import com.radius.system.objects.players.Player;
+import com.radius.system.objects.players.PlayerConfig;
 import com.radius.system.screens.ui.BoomGameStage;
 import com.radius.system.screens.ui.GameCamera;
 import com.radius.system.states.GameState;
 import com.radius.system.utils.FontUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameScreen extends AbstractScreen {
 
-    private final float WORLD_WIDTH = 31f;
+    private final float WORLD_WIDTH = GlobalConstants.WORLD_WIDTH;
 
-    private final float WORLD_HEIGHT = 17f;
+    private final float WORLD_HEIGHT = GlobalConstants.WORLD_HEIGHT;
+
+    private final float WORLD_SCALE = GlobalConstants.WORLD_SCALE;
 
     private final float VIEWPORT_WIDTH = 16f;
 
     private final float VIEWPORT_HEIGHT = 9f;
 
-    private final float WORLD_SCALE = 64f;
-
     //private final float ZOOM = 0.25785f;
     private final float ZOOM = 0.5f;
 
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
-
-    private final float scaledWorldWidth = WORLD_WIDTH * WORLD_SCALE;
-
-    private final float scaledWorldHeight = WORLD_HEIGHT * WORLD_SCALE;
 
     private BoomGameStage stage;
 
@@ -50,7 +54,7 @@ public class GameScreen extends AbstractScreen {
 
     private BitmapFont font;
 
-    private boolean maxZoomOut = true;
+    private boolean maxZoomOut = false;
 
     public GameScreen() {
         font = FontUtils.GetFont((int) WORLD_SCALE / 2, Color.WHITE, 1, Color.BLACK);
@@ -58,16 +62,35 @@ public class GameScreen extends AbstractScreen {
         InitializeView();
         InitializeStage();
         InitializeGameState();
+        InitializeEvents();
 
-        stage.AddRestartEventListener(gameState);
         gameState.RestartField();
 
         debug = false;
     }
 
+    private void InitializeEvents() {
+        HumanPlayerController controller = gameState.GetMainController();
+        if (controller == null) {
+            float newZoom = ComputeZoomValue();
+            mainCamera.SetZoom(newZoom);
+            AdjustZoom(mainViewport, newZoom);
+            return;
+        }
+
+        stage.AddMovementEventListener(controller);
+        stage.AddButtonPressListener(controller);
+
+        Player player = controller.GetPlayer();
+        player.AddCoordinateEventListener(mainCamera);
+        player.AddStatChangeListeners(stage.GetStatChangeListeners());
+
+        mainCamera.SetWatchId(player.id);
+    }
+
     private void InitializeStage() {
         //stage = new GameStage(0, uiViewport, WORLD_SCALE);;
-        stage = new BoomGameStage(0, uiViewport, WORLD_SCALE);
+        stage = new BoomGameStage(uiViewport, WORLD_SCALE);
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
@@ -91,6 +114,7 @@ public class GameScreen extends AbstractScreen {
         mainViewport = new FitViewport(viewportWidth, viewportHeight, mainCamera);
         uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
 
+        float scaledWorldWidth = WORLD_WIDTH * WORLD_SCALE, scaledWorldHeight = WORLD_HEIGHT * WORLD_SCALE;
         mainCamera.position.set(scaledWorldWidth / 2, scaledWorldHeight / 2, 0);
 
         uiCamera.position.x = mainCamera.position.x;
@@ -99,12 +123,14 @@ public class GameScreen extends AbstractScreen {
         uiCamera.update();
     }
 
+    private void AdjustZoom(Viewport viewport, float zoom) {
+        viewport.setWorldWidth(WORLD_SCALE * VIEWPORT_WIDTH / zoom / EFFECTIVE_VIEWPORT_DIVIDER);
+        viewport.setWorldHeight(WORLD_SCALE * VIEWPORT_HEIGHT / zoom / EFFECTIVE_VIEWPORT_DIVIDER);
+    }
+
     private float ComputeZoomValue() {
 
-        float viewportWidth = 0;
-        float viewportHeight = 0;
-
-        float zoom = ZOOM;
+        float viewportWidth = 0, viewportHeight = 0, zoom = ZOOM;
 
         do {
             zoom -= 0.01f;
@@ -118,7 +144,23 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void InitializeGameState() {
-        gameState = new GameState(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE, null, mainCamera);
+
+        List<PlayerConfig> configs = new ArrayList<>();
+        configs.add(CreatePlayerConfig(false, false));
+        configs.add(CreatePlayerConfig(true, true));
+
+        gameState = new GameState();
+        gameState.AddPlayers(configs);
+    }
+
+    private PlayerConfig CreatePlayerConfig(boolean human, boolean randomizeSprite) {
+        PlayerConfig config = new PlayerConfig();
+        config.isHuman = human;
+        if (randomizeSprite) {
+            config.RandomizePlayerSprite();
+        }
+
+        return config;
     }
 
     @Override
