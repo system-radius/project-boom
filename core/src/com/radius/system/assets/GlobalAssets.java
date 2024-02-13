@@ -35,6 +35,8 @@ public class GlobalAssets {
 
     public static final String BUTTON_RESTART_TEXTURE_PATH = "img/restart.png";
 
+    public static final String BACKGROUND_TEXTURE_PATH = "img/background.png";
+
     private static final Map<String, Texture> textureMap = new HashMap<>();
 
     private static final Map<String, TextureRegion[][]> textureRegionMap = new HashMap<>();

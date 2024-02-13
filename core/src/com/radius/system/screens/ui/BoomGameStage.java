@@ -2,11 +2,17 @@ package com.radius.system.screens.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.assets.GlobalAssets;
+import com.radius.system.controllers.Joystick;
 import com.radius.system.enums.BonusType;
 import com.radius.system.enums.ButtonType;
 import com.radius.system.enums.ControlKeys;
@@ -19,6 +25,7 @@ import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.screens.ui.buttons.GameButton;
 import com.radius.system.screens.ui.hud.BoomHUD;
+import com.radius.system.utils.FontUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +36,9 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final Map<ControlKeys, Boolean> pressedKeys = new HashMap<>();
 
-    private boolean isTouching;
+    private final Vector3 touchVector;
+
+    private boolean isTouching, paused;
 
     private int joystickPointer = -1;
 
@@ -37,13 +46,19 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final GameButton aButton, bButton, pauseButton, playButton, restartButton;
 
-    private boolean paused = false;
+    private final Joystick joystick;
 
     private final float scale, buttonPositionMultiplier = 5f, gameButtonSize, pauseButtonSize;
+
+    private final Texture pauseScreen;
+
+    private final BitmapFont debugFont;
 
     public BoomGameStage(int id, Viewport viewport, float scale) {
         super(viewport);
         this.scale = scale;
+        this.touchVector = new Vector3(0, 0, 0);
+        this.debugFont = FontUtils.GetFont((int) scale / 2, Color.WHITE, 1, Color.BLACK);
 
         this.hud = new BoomHUD(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight() / 9f);
         hud.AddItem(BonusType.BOMB_STOCK);
@@ -53,14 +68,20 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
         gameButtonSize = 2 * scale;
         pauseButtonSize = 4 * scale;
-        //joystick = new Joystick(camera.position.x - (Gdx.graphics.getWidth() / 2f), camera.position.y - (Gdx.graphics.getHeight() / 2f), scale);
+
+        Camera camera = viewport.getCamera();
+
+        joystick = new Joystick(camera.position.x - (Gdx.graphics.getWidth() / 2f), camera.position.y - (Gdx.graphics.getHeight() / 2f), scale);
+        pauseScreen = GlobalAssets.LoadTexture(GlobalAssets.BACKGROUND_TEXTURE_PATH);
 
         this.addActor(hud);
         this.addActor(pauseButton = CreateGameButton(GlobalAssets.BUTTON_PAUSE_TEXTURE_PATH, ButtonType.PAUSE, 0, 0, scale / 1.5f, 1));
-        this.addActor(aButton = CreateGameButton(GlobalAssets.BUTTON_A_TEXTURE_PATH, ButtonType.A, 0, viewport.getWorldHeight() / BUTTON_POSITION_Y_DIVIDER, gameButtonSize, 0.75f));
-        this.addActor(bButton = CreateGameButton(GlobalAssets.BUTTON_B_TEXTURE_PATH, ButtonType.B, 0, viewport.getWorldHeight() / BUTTON_POSITION_Y_DIVIDER, gameButtonSize, 0.75f));
+        this.addActor(aButton = CreateGameButton(GlobalAssets.BUTTON_B_TEXTURE_PATH, ButtonType.A, 0, viewport.getWorldHeight() / BUTTON_POSITION_Y_DIVIDER, gameButtonSize, 0.5f));
+        this.addActor(bButton = CreateGameButton(GlobalAssets.BUTTON_B_TEXTURE_PATH, ButtonType.B, 0, viewport.getWorldHeight() / BUTTON_POSITION_Y_DIVIDER, gameButtonSize, 0.5f));
         this.addActor(playButton = CreateGameButton(GlobalAssets.BUTTON_PLAY_TEXTURE_PATH, ButtonType.PLAY, 0, 0, pauseButtonSize, 1));
         this.addActor(restartButton = CreateGameButton(GlobalAssets.BUTTON_RESTART_TEXTURE_PATH, ButtonType.RESTART, 0, 0, pauseButtonSize, 1));
+
+        SetButtonStates();
     }
 
     private GameButton CreateGameButton(String texturePath, ButtonType type, float x, float y, float size, float alpha) {
@@ -86,6 +107,17 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         aButton.setPosition(width - buttonPositionMultiplier / 2 * scale, aButton.getY());
         bButton.setPosition(width - buttonPositionMultiplier * scale, bButton.getY());
         //hud.Resize();
+
+        joystick.SetPosition( 2.5f * scale, 2.5f * scale, true);
+    }
+
+    private void SetButtonStates() {
+        aButton.setVisible(!paused);
+        bButton.setVisible(!paused);
+        pauseButton.setVisible(!paused);
+
+        playButton.setVisible(paused);
+        restartButton.setVisible(paused);
     }
 
     private boolean ProcessKeyInput(ControlKeys currentKey, float directionality, boolean isPressed) {
@@ -180,7 +212,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         super.act(delta);
 
         if (!isTouching) {
-            //joystick.SetPosition(camera.position.x - (viewport.getWorldWidth() / 2f) + 3f * scale, camera.position.y - (viewport.getWorldHeight() / 2f) + 3f * scale, true);
+            joystick.SetPosition(2.5f * scale, 2.5f * scale, true);
         }
     }
 
@@ -197,22 +229,23 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private void DrawJoystick() {
         Batch batch = getBatch();
-        batch.setProjectionMatrix(getViewport().getCamera().combined);
+        batch.setProjectionMatrix(getCamera().combined);
 
         batch.begin();
         batch.setColor(1, 1, 1, 0.5f);
-        //joystick.Draw(batch);
+        joystick.Draw(batch);
+        debugFont.draw(getBatch(), "(" + touchVector.x + ", " + touchVector.y + ")", 0, scale);
         batch.setColor(1, 1, 1, 1f);
         batch.end();
     }
 
     private void DrawPausedOverlay() {
         Batch batch = getBatch();
-        batch.setProjectionMatrix(getViewport().getCamera().combined);
+        batch.setProjectionMatrix(getCamera().combined);
 
         batch.begin();
         batch.setColor(1, 1, 1, 0.5f);
-        //batch.draw(pauseScreen, 0, 0);
+        batch.draw(pauseScreen, 0, 0, getViewport().getWorldWidth(), getViewport().getWorldHeight());
         batch.setColor(1, 1, 1, 1f);
         batch.end();
     }
@@ -261,15 +294,12 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        /*
         touchVector.x = screenX;
         touchVector.y = screenY;
-        touchVector.set(camera.unproject(touchVector));
-
-         */
+        touchVector.set(getCamera().unproject(touchVector));
 
         if (screenX < Gdx.graphics.getWidth() / 3f && joystickPointer < 0) {
-            //joystick.SetPosition(touchVector.x, touchVector.y, false);
+            joystick.SetPosition(touchVector.x, touchVector.y, false);
             isTouching = true;
             joystickPointer = pointer;
             return true;
@@ -296,11 +326,10 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         if (!isTouching || joystickPointer != pointer) {
             return super.touchDragged(screenX, screenY, pointer);
         }
-        /*
 
         touchVector.x = screenX;
         touchVector.y = screenY;
-        touchVector.set(camera.unproject(touchVector));
+        touchVector.set(getCamera().unproject(touchVector));
 
         // Get new vector coordinates for joystick drag.
         touchVector.set(joystick.SetDragPosition(touchVector.x, touchVector.y));
@@ -310,16 +339,18 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
         float velX = Math.round(((touchVector.x - joystick.position.x) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * sensitivity)/sensitivity;
         float velY = Math.round(((touchVector.y - joystick.position.y) / (joystick.GetInnerSizeMultiplier() * scale) - modifier) * sensitivity)/sensitivity;
-        movementEvent.x = velX;
-        movementEvent.y = velY;
+        //movementEvent.x = velX;
+        //movementEvent.y = velY;
+        touchVector.x = velX;
+        touchVector.y = velY;
+
         FireMovementEvent();
-         */
         return true;
     }
 
     @Override
     public void dispose() {
-        //joystick.dispose();
+        joystick.dispose();
         //stageRenderer.dispose();
         GlobalAssets.Dispose();
         super.dispose();
@@ -335,11 +366,14 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
                 System.out.println("Button B pressed!");
                 break;
             case PAUSE:
-                //paused = false;
+                paused = true;
                 System.out.println("Pause button pressed!");
+                SetButtonStates();
                 break;
             case PLAY:
+                paused = false;
                 System.out.println("Play button pressed!");
+                SetButtonStates();
                 break;
             case RESTART:
                 System.out.println("Restart button pressed!");

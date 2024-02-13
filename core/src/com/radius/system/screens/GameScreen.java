@@ -170,9 +170,9 @@ public class GameScreen extends AbstractScreen {
         float x = (uiCamera.position.x - uiViewport.getWorldWidth() / 2f);
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
-        font.draw(spriteBatch, "(" + mainViewport.getWorldWidth() + ", " + mainViewport.getWorldHeight() + ")" , x, y);
+        //font.draw(spriteBatch, "(" + mainViewport.getWorldWidth() + ", " + mainViewport.getWorldHeight() + ")" , x, y);
         //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
-        font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
+        //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
 
         spriteBatch.end();
     }
