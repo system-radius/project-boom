@@ -146,8 +146,8 @@ public class GameScreen extends AbstractScreen {
     private void InitializeGameState() {
 
         List<PlayerConfig> configs = new ArrayList<>();
-        configs.add(CreatePlayerConfig(false, false));
         configs.add(CreatePlayerConfig(true, true));
+        configs.add(CreatePlayerConfig(false, false));
 
         gameState = new GameState();
         gameState.AddPlayers(configs);
