@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.radius.system.assets.GlobalConstants;
 
 public abstract class AbstractScreen extends ScreenAdapter {
 
@@ -18,8 +19,6 @@ public abstract class AbstractScreen extends ScreenAdapter {
     protected int screenWidth = Gdx.graphics.getWidth();
 
     protected int screenHeight = Gdx.graphics.getHeight();
-
-    protected boolean debug = false;
 
     public void ClearScreen() {
         Gdx.gl.glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
@@ -38,7 +37,7 @@ public abstract class AbstractScreen extends ScreenAdapter {
         ClearScreen();
         Draw(spriteBatch);
 
-        if (debug) {
+        if (GlobalConstants.DEBUG) {
             DrawDebug(renderer);
         }
     }

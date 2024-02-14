@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Disposable;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.board.BoardState;
+import com.radius.system.controllers.ArtificialIntelligenceController;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.enums.BoardRep;
@@ -46,7 +47,7 @@ public class GameState implements Disposable, RestartEventListener {
                 mainPlayer = i;
             } else {
                 // Supposed to be adding AI controller.
-                controllers.add(new HumanPlayerController(i, boardState, config, WORLD_SCALE));
+                controllers.add(new ArtificialIntelligenceController(i, boardState, config, WORLD_SCALE));
             }
         }
 
@@ -88,7 +89,7 @@ public class GameState implements Disposable, RestartEventListener {
             }
         }
 
-        RandomizeField(fieldIndex);
+        //RandomizeField(fieldIndex);
     }
 
     private void RandomizeField(int fieldIndex) {

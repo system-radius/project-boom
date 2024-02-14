@@ -1,8 +1,11 @@
 package com.radius.system.board;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.objects.BoomDrawable;
 import com.radius.system.objects.BoomUpdatable;
@@ -12,6 +15,7 @@ import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.players.Player;
+import com.radius.system.utils.FontUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +36,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
     private final List<Bomb> bombs;
 
+    private final BitmapFont font;
+
     public BoardState(int boardWidth, int boardHeight, int scale) {
 
         this.board = new AnimatedGameObject[boardWidth][boardHeight];
@@ -42,6 +48,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         this.boardWidth = boardWidth;
         this.boardHeight = boardHeight;
         this.scale = scale;
+
+        font = FontUtils.GetFont((int) GlobalConstants.WORLD_SCALE / 6, Color.WHITE, 1, Color.BLACK);
 
         ClearBoard();
     }
@@ -77,6 +85,10 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
     public void AddToBoard(Player player) {
         players.add(player);
+    }
+
+    public List<Player> GetPlayers() {
+        return players;
     }
 
     public void MoveItemInBoard(int srcX, int srcY, int dstX, int dstY) {
@@ -133,6 +145,17 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         }
 
         return blocks;
+    }
+
+    public void CompileBoardCost(int[][] boardCost) {
+        for (int i = 0; i < boardWidth; i++) {
+            for (int j = 0; j < boardHeight; j++) {
+                boardCost[i][j] = 0;
+                if (board[i][j] != null) {
+                    boardCost[i][j] = -1;
+                }
+            }
+        }
     }
 
     public void AttemptBurnPlayers(Bomb bomb) {
@@ -220,6 +243,14 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
             for (int j = 0; j < boardHeight; j++) {
                 if (board[i][j] != null && boardRep[i][j] != BoardRep.BOMB) {
                     board[i][j].Draw(batch);
+                }
+            }
+        }
+
+        if (GlobalConstants.DEBUG) {
+            for (int i = 0; i < boardWidth; i++) {
+                for (int j = 0; j < boardHeight; j++) {
+                    font.draw(batch, "(" + i + ", " + j + ")", i * GlobalConstants.WORLD_SCALE, j * GlobalConstants.WORLD_SCALE + GlobalConstants.WORLD_SCALE);
                 }
             }
         }

@@ -54,7 +54,7 @@ public class GameScreen extends AbstractScreen {
 
     private BitmapFont font;
 
-    private boolean maxZoomOut = false;
+    private boolean maxZoomOut = true;
 
     public GameScreen() {
         font = FontUtils.GetFont((int) WORLD_SCALE / 2, Color.WHITE, 1, Color.BLACK);
@@ -65,8 +65,6 @@ public class GameScreen extends AbstractScreen {
         InitializeEvents();
 
         gameState.RestartField();
-
-        debug = false;
     }
 
     private void InitializeEvents() {
