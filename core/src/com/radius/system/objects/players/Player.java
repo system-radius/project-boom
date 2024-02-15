@@ -149,29 +149,48 @@ public class Player extends Entity {
 
     public final int id;
 
-    private final String name;
+    private String name, spritePath;
 
     private final BitmapFont playerNameFont;
 
-    private final boolean godmode = false;
+    private boolean godmode;
 
     public Player(int id, Vector2 respawnPoint, String spritePath, float scale) {
+        this(id, respawnPoint, spritePath, scale, false);
+    }
+
+    public Player(int id, Vector2 respawnPoint, String spritePath, float scale, boolean godmode) {
         super(BoardRep.PLAYER, respawnPoint.x, respawnPoint.y, scale, scale);
 
         this.id = id;
-        this.name = "Player" + (id + 1);
+        this.name = godmode ? "Zero" : "Player" + (id + 1);
+        this.godmode = godmode;
         playerNameFont = FontUtils.GetFont((int)scale / 4, Color.WHITE, 1, Color.BLACK);
 
         this.respawnPoint = respawnPoint;
         this.scale = scale;
-        LoadAsset(spritePath);
+        this.spritePath = spritePath;
+        if (godmode) {
+            this.spritePath = "img/player_5.png";
+        }
+        LoadAsset(this.spritePath);
 
         bombs = new ArrayList<>();
         movementEvent = new MovementEvent(id, respawnPoint.x, respawnPoint.y);
         statChangeEvent = new StatChangeEvent(id);
     }
 
+    public void ActivateGodMode() {
+        this.godmode = true;
+    }
+
     public void Reset() {
+
+        this.name = godmode ? "Zero" : "Player" + (id + 1);
+        if (godmode) {
+            this.spritePath = "img/player_5.png";
+        }
+        LoadAsset(this.spritePath);
 
         bombStock = 1;
         firePower = 1;

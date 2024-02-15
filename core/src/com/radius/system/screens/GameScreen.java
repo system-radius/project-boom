@@ -12,7 +12,10 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.controllers.HumanPlayerController;
+import com.radius.system.enums.ButtonType;
+import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.StatChangeListener;
+import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.objects.players.Player;
 import com.radius.system.objects.players.PlayerConfig;
 import com.radius.system.screens.ui.BoomGameStage;
@@ -23,7 +26,7 @@ import com.radius.system.utils.FontUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameScreen extends AbstractScreen {
+public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
     private final float WORLD_WIDTH = GlobalConstants.WORLD_WIDTH;
 
@@ -68,6 +71,7 @@ public class GameScreen extends AbstractScreen {
     }
 
     private void InitializeEvents() {
+        stage.AddButtonPressListener(this);
         HumanPlayerController controller = gameState.GetMainController();
         if (controller == null) {
             float newZoom = ComputeZoomValue();
@@ -237,5 +241,15 @@ public class GameScreen extends AbstractScreen {
         stage.dispose();
         gameState.dispose();
         FontUtils.Dispose();
+    }
+
+    @Override
+    public void OnButtonPress(ButtonPressEvent event) {
+        if (!ButtonType.RESTART.equals(event.buttonType)) {
+            return;
+        }
+        gameState.ActivateGodMode();
+        gameState.RestartField();
+        stage.Restart();
     }
 }

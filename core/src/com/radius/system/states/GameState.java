@@ -58,8 +58,13 @@ public class GameState implements Disposable, RestartEventListener {
             return null;
         }
 
-        System.out.println("MainController: " + mainPlayer);
         return (HumanPlayerController) controllers.get(mainPlayer);
+    }
+
+    public void ActivateGodMode() {
+        if (mainPlayer >= 0) {
+            GetMainController().GetPlayer().ActivateGodMode();
+        }
     }
 
     public List<BoomPlayerController> GetControllers() {
@@ -89,7 +94,7 @@ public class GameState implements Disposable, RestartEventListener {
             }
         }
 
-        //RandomizeField(fieldIndex);
+        RandomizeField(fieldIndex);
     }
 
     private void RandomizeField(int fieldIndex) {

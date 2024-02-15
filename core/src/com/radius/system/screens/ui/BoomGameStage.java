@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.assets.GlobalAssets;
+import com.radius.system.assets.GlobalConstants;
 import com.radius.system.controllers.Joystick;
 import com.radius.system.enums.BonusType;
 import com.radius.system.enums.ButtonType;
@@ -109,6 +110,12 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         GameButton button = new GameButton(texture, type, x, y, size, size, alpha);
         button.AddListener(this);
         return button;
+    }
+
+    public void Restart() {
+        timer.StartTimer(600);
+        paused = false;
+        SetButtonStates();
     }
 
     public void Resize() {
@@ -365,8 +372,8 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
                 SetButtonStates();
                 break;
             case RESTART:
+                GlobalConstants.DEBUG = GlobalConstants.GODMODE = true;
                 System.out.println("Restart button pressed!");
-                break;
             case A:
             case B:
             default:

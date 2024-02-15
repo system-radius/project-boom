@@ -1,5 +1,6 @@
 package com.radius.system.controllers;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -19,6 +20,8 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     private final Vector2 movementVector = new Vector2(0, 0);
 
     private final List<Player> players;
+
+    private List<Node> currentPath;
 
     private final Node targetNode, pastTarget;
 
@@ -68,17 +71,19 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
         SelectTarget();
         if (targetNode.IsInvalid()) {
+            movementVector.x = movementVector.y = 0;
             return;
         }
 
         boardState.CompileBoardCost(boardCost);
-        List<Node> currentPath = AStar.FindShortestPath(boardCost, player.GetWorldX(), player.GetWorldY(), targetNode.x, targetNode.y);
+        currentPath = AStar.FindShortestPath(boardCost, player.GetWorldX(), player.GetWorldY(), targetNode.x, targetNode.y);
         if (currentPath == null) {
+            movementVector.x = movementVector.y = 0;
             return;
         }
 
         Node node = currentPath.get(0);
-        if (targetNode.x != pastTarget.x || targetNode.y != pastTarget.y) {
+        if ((targetNode.x != pastTarget.x || targetNode.y != pastTarget.y) && GlobalConstants.DEBUG) {
            System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + node.x + ", " + node.y + ")");
            pastTarget.x = targetNode.x;
            pastTarget.y = targetNode.y;
@@ -88,13 +93,13 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         movementVector.x = Math.round(UpdateMovementAxis(node.x, player.position.x) * sensitivity) / sensitivity;
         movementVector.y = Math.round(UpdateMovementAxis(node.y, player.position.y) * sensitivity) / sensitivity;
 
-        player.MoveAlongX(movementVector.x);
-        player.MoveAlongY(movementVector.y);
     }
 
     @Override
     public void Update(float delta) {
         UpdateMovement();
+        player.MoveAlongX(movementVector.x);
+        player.MoveAlongY(movementVector.y);
         player.Update(delta);
         player.Collide(boardState.GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
     }
@@ -106,7 +111,15 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     @Override
     public void DrawDebug(ShapeRenderer renderer) {
+        if (currentPath == null) {
+            return;
+        }
 
+        renderer.setColor(Color.RED);
+        float scale = GlobalConstants.WORLD_SCALE;
+        for (Node node : currentPath) {
+            renderer.rect(node.x * scale, node.y * scale, scale, scale);
+        }
     }
 
     @Override

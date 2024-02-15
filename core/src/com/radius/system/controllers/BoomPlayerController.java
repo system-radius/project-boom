@@ -12,7 +12,7 @@ public abstract class BoomPlayerController implements Disposable {
 
     protected final BoardState boardState;
 
-    protected final Player player;
+    protected Player player;
 
     public BoomPlayerController(BoardState boardState, Player player) {
         this.boardState = boardState;

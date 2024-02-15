@@ -3,6 +3,7 @@ package com.radius.system.controllers;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.radius.system.assets.GlobalConstants;
 import com.radius.system.board.BoardState;
 import com.radius.system.enums.ButtonType;
 import com.radius.system.events.ButtonEventListener;
@@ -18,7 +19,7 @@ public class HumanPlayerController extends BoomPlayerController implements Movem
     private final int id;
 
     public HumanPlayerController(int id, BoardState boardState, PlayerConfig config, float scale) {
-        super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
+        super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale, GlobalConstants.GODMODE));
         this.id = id;
     }
 
