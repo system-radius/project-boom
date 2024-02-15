@@ -8,15 +8,15 @@ public class AStar {
 
     private static AStar instance;
 
-    private final List<Node> openLlist = new ArrayList<>();
+    private final List<Point> openLlist = new ArrayList<>();
 
-    private final List<Node> closedList = new ArrayList<>();
+    private final List<Point> closedList = new ArrayList<>();
 
     private int[][] maze;
 
     private AStar() {}
 
-    public static List<Node> FindShortestPath(int[][] boardCost, int srcX, int srcY, int dstX, int dstY) {
+    public static List<Point> FindShortestPath(int[][] boardCost, int srcX, int srcY, int dstX, int dstY) {
         if (instance == null) {
             instance = new AStar();
         }
@@ -24,12 +24,12 @@ public class AStar {
         return instance.FindShortestPathInternal(boardCost, srcX, srcY, dstX, dstY);
     }
 
-    private List<Node> FindShortestPathInternal(int[][] boardCost, int srcX, int srcY, int dstX, int dstY) {
+    private List<Point> FindShortestPathInternal(int[][] boardCost, int srcX, int srcY, int dstX, int dstY) {
         openLlist.clear();
         closedList.clear();
 
         maze = boardCost;
-        Node now = new Node(null, srcX, srcY, 0, 0);
+        Point now = new Point(null, srcX, srcY, 0, 0);
 
         for (openLlist.add(now); openLlist.size() > 0;) {
             now = this.openLlist.remove(0);
@@ -47,7 +47,7 @@ public class AStar {
         return null;
     }
 
-    private void AddChildrenToOpenList(Node parent, int dstX, int dstY) {
+    private void AddChildrenToOpenList(Point parent, int dstX, int dstY) {
         int parentX = parent.x, parentY = parent.y;
         float parentG = parent.g;
 
@@ -68,7 +68,7 @@ public class AStar {
                     continue;
                 }
 
-                Node child = new Node(parent, childX, childY, parentG + 1 + maze[childX][childY], ComputeHeuristic(childX, childY, dstX, dstY));
+                Point child = new Point(parent, childX, childY, parentG + 1 + maze[childX][childY], ComputeHeuristic(childX, childY, dstX, dstY));
                 if (!(FindInList(openLlist, child) || FindInList(closedList, child))) {
                     openLlist.add(child);
                 }
@@ -82,9 +82,9 @@ public class AStar {
         return (float) Math.abs(x - dstX) + Math.abs(y - dstY);
     }
 
-    private boolean FindInList(List<Node> nodes, Node node) {
-        for (Node inList : nodes) {
-            if (node.x == inList.x && node.y == inList.y) {
+    private boolean FindInList(List<Point> points, Point point) {
+        for (Point inList : points) {
+            if (point.x == inList.x && point.y == inList.y) {
                 return true;
             }
         }
@@ -92,10 +92,10 @@ public class AStar {
         return false;
     }
 
-    private List<Node> ReconstructPath(Node node) {
-        List<Node> path = new ArrayList<>();
-        path.add(node);
-        for (Node parent = node.GetParent(); parent != null; parent = parent.GetParent()) {
+    private List<Point> ReconstructPath(Point point) {
+        List<Point> path = new ArrayList<>();
+        path.add(point);
+        for (Point parent = point.GetParent(); parent != null; parent = parent.GetParent()) {
             if (parent.GetParent() == null) {
                 break;
             }

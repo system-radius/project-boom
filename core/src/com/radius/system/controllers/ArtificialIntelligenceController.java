@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.radius.system.ai.AStar;
-import com.radius.system.ai.Node;
+import com.radius.system.ai.Point;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.board.BoardState;
 import com.radius.system.objects.players.Player;
@@ -21,14 +21,14 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     private final List<Player> players;
 
-    private List<Node> currentPath;
+    private List<Point> currentPath;
 
-    private final Node targetNode, pastTarget;
+    private final Point targetPoint, pastTarget;
 
     public ArtificialIntelligenceController(int id, BoardState boardState, PlayerConfig config, float scale) {
         super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
-        targetNode = new Node(null, -1, -1, 0, 0);
-        pastTarget = new Node(null, -1, -1, 0, 0);
+        targetPoint = new Point(null, -1, -1, 0, 0);
+        pastTarget = new Point(null, -1, -1, 0, 0);
         players =  boardState.GetPlayers();
     }
 
@@ -47,8 +47,8 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
             if (diffX < x && diffY < y) {
                 x = diffX;
                 y = diffY;
-                targetNode.x = player.GetWorldX();
-                targetNode.y = player.GetWorldY();
+                targetPoint.x = player.GetWorldX();
+                targetPoint.y = player.GetWorldY();
             }
         }
     }
@@ -70,28 +70,28 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     private void UpdateMovement() {
 
         SelectTarget();
-        if (targetNode.IsInvalid()) {
+        if (targetPoint.IsInvalid()) {
             movementVector.x = movementVector.y = 0;
             return;
         }
 
         boardState.CompileBoardCost(boardCost);
-        currentPath = AStar.FindShortestPath(boardCost, player.GetWorldX(), player.GetWorldY(), targetNode.x, targetNode.y);
+        currentPath = AStar.FindShortestPath(boardCost, player.GetWorldX(), player.GetWorldY(), targetPoint.x, targetPoint.y);
         if (currentPath == null) {
             movementVector.x = movementVector.y = 0;
             return;
         }
 
-        Node node = currentPath.get(0);
-        if ((targetNode.x != pastTarget.x || targetNode.y != pastTarget.y) && GlobalConstants.DEBUG) {
-           System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + node.x + ", " + node.y + ")");
-           pastTarget.x = targetNode.x;
-           pastTarget.y = targetNode.y;
+        Point point = currentPath.get(0);
+        if ((targetPoint.x != pastTarget.x || targetPoint.y != pastTarget.y) && GlobalConstants.DEBUG) {
+           System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + point.x + ", " + point.y + ")");
+           pastTarget.x = targetPoint.x;
+           pastTarget.y = targetPoint.y;
         }
 
         float sensitivity = 1f;
-        movementVector.x = Math.round(UpdateMovementAxis(node.x, player.position.x) * sensitivity) / sensitivity;
-        movementVector.y = Math.round(UpdateMovementAxis(node.y, player.position.y) * sensitivity) / sensitivity;
+        movementVector.x = Math.round(UpdateMovementAxis(point.x, player.position.x) * sensitivity) / sensitivity;
+        movementVector.y = Math.round(UpdateMovementAxis(point.y, player.position.y) * sensitivity) / sensitivity;
 
     }
 
@@ -117,8 +117,8 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
         renderer.setColor(Color.RED);
         float scale = GlobalConstants.WORLD_SCALE;
-        for (Node node : currentPath) {
-            renderer.rect(node.x * scale, node.y * scale, scale, scale);
+        for (Point point : currentPath) {
+            renderer.rect(point.x * scale, point.y * scale, scale, scale);
         }
     }
 

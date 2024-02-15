@@ -2,15 +2,15 @@ package com.radius.system.ai;
 
 import com.radius.system.assets.GlobalConstants;
 
-public class Node implements Comparable<Node> {
+public class Point implements Comparable<Point> {
 
     public int x, y;
 
     public float h, g;
 
-    private Node parent;
+    private Point parent;
 
-    public Node(Node parent, int x, int y, float g, float h) {
+    public Point(Point parent, int x, int y, float g, float h) {
         this.parent = parent;
         this.x = x;
         this.y = y;
@@ -18,7 +18,7 @@ public class Node implements Comparable<Node> {
         this.h = h;
     }
 
-    public Node GetParent() {
+    public Point GetParent() {
         return parent;
     }
 
@@ -36,7 +36,7 @@ public class Node implements Comparable<Node> {
     }
 
     @Override
-    public int compareTo(Node that) {
+    public int compareTo(Point that) {
         return Float.compare(this.GetCost(), that.GetCost());
     }
 }
