@@ -1,4 +1,4 @@
-package com.radius.system.ai;
+package com.radius.system.ai.pathfinding;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -563,6 +563,10 @@ public class Player extends Entity {
         FireStatChange(BonusType.BOMB_STOCK, bombStock - bombs.size());
     }
 
+    public boolean IsAlive() {
+        return state != PlayerState.DEAD && state != PlayerState.DYING;
+    }
+
     @Override
     public void dispose() {
         spriteSheet.dispose();

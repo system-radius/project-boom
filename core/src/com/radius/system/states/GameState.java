@@ -94,7 +94,7 @@ public class GameState implements Disposable, RestartEventListener {
             }
         }
 
-        RandomizeField(fieldIndex);
+        //RandomizeField(fieldIndex);
     }
 
     private void RandomizeField(int fieldIndex) {

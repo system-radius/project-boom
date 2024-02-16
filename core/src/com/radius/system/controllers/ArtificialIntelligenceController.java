@@ -4,13 +4,19 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.radius.system.ai.AStar;
-import com.radius.system.ai.Point;
+import com.radius.system.ai.behaviortree.trees.DefaultTree;
+import com.radius.system.ai.behaviortree.trees.Tree;
+import com.radius.system.ai.pathfinding.AStar;
+import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.board.BoardState;
 import com.radius.system.objects.players.Player;
 import com.radius.system.objects.players.PlayerConfig;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class ArtificialIntelligenceController extends BoomPlayerController {
@@ -23,13 +29,17 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     private List<Point> currentPath;
 
-    private final Point targetPoint, pastTarget;
+    private final Point targetPoint, pastTarget, srcPoint;
+
+    private Tree tree;
 
     public ArtificialIntelligenceController(int id, BoardState boardState, PlayerConfig config, float scale) {
         super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
         targetPoint = new Point(null, -1, -1, 0, 0);
         pastTarget = new Point(null, -1, -1, 0, 0);
+        srcPoint = new Point(null, -1, -1, 0, 0);
         players =  boardState.GetPlayers();
+        tree = new DefaultTree(id, boardState);
     }
 
     private void SelectTarget() {
@@ -67,6 +77,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         return value;
     }
 
+    @SuppressWarnings("unchecked")
     private void UpdateMovement() {
 
         SelectTarget();
@@ -75,33 +86,39 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
             return;
         }
 
-        boardState.CompileBoardCost(boardCost);
-        currentPath = AStar.FindShortestPath(boardCost, player.GetWorldX(), player.GetWorldY(), targetPoint.x, targetPoint.y);
-        if (currentPath == null) {
+        Object object = tree.GetData("movementPath");
+        if (object == null) {
             movementVector.x = movementVector.y = 0;
+            currentPath = null;
             return;
         }
+        currentPath = (List<Point>) tree.GetData("movementPath");
 
         Point point = currentPath.get(0);
         if ((targetPoint.x != pastTarget.x || targetPoint.y != pastTarget.y) && GlobalConstants.DEBUG) {
-           System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + point.x + ", " + point.y + ")");
-           pastTarget.x = targetPoint.x;
-           pastTarget.y = targetPoint.y;
+            System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + point.x + ", " + point.y + ")");
+            pastTarget.x = targetPoint.x;
+            pastTarget.y = targetPoint.y;
         }
 
         float sensitivity = 1f;
         movementVector.x = Math.round(UpdateMovementAxis(point.x, player.position.x) * sensitivity) / sensitivity;
         movementVector.y = Math.round(UpdateMovementAxis(point.y, player.position.y) * sensitivity) / sensitivity;
-
     }
 
     @Override
     public void Update(float delta) {
+        tree.SetData("srcPoint", srcPoint);
+        tree.Update(delta);
+
         UpdateMovement();
         player.MoveAlongX(movementVector.x);
         player.MoveAlongY(movementVector.y);
         player.Update(delta);
         player.Collide(boardState.GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
+
+        srcPoint.x = player.GetWorldX();
+        srcPoint.y = player.GetWorldY();
     }
 
     @Override

@@ -9,7 +9,6 @@ import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.objects.BoomDrawable;
 import com.radius.system.objects.BoomUpdatable;
-import com.radius.system.objects.GameObject;
 import com.radius.system.objects.bombs.Bomb;
 import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
@@ -22,13 +21,13 @@ import java.util.List;
 
 public class BoardState implements BoomUpdatable, BoomDrawable {
 
+    public final int BOARD_WIDTH;
+
+    public final int BOARD_HEIGHT;
+
     private final AnimatedGameObject[][] board;
 
     private final BoardRep[][] boardRep;
-
-    private final int boardWidth;
-
-    private final int boardHeight;
 
     private final int scale;
 
@@ -45,8 +44,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         this.players = new ArrayList<>();
         this.bombs = new ArrayList<>();
 
-        this.boardWidth = boardWidth;
-        this.boardHeight = boardHeight;
+        this.BOARD_WIDTH = boardWidth;
+        this.BOARD_HEIGHT = boardHeight;
         this.scale = scale;
 
         font = FontUtils.GetFont((int) GlobalConstants.WORLD_SCALE / 6, Color.WHITE, 1, Color.BLACK);
@@ -55,8 +54,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
     }
 
     public void ClearBoard() {
-        for (int x = 0; x < boardWidth; x++) {
-            for (int y = 0; y < boardHeight; y++) {
+        for (int x = 0; x < BOARD_WIDTH; x++) {
+            for (int y = 0; y < BOARD_HEIGHT; y++) {
                 boardRep[x][y] = BoardRep.EMPTY;
                 board[x][y] = null;
             }
@@ -120,7 +119,7 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
     public BoardRep GetBoardEntry(int x, int y) {
 
-        if (x < 0 || y < 0 || x >= boardWidth || y >= boardHeight) {
+        if (x < 0 || y < 0 || x >= BOARD_WIDTH || y >= BOARD_HEIGHT) {
             return null;
         }
 
@@ -135,9 +134,9 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         List<Block> blocks = new ArrayList<>();
 
         for (int i = x - 1; i <= x + 1; i++) {
-            if (i < 0 || i >= boardWidth) continue;
+            if (i < 0 || i >= BOARD_WIDTH) continue;
             for (int j = y - 1; j <= y + 1; j++) {
-                if (j < 0 || j >= boardHeight) continue;
+                if (j < 0 || j >= BOARD_HEIGHT) continue;
                 if (board[i][j] instanceof Block) {
                     blocks.add((Block)board[i][j]);
                 }
@@ -147,9 +146,9 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         return blocks;
     }
 
-    public void CompileBoardCost(int[][] boardCost) {
-        for (int i = 0; i < boardWidth; i++) {
-            for (int j = 0; j < boardHeight; j++) {
+    public void CompileBoardCost(int[][] boardCost, int id) {
+        for (int i = 0; i < BOARD_WIDTH; i++) {
+            for (int j = 0; j < BOARD_HEIGHT; j++) {
                 boardCost[i][j] = 0;
                 if (board[i][j] != null) {
                     boardCost[i][j] = -1;
@@ -211,8 +210,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
     }
 
     private void UpdateBoard(float delta) {
-        for (int i = 0; i < boardWidth; i++) {
-            for (int j = 0; j < boardHeight; j++) {
+        for (int i = 0; i < BOARD_WIDTH; i++) {
+            for (int j = 0; j < BOARD_HEIGHT; j++) {
                 if (board[i][j] != null) {
                     board[i][j].Update(delta);
 
@@ -239,8 +238,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
             bomb.Draw(batch);
         }
 
-        for (int i = 0; i < boardWidth; i++) {
-            for (int j = 0; j < boardHeight; j++) {
+        for (int i = 0; i < BOARD_WIDTH; i++) {
+            for (int j = 0; j < BOARD_HEIGHT; j++) {
                 if (board[i][j] != null && boardRep[i][j] != BoardRep.BOMB) {
                     board[i][j].Draw(batch);
                 }
@@ -248,8 +247,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         }
 
         if (GlobalConstants.DEBUG) {
-            for (int i = 0; i < boardWidth; i++) {
-                for (int j = 0; j < boardHeight; j++) {
+            for (int i = 0; i < BOARD_WIDTH; i++) {
+                for (int j = 0; j < BOARD_HEIGHT; j++) {
                     font.draw(batch, "(" + i + ", " + j + ")", i * GlobalConstants.WORLD_SCALE, j * GlobalConstants.WORLD_SCALE + GlobalConstants.WORLD_SCALE);
                 }
             }
@@ -258,8 +257,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
     @Override
     public void DrawDebug(ShapeRenderer renderer) {
-        for (int i = 0; i < boardWidth; i++) {
-            for (int j = 0; j < boardHeight; j++) {
+        for (int i = 0; i < BOARD_WIDTH; i++) {
+            for (int j = 0; j < BOARD_HEIGHT; j++) {
                 if (board[i][j] != null) {
                     board[i][j].DrawDebug(renderer);
                 }
