@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Disposable;
 import com.radius.system.assets.GlobalConstants;
-import com.radius.system.board.BoardState;
 import com.radius.system.controllers.ArtificialIntelligenceController;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.controllers.BoomPlayerController;
@@ -13,7 +12,6 @@ import com.radius.system.events.RestartEventListener;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.HardBlock;
 import com.radius.system.objects.blocks.SoftBlock;
-import com.radius.system.objects.players.Player;
 import com.radius.system.objects.players.PlayerConfig;
 
 import java.util.ArrayList;

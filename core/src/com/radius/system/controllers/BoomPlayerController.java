@@ -3,9 +3,7 @@ package com.radius.system.controllers;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Disposable;
-import com.radius.system.board.BoardState;
-import com.radius.system.events.listeners.ButtonPressListener;
-import com.radius.system.events.parameters.ButtonPressEvent;
+import com.radius.system.states.BoardState;
 import com.radius.system.objects.players.Player;
 
 public abstract class BoomPlayerController implements Disposable {

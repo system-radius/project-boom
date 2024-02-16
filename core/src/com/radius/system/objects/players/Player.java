@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
-import com.radius.system.board.BoardState;
+import com.radius.system.states.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
 import com.radius.system.enums.BonusType;

@@ -1,8 +1,6 @@
 package com.radius.system.objects.bombs;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -10,7 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.assets.GlobalAssets;
-import com.radius.system.board.BoardState;
+import com.radius.system.states.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombState;
 import com.radius.system.enums.BombType;

@@ -6,17 +6,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.radius.system.ai.behaviortree.trees.DefaultTree;
 import com.radius.system.ai.behaviortree.trees.Tree;
-import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
-import com.radius.system.board.BoardState;
+import com.radius.system.states.BoardState;
 import com.radius.system.objects.players.Player;
 import com.radius.system.objects.players.PlayerConfig;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class ArtificialIntelligenceController extends BoomPlayerController {

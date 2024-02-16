@@ -1,4 +1,4 @@
-package com.radius.system.board;
+package com.radius.system.states;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;

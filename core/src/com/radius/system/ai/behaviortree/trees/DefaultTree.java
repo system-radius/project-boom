@@ -5,7 +5,7 @@ import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.ai.behaviortree.nodes.Sequencer;
 import com.radius.system.ai.behaviortree.tasks.FindPlayer;
 import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
-import com.radius.system.board.BoardState;
+import com.radius.system.states.BoardState;
 
 public class DefaultTree extends Tree {
 

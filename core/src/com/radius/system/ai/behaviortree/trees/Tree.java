@@ -1,7 +1,7 @@
 package com.radius.system.ai.behaviortree.trees;
 
 import com.radius.system.ai.behaviortree.nodes.Node;
-import com.radius.system.board.BoardState;
+import com.radius.system.states.BoardState;
 import com.radius.system.objects.BoomUpdatable;
 
 public abstract class Tree implements BoomUpdatable {
