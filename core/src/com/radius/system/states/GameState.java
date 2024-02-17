@@ -10,6 +10,7 @@ import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.events.RestartEventListener;
 import com.radius.system.objects.blocks.Block;
+import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.blocks.HardBlock;
 import com.radius.system.objects.blocks.SoftBlock;
 import com.radius.system.objects.players.PlayerConfig;
@@ -92,11 +93,26 @@ public class GameState implements Disposable, RestartEventListener {
             }
         }
 
+        RandomizeBonus();
         //RandomizeField(fieldIndex);
     }
 
+    private void RandomizeBonus() {
+        int totalBonuses = 50;
+        for (int i = 0; i < totalBonuses; i++) {
+            int x = (int) (Math.random() * WORLD_WIDTH);
+            int y = (int) (Math.random() * WORLD_HEIGHT);
+
+            if (boardState.GetBoardEntry(x, y) != BoardRep.EMPTY || IsBoardCorner(x, y)) {
+                continue;
+            }
+
+            boardState.AddToBoard(new Bonus(x, y, WORLD_SCALE, WORLD_SCALE));
+        }
+    }
+
     private void RandomizeField(int fieldIndex) {
-        int totalArea = (int) (WORLD_WIDTH * WORLD_HEIGHT);
+        int totalArea = GlobalConstants.WORLD_AREA;
         int boundingBlocks = (int) (WORLD_WIDTH * 2) + (int) (WORLD_HEIGHT * 2);
         int placeableBlocks = totalArea - boundingBlocks;
 
