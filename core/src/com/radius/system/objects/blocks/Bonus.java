@@ -20,9 +20,9 @@ public class Bonus extends Block {
             BonusType.FIRE_POWER,
             BonusType.FLASH_FIRE,
             BonusType.MOVEMENT_SPEED,
-            BonusType.REMOTE_MINE,
-            BonusType.PIERCE_BOMB,
-            BonusType.IMPACT_BOMB
+            //BonusType.REMOTE_MINE,
+            //BonusType.PIERCE_BOMB,
+            //BonusType.IMPACT_BOMB
     };
 
     private final BonusType bonusType;
