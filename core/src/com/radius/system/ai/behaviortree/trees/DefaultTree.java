@@ -4,6 +4,7 @@ import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.ai.behaviortree.nodes.Sequencer;
+import com.radius.system.ai.behaviortree.tasks.FindBonus;
 import com.radius.system.ai.behaviortree.tasks.FindPlayer;
 import com.radius.system.ai.behaviortree.tasks.FindSpace;
 import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
@@ -25,8 +26,13 @@ public class DefaultTree extends Tree {
         moveToSafety.AttachChild(new MoveToTarget());
         root.AttachChild(moveToSafety);
 
+
+        Node findTarget = new Selector();
+        findTarget.AttachChild(new FindBonus(fireThreshold, boardState));
+        findTarget.AttachChild(new FindPlayer(id, fireThreshold, boardState));
+
         Node moveToTarget = new Sequencer();
-        moveToTarget.AttachChild(new FindPlayer(id, fireThreshold, boardState));
+        moveToTarget.AttachChild(findTarget);
         moveToTarget.AttachChild(new MoveToTarget());
 
         root.AttachChild(moveToTarget);
