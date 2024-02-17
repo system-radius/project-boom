@@ -49,7 +49,7 @@ public class FindBonus extends Solidifier {
             return NodeState.FAILURE;
         }
 
-        System.out.println("Target point for find bonus: " + targetPoint);
+        //System.out.println("Target point for find bonus: " + targetPoint);
         GetRoot().SetData(NodeKeys.TARGET_POINT, targetPoint);
         return NodeState.SUCCESS;
     }
