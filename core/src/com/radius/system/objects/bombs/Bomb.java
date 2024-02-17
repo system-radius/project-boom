@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.assets.GlobalAssets;
+import com.radius.system.assets.GlobalConstants;
 import com.radius.system.states.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombState;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Bomb extends Block {
+
+    protected static final int MAX_COST = (int) (GlobalConstants.WORLD_WIDTH * GlobalConstants.WORLD_HEIGHT);
 
     protected static final float FRAME_DURATION_BREATHING = 1f / 5f;
 
@@ -83,13 +86,7 @@ public class Bomb extends Block {
 
     protected Rectangle fireStreamCenterBound;
 
-    protected float rangeNorth;
-
-    protected float rangeSouth;
-
-    protected float rangeEast;
-
-    protected float rangeWest;
+    protected Map<Direction, Integer> fireRanges = new HashMap<>();
 
     protected float range;
 
@@ -107,7 +104,7 @@ public class Bomb extends Block {
 
     private float thinWidth, thinHeight;
 
-    private final float boundsOffset = 0.01f;
+    private final float boundsOffset = 0.1f;
 
     public Bomb(Player player, float x, float y, float width, float height, float scale) {
         this(BombType.NORMAL, player, x, y, width, height, scale);
@@ -188,6 +185,16 @@ public class Bomb extends Block {
         bounds.setPosition(x + boundsOffset / 2, y + boundsOffset / 2);
     }
 
+    public int GetCost() {
+        // Get percentage of the explosion limit against the current time.
+        float percent = 1 - ((WAIT_TIMER - preExplosionTime) / WAIT_TIMER);
+        return IsExploding() ? -1 : (int)(MAX_COST * percent);
+    }
+
+    public Map<Direction, Integer> GetRangeValues() {
+        return fireRanges;
+    }
+
     public void UpdateBounds(BoardState boardState) {
 
         int intX = GetWorldX();
@@ -198,10 +205,15 @@ public class Bomb extends Block {
         int intYPlus1 = intY + 1;
         int intYLess1 = intY - 1;
 
-        rangeNorth = CheckObstacle(boardState, intX, intYPlus1, Direction.NORTH, 1);
-        rangeSouth = CheckObstacle(boardState, intX, intYLess1, Direction.SOUTH, 1);
-        rangeWest = CheckObstacle(boardState, intXLess1, intY, Direction.WEST, 1);
-        rangeEast = CheckObstacle(boardState, intXPlus1, intY, Direction.EAST, 1);
+        int rangeNorth = CheckObstacle(boardState, intX, intYPlus1, Direction.NORTH, 1);
+        int rangeSouth = CheckObstacle(boardState, intX, intYLess1, Direction.SOUTH, 1);
+        int rangeWest = CheckObstacle(boardState, intXLess1, intY, Direction.WEST, 1);
+        int rangeEast = CheckObstacle(boardState, intXPlus1, intY, Direction.EAST, 1);
+
+        fireRanges.put(Direction.NORTH, rangeNorth);
+        fireRanges.put(Direction.SOUTH, rangeSouth);
+        fireRanges.put(Direction.WEST, rangeWest);
+        fireRanges.put(Direction.EAST, rangeEast);
 
         fireStreamNorthBound = RefreshRectangle(fireStreamNorthBound, intX, intYPlus1, 1, (rangeNorth - 1));
         fireStreamSouthBound = RefreshRectangle(fireStreamSouthBound, intX, intYPlus1 - rangeSouth, 1, (rangeSouth - 1));
@@ -252,10 +264,10 @@ public class Bomb extends Block {
         int y = (int) GetWorldY();
 
         for (int i = 1; i <= range; i++) {
-            BurnObject(boardState, i, (int) rangeNorth, x, y + i);
-            BurnObject(boardState, i, (int) rangeSouth, x, y - i);
-            BurnObject(boardState, i, (int) rangeWest, x - i, y);
-            BurnObject(boardState, i, (int) rangeEast, x + i, y);
+            BurnObject(boardState, i, fireRanges.get(Direction.NORTH), x, y + i);
+            BurnObject(boardState, i, fireRanges.get(Direction.SOUTH), x, y - i);
+            BurnObject(boardState, i, fireRanges.get(Direction.WEST), x - i, y);
+            BurnObject(boardState, i, fireRanges.get(Direction.EAST), x + i, y);
         }
 
         burnt = true;
@@ -465,10 +477,10 @@ public class Bomb extends Block {
         int y = GetWorldY();
 
         for (int i = 1; i <= range; i++) {
-            DrawFireDirection(batch, fireStreamV, fireStreamNorth, i, (int) rangeNorth, x, (y + i));
-            DrawFireDirection(batch, fireStreamV, fireStreamSouth, i, (int) rangeSouth, x, (y - i));
-            DrawFireDirection(batch, fireStreamH, fireStreamWest, i, (int) rangeWest, (x - i), y);
-            DrawFireDirection(batch, fireStreamH, fireStreamEast, i, (int) rangeEast, (x + i), y);
+            DrawFireDirection(batch, fireStreamV, fireStreamNorth, i, fireRanges.get(Direction.NORTH), x, (y + i));
+            DrawFireDirection(batch, fireStreamV, fireStreamSouth, i, fireRanges.get(Direction.SOUTH), x, (y - i));
+            DrawFireDirection(batch, fireStreamH, fireStreamWest, i, fireRanges.get(Direction.WEST), (x - i), y);
+            DrawFireDirection(batch, fireStreamH, fireStreamEast, i, fireRanges.get(Direction.EAST), (x + i), y);
         }
 
         DrawAnimation(batch, fireStreamCenter, x, y);

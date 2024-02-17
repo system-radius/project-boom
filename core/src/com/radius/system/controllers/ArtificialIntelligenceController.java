@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.trees.DefaultTree;
 import com.radius.system.ai.behaviortree.trees.Tree;
 import com.radius.system.ai.pathfinding.Point;
@@ -30,32 +31,11 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     public ArtificialIntelligenceController(int id, BoardState boardState, PlayerConfig config, float scale) {
         super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
-        targetPoint = new Point(null, -1, -1, 0, 0);
-        pastTarget = new Point(null, -1, -1, 0, 0);
-        srcPoint = new Point(null, -1, -1, 0, 0);
+        targetPoint = new Point(null, -1, -1);
+        pastTarget = new Point(null, -1, -1);
+        srcPoint = new Point(null, player.GetWorldX(), player.GetWorldY());
         players =  boardState.GetPlayers();
-        tree = new DefaultTree(id, boardState);
-    }
-
-    private void SelectTarget() {
-        float x = Float.MAX_VALUE;
-        float y = Float.MAX_VALUE;
-
-        for (Player player : players) {
-            if (player.equals(this.player)) {
-                continue;
-            }
-
-            float diffX = Math.abs(player.GetWorldX() - this.player.GetWorldX());
-            float diffY = Math.abs(player.GetWorldY() - this.player.GetWorldY());
-
-            if (diffX < x && diffY < y) {
-                x = diffX;
-                y = diffY;
-                targetPoint.x = player.GetWorldX();
-                targetPoint.y = player.GetWorldY();
-            }
-        }
+        tree = new DefaultTree(id, 2, boardState);
     }
 
     private float UpdateMovementAxis(float node, float position) {
@@ -75,30 +55,31 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     @SuppressWarnings("unchecked")
     private void UpdateMovement() {
 
-        SelectTarget();
-        if (targetPoint.IsInvalid()) {
+        if (targetPoint.IsEqualPosition(player.GetDirection(), player.position.x, player.position.y)) {
             movementVector.x = movementVector.y = 0;
-            return;
         }
 
-        Object object = tree.GetData("movementPath");
+        Object object = tree.GetData(NodeKeys.MOVEMENT_PATH);
         if (object == null) {
-            movementVector.x = movementVector.y = 0;
             currentPath = null;
             return;
         }
-        currentPath = (List<Point>) tree.GetData("movementPath");
+        currentPath = (List<Point>) tree.GetData(NodeKeys.MOVEMENT_PATH);
 
         Point point = currentPath.get(0);
-        if ((targetPoint.x != pastTarget.x || targetPoint.y != pastTarget.y) && GlobalConstants.DEBUG) {
-            System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + point.x + ", " + point.y + ")");
-            pastTarget.x = targetPoint.x;
-            pastTarget.y = targetPoint.y;
-        }
+        targetPoint.x = point.x;
+        targetPoint.y = point.y;
 
         float sensitivity = 1f;
         movementVector.x = Math.round(UpdateMovementAxis(point.x, player.position.x) * sensitivity) / sensitivity;
         movementVector.y = Math.round(UpdateMovementAxis(point.y, player.position.y) * sensitivity) / sensitivity;
+        if ((point.x != pastTarget.x || point.y != pastTarget.y)) {
+            if (GlobalConstants.DEBUG) {
+                System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + point.x + ", " + point.y + ")");
+            }
+            pastTarget.x = point.x;
+            pastTarget.y = point.y;
+        }
     }
 
     @Override

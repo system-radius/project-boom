@@ -504,6 +504,10 @@ public class Player extends Entity {
         statChangeListeners.add(listener);
     }
 
+    public Direction GetDirection() {
+        return direction;
+    }
+
     public Bomb PlantBomb(BoardState boardState) {
 
         if (state == PlayerState.DEAD || state == PlayerState.DYING) {

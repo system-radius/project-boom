@@ -1,6 +1,6 @@
 package com.radius.system.ai.behaviortree.tasks;
 
-import com.radius.system.ai.NodeKeys;
+import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.BoardRep;
+import com.radius.system.enums.Direction;
 import com.radius.system.objects.BoomDrawable;
 import com.radius.system.objects.BoomUpdatable;
 import com.radius.system.objects.bombs.Bomb;
@@ -18,6 +19,7 @@ import com.radius.system.utils.FontUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class BoardState implements BoomUpdatable, BoomDrawable {
 
@@ -28,6 +30,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
     private final AnimatedGameObject[][] board;
 
     private final BoardRep[][] boardRep;
+
+    private final int[][] boardCost;
 
     private final int scale;
 
@@ -41,6 +45,7 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
         this.board = new AnimatedGameObject[boardWidth][boardHeight];
         this.boardRep = new BoardRep[boardWidth][boardHeight];
+        this.boardCost = new int[boardWidth][boardHeight];
         this.players = new ArrayList<>();
         this.bombs = new ArrayList<>();
 
@@ -146,14 +151,73 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         return blocks;
     }
 
-    public void CompileBoardCost(int[][] boardCost, int id) {
+    public void UpdateBoardCost() {
         for (int i = 0; i < BOARD_WIDTH; i++) {
             for (int j = 0; j < BOARD_HEIGHT; j++) {
-                boardCost[i][j] = 0;
-                if (board[i][j] != null) {
-                    boardCost[i][j] = -1;
+                switch(boardRep[i][j]) {
+                    case HARD_BLOCK:
+                    case SOFT_BLOCK:
+                    case PERMANENT_BLOCK:
+                        boardCost[i][j] = -1;
+                        break;
+                    default:
+                        boardCost[i][j] = 1;
                 }
             }
+        }
+
+        for (Bomb bomb : bombs) {
+
+            int x = bomb.GetWorldX(), y = bomb.GetWorldY();
+            Map<Direction, Integer> fireRanges = bomb.GetRangeValues();
+
+            int cost = bomb.GetCost();
+
+            SetCostInRange(boardCost, x, y, fireRanges.get(Direction.NORTH), 1, cost, Direction.NORTH);
+            SetCostInRange(boardCost, x, y, fireRanges.get(Direction.SOUTH), 1, cost, Direction.SOUTH);
+            SetCostInRange(boardCost, x, y, fireRanges.get(Direction.WEST), 1, cost, Direction.WEST);
+            SetCostInRange(boardCost, x, y, fireRanges.get(Direction.EAST), 1, cost, Direction.EAST);
+        }
+    }
+
+    public void CompileBoardCost(int[][] boardCost, int fireThreshold, int id) {
+        for (int i = 0; i < BOARD_WIDTH; i++) {
+            /*
+            for (int j = 0; j < BOARD_HEIGHT; j++) {
+                boardCost[i][j] = this.boardCost[i][j] > fireThreshold ? -1 : this.boardCost[i][j];
+            }
+
+             */
+            System.arraycopy(this.boardCost[i], 0, boardCost[i], 0, BOARD_HEIGHT);
+        }
+
+        for (Bomb bomb : bombs) {
+            int x = bomb.GetWorldX(), y = bomb.GetWorldY();
+            boardCost[x][y] = bomb.HasActiveCollision(players.get(id)) ? -1 : this.boardCost[x][y];
+        }
+    }
+
+    private void SetCostInRange(int[][] boardCost, int x, int y, int range, int counter, int cost, Direction direction) {
+        if (counter > range || x < 0 || y < 0 || x >= BOARD_WIDTH || y >= BOARD_HEIGHT) {
+            return;
+        }
+
+        if (boardCost[x][y] > 0 ) {
+            boardCost[x][y] = cost;
+        }
+        switch (direction) {
+            case NORTH:
+                SetCostInRange(boardCost, x, y + 1, range, counter + 1, cost, direction);
+                break;
+            case SOUTH:
+                SetCostInRange(boardCost, x, y - 1, range, counter + 1, cost, direction);
+                break;
+            case WEST:
+                SetCostInRange(boardCost, x - 1, y, range, counter + 1, cost, direction);
+                break;
+            case EAST:
+                SetCostInRange(boardCost, x + 1, y, range, counter + 1, cost, direction);
+                break;
         }
     }
 
@@ -171,6 +235,7 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
     public void Update(float delta) {
         UpdateBombs(delta);
         UpdateBoard(delta);
+        UpdateBoardCost();
     }
 
     private void UpdateBombs(float delta) {
@@ -250,6 +315,7 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
             for (int i = 0; i < BOARD_WIDTH; i++) {
                 for (int j = 0; j < BOARD_HEIGHT; j++) {
                     font.draw(batch, "(" + i + ", " + j + ")", i * GlobalConstants.WORLD_SCALE, j * GlobalConstants.WORLD_SCALE + GlobalConstants.WORLD_SCALE);
+                    font.draw(batch, "[" + boardCost[i][j] + "]", i * GlobalConstants.WORLD_SCALE, j * GlobalConstants.WORLD_SCALE + GlobalConstants.WORLD_SCALE - 20);
                 }
             }
         }

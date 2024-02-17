@@ -12,6 +12,6 @@ public class GlobalConstants {
 
     public static boolean DEBUG = true;
 
-    public static boolean GODMODE = false;
+    public static boolean GODMODE = true;
 
 }

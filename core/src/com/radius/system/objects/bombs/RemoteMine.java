@@ -9,6 +9,10 @@ public class RemoteMine extends Bomb {
         super(BombType.REMOTE, player, x, y, width, height, scale);
     }
 
+    public int GetCost() {
+        return MAX_COST;
+    }
+
     @Override
     public void Move(float x, float y) {
         // Do nothing, remote mines do not move.

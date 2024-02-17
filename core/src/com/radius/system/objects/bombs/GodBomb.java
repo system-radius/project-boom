@@ -15,6 +15,11 @@ public class GodBomb extends Bomb {
     }
 
     @Override
+    public int GetCost() {
+        return MAX_COST;
+    }
+
+    @Override
     protected int CheckObstacle(BoardState boardState, int x, int y, Direction direction, int counter) {
         if (counter > range) return 1;
 

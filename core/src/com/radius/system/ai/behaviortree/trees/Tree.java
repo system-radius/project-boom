@@ -6,7 +6,7 @@ import com.radius.system.objects.BoomUpdatable;
 
 public abstract class Tree implements BoomUpdatable {
 
-    protected final int id;
+    protected final int id, fireThreshold;
 
     protected final BoardState boardState;
 
@@ -14,9 +14,10 @@ public abstract class Tree implements BoomUpdatable {
 
     private Node root;
 
-    public Tree(int id, BoardState boardState) {
+    public Tree(int id, int fireThreshold, BoardState boardState) {
 
         this.id =  id;
+        this.fireThreshold = fireThreshold;
         this.boardState = boardState;
         boardCost = new int[boardState.BOARD_WIDTH][boardState.BOARD_HEIGHT];
 
@@ -38,7 +39,7 @@ public abstract class Tree implements BoomUpdatable {
     @Override
     public final void Update(float delta) {
         if (root != null) {
-            boardState.CompileBoardCost(boardCost, id);
+            boardState.CompileBoardCost(boardCost, fireThreshold, id);
             root.Evaluate(0, delta, boardCost);
         }
     }
