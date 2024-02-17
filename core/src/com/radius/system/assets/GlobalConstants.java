@@ -10,6 +10,8 @@ public class GlobalConstants {
 
     public static final float WORLD_SCALE = 64f;
 
+    public static final int WORLD_AREA = (int)(WORLD_WIDTH * WORLD_HEIGHT);
+
     public static boolean DEBUG = true;
 
     public static boolean GODMODE = true;

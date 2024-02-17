@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class Bomb extends Block {
 
-    protected static final int MAX_COST = (int) (GlobalConstants.WORLD_WIDTH * GlobalConstants.WORLD_HEIGHT);
+    protected static final int MAX_COST = GlobalConstants.WORLD_AREA;
 
     protected static final float FRAME_DURATION_BREATHING = 1f / 5f;
 

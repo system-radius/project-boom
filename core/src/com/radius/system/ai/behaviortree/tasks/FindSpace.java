@@ -18,7 +18,7 @@ public class FindSpace extends Node {
             return NodeState.FAILURE;
         }
 
-        List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, (int) (GlobalConstants.WORLD_WIDTH * GlobalConstants.WORLD_HEIGHT));
+        List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         // Find the lowest space cost.
         int lowestCost = Integer.MAX_VALUE;
         Point targetPoint = null;
