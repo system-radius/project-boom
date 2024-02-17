@@ -23,6 +23,11 @@ public class MoveToTarget extends Node {
         List<Point> currentPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, dstPoint.x, dstPoint.y);
         GetRoot().SetData(NodeKeys.MOVEMENT_PATH, currentPath);
 
+        if (currentPath != null) {
+            if (currentPath.size() == 1) {
+                return NodeState.SUCCESS;
+            }
+        }
         //System.out.println("[" + depth + ": MoveToTarget] Returning running!");
         return NodeState.RUNNING;
     }
