@@ -10,6 +10,8 @@ public class NodeKeys {
 
     public static final String ON_FIRE_PATH = "onFirePath";
 
+    public static final String PLANT_BOMB = "plantBomb";
+
     private NodeKeys(){
 
     }

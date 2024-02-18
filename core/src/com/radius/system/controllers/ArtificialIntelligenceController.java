@@ -37,11 +37,6 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         tree.SetData("srcPoint", srcPoint);
         tree.Update(delta);
         UpdateMovement();
-
-        Boolean plantBomb = (Boolean) tree.GetData(NodeKeys.PLANT_BOMB);
-        if (plantBomb != null && plantBomb) {
-            PlantBomb();
-        }
     }
 
     private float UpdateMovementAxis(float node, float position) {
@@ -63,6 +58,11 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
         if (targetPoint.IsEqualPosition(player.GetDirection(), player.position.x, player.position.y)) {
             movementVector.x = movementVector.y = 0;
+            Boolean plantBomb = (Boolean) tree.GetData(NodeKeys.PLANT_BOMB);
+            if (plantBomb != null && plantBomb) {
+                PlantBomb();
+                tree.ClearData(NodeKeys.PLANT_BOMB);
+            }
         }
 
         Object object = tree.GetData(NodeKeys.MOVEMENT_PATH);
@@ -81,7 +81,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         movementVector.y = Math.round(UpdateMovementAxis(point.y, player.position.y) * sensitivity) / sensitivity;
         if ((point.x != pastTarget.x || point.y != pastTarget.y)) {
             if (GlobalConstants.DEBUG) {
-                System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + point.x + ", " + point.y + ")");
+                //System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + point.x + ", " + point.y + ")");
             }
             pastTarget.x = point.x;
             pastTarget.y = point.y;
