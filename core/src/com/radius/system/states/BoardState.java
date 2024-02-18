@@ -17,6 +17,7 @@ import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.players.Player;
 import com.radius.system.utils.FontUtils;
 
+import java.io.DataInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -173,10 +174,17 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
             int cost = bomb.GetCost();
 
-            SetCostInRange(boardCost, x, y, fireRanges.get(Direction.NORTH), 1, cost, Direction.NORTH);
-            SetCostInRange(boardCost, x, y, fireRanges.get(Direction.SOUTH), 1, cost, Direction.SOUTH);
-            SetCostInRange(boardCost, x, y, fireRanges.get(Direction.WEST), 1, cost, Direction.WEST);
-            SetCostInRange(boardCost, x, y, fireRanges.get(Direction.EAST), 1, cost, Direction.EAST);
+            if (fireRanges.containsKey(Direction.NORTH))
+                SetCostInRange(boardCost, x, y, fireRanges.get(Direction.NORTH), 1, cost, Direction.NORTH);
+
+            if (fireRanges.containsKey(Direction.SOUTH))
+                SetCostInRange(boardCost, x, y, fireRanges.get(Direction.SOUTH), 1, cost, Direction.SOUTH);
+
+            if (fireRanges.containsKey(Direction.WEST))
+                SetCostInRange(boardCost, x, y, fireRanges.get(Direction.WEST), 1, cost, Direction.WEST);
+
+            if (fireRanges.containsKey(Direction.EAST))
+                SetCostInRange(boardCost, x, y, fireRanges.get(Direction.EAST), 1, cost, Direction.EAST);
         }
     }
 
