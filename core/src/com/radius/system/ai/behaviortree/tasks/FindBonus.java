@@ -25,25 +25,13 @@ public class FindBonus extends Solidifier {
     public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
         super.Evaluate(depth, delta, boardCost);
 
-        Point srcPoint = (Point) GetRoot().GetData(NodeKeys.SOURCE_POINT);
+        srcPoint = (Point) GetRoot().GetData(NodeKeys.SOURCE_POINT);
         if (srcPoint == null) {
             return NodeState.FAILURE;
         }
 
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
-        int lowestCost = Integer.MAX_VALUE;
-        Point targetPoint = null;
-        for (Point point : spaces) {
-            //System.out.println("potential target point: (" + point.x + ", " + point.y + ") ---> cost: " + point.GetCost() + ", tile cost: " + point.selfCost);
-            if (!point.IsEqualPosition(srcPoint) &&
-                    point.GetCost() < lowestCost &&
-                    point.selfCost <= 1 &&
-                    BoardRep.BONUS.equals(boardState.GetBoardEntry(point.x, point.y))
-            ) {
-                lowestCost = (int) point.GetCost();
-                targetPoint = point;
-            }
-        }
+        Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
             return NodeState.FAILURE;
@@ -52,5 +40,10 @@ public class FindBonus extends Solidifier {
         //System.out.println("Target point for find bonus: " + targetPoint);
         GetRoot().SetData(NodeKeys.TARGET_POINT, targetPoint);
         return NodeState.SUCCESS;
+    }
+
+    @Override
+    protected boolean AcceptPoint(Point point) {
+        return super.AcceptPoint(point) && BoardRep.BONUS.equals(boardState.GetBoardEntry(point.x, point.y));
     }
 }
