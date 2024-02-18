@@ -1,9 +1,10 @@
 package com.radius.system.ai.behaviortree.nodes;
 
 import com.radius.system.ai.behaviortree.NodeKeys;
+import com.radius.system.ai.behaviortree.tasks.FindSpace;
 import com.radius.system.enums.NodeState;
 
-public abstract class Solidifier extends Node {
+public abstract class Solidifier extends FindSpace {
 
     protected final int fireThreshold;
 
