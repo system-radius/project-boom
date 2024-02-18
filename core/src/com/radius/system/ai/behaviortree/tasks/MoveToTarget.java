@@ -15,14 +15,9 @@ public class MoveToTarget extends Selector {
     public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
 
         Point srcPoint = (Point) GetData(NodeKeys.SOURCE_POINT);
-        if (srcPoint == null) {
-            System.out.println("[" + depth + ": MoveToTarget] Returning failure due to null source point!");
-            return NodeState.FAILURE;
-        }
-
         Point dstPoint = (Point) GetData(NodeKeys.TARGET_POINT);
         if (srcPoint == null || dstPoint == null) {
-            System.out.println("[" + depth + ": MoveToTarget] Returning failure due to null target point!");
+            //System.out.println("[" + depth + ": MoveToTarget] Returning failure due to null target point!");
             return NodeState.FAILURE;
         }
 
