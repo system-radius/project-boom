@@ -359,6 +359,10 @@ public class Player extends Entity {
         return firePower;
     }
 
+    public int GetAvailableBombs() {
+        return bombStock - bombs.size();
+    }
+
     public Rectangle GetBurnRect() {
         return burnRect;
     }
@@ -486,6 +490,10 @@ public class Player extends Entity {
         }
         this.bombType = bombType;
         FireBombChangeEvent();
+    }
+
+    public BombType GetBombType() {
+        return bombType;
     }
 
     public void AddCoordinateEventListener(MovementEventListener listener) {
