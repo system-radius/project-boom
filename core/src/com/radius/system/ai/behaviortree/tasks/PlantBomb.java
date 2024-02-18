@@ -8,6 +8,9 @@ public class PlantBomb extends Node {
     @Override
     public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
         GetRoot().SetData(NodeKeys.PLANT_BOMB, true);
+        GetRoot().ClearData(NodeKeys.TARGET_POINT);
+
+        //System.out.println("Planting bomb!");
         return NodeState.SUCCESS;
     }
 }
