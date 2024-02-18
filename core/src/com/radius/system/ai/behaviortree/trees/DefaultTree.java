@@ -40,11 +40,11 @@ public class DefaultTree extends Tree {
         Node attackPlayer = new Sequencer();
         attackPlayer.AttachChild(new FindPlayer(id, fireThreshold, boardState));
         attackPlayer.AttachChild(new MoveToTarget());
-        //attackPlayer.AttachChild(new PlantBomb());
+        attackPlayer.AttachChild(new PlantBomb());
         root.AttachChild(attackPlayer);
 
         Node selectBombArea = new Selector();
-        selectBombArea.AttachChild(new HasTargetPoint());
+        //selectBombArea.AttachChild(new HasTargetPoint());
         selectBombArea.AttachChild(new FindBombArea(fireThreshold, boardState, boardState.GetPlayers().get(id)));
 
         Node moveThenBomb = new MoveToTarget();
