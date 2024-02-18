@@ -26,6 +26,7 @@ public class MoveToTarget extends Selector {
 
         if (currentPath != null) {
             if (currentPath.size() == 1 && currentPath.get(0).IsEqualPosition(srcPoint)) {
+                ClearData(NodeKeys.TARGET_POINT);
                 if (children.size() > 0) {
                     return super.Evaluate(depth, delta, boardCost);
                 }

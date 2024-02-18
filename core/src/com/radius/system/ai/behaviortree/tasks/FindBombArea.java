@@ -61,7 +61,7 @@ public class FindBombArea extends Solidifier {
             return NodeState.FAILURE;
         }
 
-        GetRoot().SetData(NodeKeys.TARGET_POINT, targetPoint);
+        GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
         System.out.println(targetPoint + " Selected target point: " + maxBurnCount);
         return NodeState.SUCCESS;
     }

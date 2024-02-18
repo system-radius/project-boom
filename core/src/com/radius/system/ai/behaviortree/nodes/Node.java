@@ -59,23 +59,29 @@ public abstract class Node {
         return parent.GetParent(order - 1);
     }
 
-    public final Object GetData(String key) {
+    public final Object GetData(String key, boolean traverse) {
         if (data.containsKey(key)) {
             return data.get(key);
         }
 
-        Node node = parent;
+        if (traverse) {
+            Node node = parent;
 
-        while (node != null) {
-            Object value = node.GetData(key);
-            if (value != null) {
-                return value;
+            while (node != null) {
+                Object value = node.GetData(key);
+                if (value != null) {
+                    return value;
+                }
+
+                node = node.parent;
             }
-
-            node = node.parent;
         }
 
         return null;
+    }
+
+    public final Object GetData(String key) {
+        return GetData(key, true);
     }
 
     public final boolean ClearData(String key) {

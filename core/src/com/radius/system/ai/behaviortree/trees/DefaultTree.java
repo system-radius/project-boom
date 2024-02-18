@@ -44,7 +44,7 @@ public class DefaultTree extends Tree {
         root.AttachChild(attackPlayer);
 
         Node selectBombArea = new Selector();
-        //selectBombArea.AttachChild(new HasTargetPoint());
+        selectBombArea.AttachChild(new HasTargetPoint());
         selectBombArea.AttachChild(new FindBombArea(fireThreshold, boardState, boardState.GetPlayers().get(id)));
 
         Node moveThenBomb = new MoveToTarget();

@@ -9,7 +9,7 @@ public class HasTargetPoint extends Node {
     @Override
     public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
 
-        Point targetPoint = (Point) GetRoot().GetData(NodeKeys.TARGET_POINT);
+        Point targetPoint = (Point) GetParent(1).GetData(NodeKeys.TARGET_POINT, false);
         if (targetPoint == null) {
             return NodeState.FAILURE;
         }
