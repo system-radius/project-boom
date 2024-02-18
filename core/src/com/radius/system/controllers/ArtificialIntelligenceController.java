@@ -17,25 +17,31 @@ import java.util.List;
 
 public class ArtificialIntelligenceController extends BoomPlayerController {
 
-    private int[][] boardCost = new int[(int)GlobalConstants.WORLD_WIDTH][(int)GlobalConstants.WORLD_HEIGHT];
-
     private final Vector2 movementVector = new Vector2(0, 0);
-
-    private final List<Player> players;
-
-    private List<Point> currentPath;
 
     private final Point targetPoint, pastTarget, srcPoint;
 
-    private Tree tree;
+    private final Tree tree;
+
+    private List<Point> currentPath;
 
     public ArtificialIntelligenceController(int id, BoardState boardState, PlayerConfig config, float scale) {
         super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
         targetPoint = new Point(null, -1, -1);
         pastTarget = new Point(null, -1, -1);
         srcPoint = new Point(null, player.GetWorldX(), player.GetWorldY());
-        players =  boardState.GetPlayers();
         tree = new DefaultTree(id, 2, boardState);
+    }
+
+    private void UpdateTree(float delta) {
+        tree.SetData("srcPoint", srcPoint);
+        tree.Update(delta);
+        UpdateMovement();
+
+        Boolean plantBomb = (Boolean) tree.GetData(NodeKeys.PLANT_BOMB);
+        if (plantBomb != null && plantBomb) {
+            PlantBomb();
+        }
     }
 
     private float UpdateMovementAxis(float node, float position) {
@@ -84,10 +90,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     @Override
     public void Update(float delta) {
-        tree.SetData("srcPoint", srcPoint);
-        tree.Update(delta);
-
-        UpdateMovement();
+        UpdateTree(delta);
         player.MoveAlongX(movementVector.x);
         player.MoveAlongY(movementVector.y);
         player.Update(delta);
