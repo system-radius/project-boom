@@ -75,7 +75,8 @@ public class GameState implements Disposable, RestartEventListener {
         boardState.ClearBoard();
 
         for (BoomPlayerController controller : controllers) {
-            controller.GetPlayer().Reset();
+            controller.Restart();
+
         }
 
         float spacing = 2f; // Allows for leaving spaces when generating hard blocks.
@@ -93,8 +94,8 @@ public class GameState implements Disposable, RestartEventListener {
             }
         }
 
-        RandomizeBonus();
-        //RandomizeField(fieldIndex);
+        //RandomizeBonus();
+        RandomizeField(fieldIndex);
     }
 
     private void RandomizeBonus() {
