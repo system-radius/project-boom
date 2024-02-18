@@ -1,6 +1,7 @@
 package com.radius.system.ai.behaviortree.tasks;
 
 import com.radius.system.ai.behaviortree.NodeKeys;
+import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Solidifier;
 import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
@@ -12,16 +13,23 @@ import com.radius.system.enums.NodeState;
 import com.radius.system.objects.players.Player;
 import com.radius.system.states.BoardState;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FindBombArea extends Solidifier {
+
+    private final Node theoryCrafter;
 
     private final BoardState boardState;
 
     private final Player player;
 
-    private int maxBurnCount = 0, range;
+    private int[][] boardCost;
+
+    private float delta;
+
+    private int maxBurnCount = 0, currentBurnCount, range, depth;
 
     private boolean hasPierceBomb;
 
@@ -29,6 +37,8 @@ public class FindBombArea extends Solidifier {
         super(fireThreshold);
         this.boardState = boardState;
         this.player = player;
+
+        theoryCrafter = new TheoreticalSafeSpace();
     }
 
     @Override
@@ -40,6 +50,9 @@ public class FindBombArea extends Solidifier {
             return NodeState.FAILURE;
         }
 
+        this.depth = depth;
+        this.delta = delta;
+        this.boardCost = boardCost;
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
@@ -61,52 +74,114 @@ public class FindBombArea extends Solidifier {
 
     @Override
     protected boolean AcceptPoint(Point point) {
-        int currentBurnCount = AssessBombArea(point.x, point.y);
+
+        Map<Direction, Integer> rangeMapping = AssessBombArea(point.x, point.y);
 
         boolean hasMoreBurnCount = currentBurnCount > maxBurnCount;
-        boolean acceptedBySuper = point.selfCost <= 1;
-        System.out.println(point + " Accepted by super: " + acceptedBySuper + ", has more burn count (" + currentBurnCount + " > " + maxBurnCount + "): " + hasMoreBurnCount);
+        //System.out.println(point + " Accepted by super: " + acceptedBySuper + ", has more burn count (" + currentBurnCount + " > " + maxBurnCount + "): " + hasMoreBurnCount);
+
+        boolean acceptPoint = false;
+
         if (hasMoreBurnCount) {
-            maxBurnCount = currentBurnCount;
+            //System.out.println(point + " Accepted preliminarily!");
+            ((TheoreticalSafeSpace) theoryCrafter).SetSourcePoint(point);
+            NodeState state = theoryCrafter.Evaluate(depth, delta, ModifyBoardCost(rangeMapping, point));
+            acceptPoint = NodeState.SUCCESS.equals(state);
+            if (acceptPoint) {
+                maxBurnCount = currentBurnCount;
+            }
         }
 
-        return acceptedBySuper && hasMoreBurnCount;
+        return acceptPoint;
     }
 
-    private int AssessBombArea(int x, int y) {
+    private int[][] ModifyBoardCost(Map<Direction, Integer> rangeMapping, Point point) {
+        int width = boardCost.length, height = boardCost[0].length;
+        int[][] modifiedBoardCost = new int[width][height];
+        for (int i = 0; i < boardCost.length; i++) {
+            System.arraycopy(boardCost[i], 0, modifiedBoardCost[i], 0, boardCost[i].length);
+        }
+
+        int x = point.x, y = point.y;
+
+        for (int i = 1; i <= range; i++) {
+
+            int rangeNorth = rangeMapping.get(Direction.NORTH);
+            if (CheckValue(i, rangeNorth, y, height, true)) {
+                SetCost(modifiedBoardCost, x, y + i);
+            }
+
+            int rangeSouth = rangeMapping.get(Direction.SOUTH);
+            if (CheckValue(i, rangeSouth, y, 0, false)) {
+                SetCost(modifiedBoardCost, x, y - i);
+                //modifiedBoardCost[x][y - i] = GlobalConstants.WORLD_AREA;
+            }
+
+            int rangeWest = rangeMapping.get(Direction.WEST);
+            if (CheckValue(i, rangeWest, x, 0, false)) {
+                SetCost(modifiedBoardCost, x - i, y);
+                //modifiedBoardCost[x - i][y] = GlobalConstants.WORLD_AREA;
+            }
+
+            int rangeEast = rangeMapping.get(Direction.EAST);
+            if (CheckValue(i, rangeEast, x, width, true)) {
+                SetCost(modifiedBoardCost, x + i, y);
+                //modifiedBoardCost[x + i][y] = GlobalConstants.WORLD_AREA;
+            }
+
+        }
+
+        modifiedBoardCost[x][y] = GlobalConstants.WORLD_AREA;
+        return modifiedBoardCost;
+    }
+
+    private void SetCost(int[][] boardCost, int x, int y) {
+        if (boardCost[x][y] < 0) {
+            return;
+        }
+        boardCost[x][y] = GlobalConstants.WORLD_AREA;
+    }
+
+    private boolean CheckValue(int counter, int range, int axis, int limit, boolean positive) {
+        boolean goodAxis = positive ? axis + counter < limit : axis - counter >= limit;
+        return counter <= range && goodAxis;
+    }
+
+    private Map<Direction, Integer> AssessBombArea(int x, int y) {
         range = player.GetFirePower();
         hasPierceBomb = BombType.PIERCE.equals(player.GetBombType());
-        int burntArea = CheckObstacle(boardState, x, y + 1, Direction.NORTH, 1, 0);
+        currentBurnCount = 0;
+
+        Map<Direction, Integer> rangeMapping = new HashMap<>();
+        rangeMapping.put(Direction.NORTH, CheckObstacle(boardState, x, y + 1, Direction.NORTH, 1));
         //System.out.println("Checked north: " + burntArea);
-        burntArea = CheckObstacle(boardState, x, y - 1, Direction.SOUTH, 1, burntArea);
+        rangeMapping.put(Direction.SOUTH, CheckObstacle(boardState, x, y - 1, Direction.SOUTH, 1));
         //System.out.println("Checked north + south: " + burntArea);
-        burntArea = CheckObstacle(boardState, x - 1, y, Direction.WEST, 1, burntArea);
+        rangeMapping.put(Direction.WEST, CheckObstacle(boardState, x - 1, y, Direction.WEST, 1));
         //System.out.println("Checked north + south + west: " + burntArea);
-        burntArea = CheckObstacle(boardState, x + 1, y, Direction.EAST,  1, burntArea);
+        rangeMapping.put(Direction.EAST, CheckObstacle(boardState, x + 1, y, Direction.EAST,  1));
         //System.out.println("Checked north + south + west + east: " + burntArea);
 
-        return burntArea;
+        return rangeMapping;
     }
 
-    protected int CheckObstacle(BoardState boardState, int x, int y, Direction direction, int counter, int burntArea) {
-        if (counter > range) return burntArea;
+    protected int CheckObstacle(BoardState boardState, int x, int y, Direction direction, int counter) {
+        if (counter > range) return 1;
 
         BoardRep rep = boardState.GetBoardEntry(x, y);
 
         if (rep == null) {
-            return burntArea;
+            return 1;
         }
 
         switch (rep) {
             case PERMANENT_BLOCK:
             case HARD_BLOCK:
-                return burntArea;
+                return 2;
             case SOFT_BLOCK:
-                burntArea++;
-                //PrintStackTrace("[" + x + ", " + y + "] Increased burn area: " + burntArea);
-                System.out.println("[" + x + ", " + y + "] Increased burn area: " + burntArea);
+                currentBurnCount++;
                 if (!hasPierceBomb) {
-                    return burntArea;
+                    return 2;
                 }
         }
 
@@ -114,16 +189,16 @@ public class FindBombArea extends Solidifier {
 
         switch (direction) {
             case NORTH:
-                return CheckObstacle(boardState, x, y + 1, direction, counter, burntArea);
+                return 1 + CheckObstacle(boardState, x, y + 1, direction, counter);
             case SOUTH:
-                return CheckObstacle(boardState, x, y - 1, direction, counter, burntArea);
+                return 1 + CheckObstacle(boardState, x, y - 1, direction, counter);
             case WEST:
-                return CheckObstacle(boardState, x - 1, y, direction, counter, burntArea);
+                return 1 + CheckObstacle(boardState, x - 1, y, direction, counter);
             case EAST:
-                return CheckObstacle(boardState, x + 1, y, direction, counter, burntArea);
+                return 1 + CheckObstacle(boardState, x + 1, y, direction, counter);
         }
 
-        return burntArea;
+        return 1;
     }
 
     /*

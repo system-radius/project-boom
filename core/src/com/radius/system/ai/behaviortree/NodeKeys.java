@@ -12,6 +12,8 @@ public class NodeKeys {
 
     public static final String PLANT_BOMB = "plantBomb";
 
+    public static final String POTENTIAL_TARGET_POINT = "potentialTargetPoint";
+
     private NodeKeys(){
 
     }
