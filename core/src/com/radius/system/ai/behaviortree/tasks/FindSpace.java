@@ -40,7 +40,8 @@ public class FindSpace extends Node {
         Point targetPoint = null;
 
         lowestCost = Integer.MAX_VALUE;
-        for (Point space : spaces) {
+        for (int i = 0; i < spaces.size(); i++) {
+            Point space = spaces.get(i);
             if (AcceptPoint(space)) {
                 targetPoint = space;
                 lowestCost = (int) space.GetCost();
