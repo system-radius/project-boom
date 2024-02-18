@@ -19,6 +19,10 @@ public abstract class BoomPlayerController implements Disposable {
         boardState.AddToBoard(player);
     }
 
+    public void Restart() {
+        player.Reset();
+    }
+
     public Player GetPlayer() {
         return player;
     }

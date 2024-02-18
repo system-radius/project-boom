@@ -27,6 +27,10 @@ public abstract class Node {
         }
     }
 
+    public void Restart() {
+        data.clear();
+    }
+
     public void AttachChild(Node child) {
         child.parent = this;
         children.add(child);

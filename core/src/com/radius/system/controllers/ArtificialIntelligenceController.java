@@ -33,6 +33,13 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         tree = new DefaultTree(id, 2, boardState);
     }
 
+    @Override
+    public void Restart() {
+        super.Restart();
+        tree.Restart();
+        currentPath = null;
+    }
+
     private void UpdateTree(float delta) {
         tree.SetData("srcPoint", srcPoint);
         tree.Update(delta);
@@ -62,6 +69,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
             if (plantBomb != null && plantBomb) {
                 PlantBomb();
                 tree.ClearData(NodeKeys.PLANT_BOMB);
+                //System.out.println("Bomb has been planted!");
             }
         }
 

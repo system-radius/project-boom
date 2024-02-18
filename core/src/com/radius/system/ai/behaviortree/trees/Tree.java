@@ -24,6 +24,10 @@ public abstract class Tree implements BoomUpdatable {
         root = SetupTree();
     }
 
+    public void Restart() {
+        root.Restart();
+    }
+
     public void SetData(String key, Object value) {
         root.SetData(key, value);
     }
