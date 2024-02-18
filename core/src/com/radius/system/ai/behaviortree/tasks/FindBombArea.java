@@ -57,7 +57,7 @@ public class FindBombArea extends Solidifier {
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
-            System.out.println("Failed to select target!");
+            //System.out.println("Failed to select target!");
             return NodeState.FAILURE;
         }
 
