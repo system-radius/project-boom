@@ -1,9 +1,6 @@
 package com.radius.system.ai.pathfinding;
 
 import com.radius.system.assets.GlobalConstants;
-import com.radius.system.enums.Direction;
-
-import java.util.Map;
 
 public class Point implements Comparable<Point> {
 
@@ -44,28 +41,10 @@ public class Point implements Comparable<Point> {
         return this.x == that.x && this.y == that.y;
     }
 
-    public boolean IsEqualPosition(Direction direction, float x, float y) {
-        boolean xEqual = this.x == Math.round(x), yEqual = this.y == Math.round(y);
-        //System.out.println("Comparing: " + this.x + " == " + x + " && " + this.y + " == " + y + " ---> " + (xEqual && yEqual));
-        switch (direction) {
-            case NORTH:
-                yEqual = Math.ceil(this.y - y) == 0;
-                //System.out.println("Processing NORTH: " + (this.y - y) + " ---> " + Math.ceil(this.y - y));
-                break;
-            case SOUTH:
-                yEqual = Math.floor(this.y - y) == 0;
-                //System.out.println("Processing SOUTH: " + (this.y - y) + " ---> " + Math.floor(this.y - y));
-                break;
-            case WEST:
-                xEqual = Math.floor(this.x - x) == 0;
-                //System.out.println("Processing WEST: " + (this.x - x) + " ---> " + Math.floor(this.x - x));
-                break;
-            case EAST:
-                xEqual = Math.ceil(this.x - x) == 0;
-                //System.out.println("Processing EAST: " + (this.x - x) + " ---> " + Math.ceil(this.x - x));
-                break;
-        }
-        //return Math.abs(this.x - x) < diffThreshold && Math.abs(this.y - y) < diffThreshold;
+    public boolean IsEqualPosition(float x, float y) {
+        float diff = 0.05f;
+        boolean xEqual = Math.abs(this.x - x) < diff;
+        boolean yEqual = Math.abs(this.y - y) < diff;
         return xEqual && yEqual;
     }
 

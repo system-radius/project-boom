@@ -63,7 +63,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     @SuppressWarnings("unchecked")
     private void UpdateMovement() {
 
-        if (targetPoint.IsEqualPosition(player.GetDirection(), player.position.x, player.position.y)) {
+        if (targetPoint.IsEqualPosition(player.position.x, player.position.y)) {
             movementVector.x = movementVector.y = 0;
             Boolean plantBomb = (Boolean) tree.GetData(NodeKeys.PLANT_BOMB);
             if (plantBomb != null && plantBomb) {
