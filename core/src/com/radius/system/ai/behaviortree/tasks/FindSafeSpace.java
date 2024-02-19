@@ -44,12 +44,12 @@ public class FindSafeSpace extends Solidifier {
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
-            System.out.println("[FindSafeSpace] Failed to select target!");
+            //System.out.println("[FindSafeSpace] Failed to select target!");
             return NodeState.FAILURE;
         }
 
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
-        System.out.println(" = = = final target point: (" + targetPoint.x + ", " + targetPoint.y + ") = = =");
+        //System.out.println(" = = = final target point: (" + targetPoint.x + ", " + targetPoint.y + ") = = =");
         return NodeState.SUCCESS;
     }
 
