@@ -42,7 +42,7 @@ public class Point implements Comparable<Point> {
     }
 
     public boolean IsEqualPosition(float x, float y) {
-        float diff = 0.05f;
+        float diff = 0.1f;
         boolean xEqual = Math.abs(this.x - x) < diff;
         boolean yEqual = Math.abs(this.y - y) < diff;
         return xEqual && yEqual;
