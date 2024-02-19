@@ -150,6 +150,8 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         List<PlayerConfig> configs = new ArrayList<>();
         configs.add(CreatePlayerConfig(true, true));
         configs.add(CreatePlayerConfig(false, false));
+        configs.add(CreatePlayerConfig(false, true));
+        configs.add(CreatePlayerConfig(false, true));
 
         gameState = new GameState();
         gameState.AddPlayers(configs);
