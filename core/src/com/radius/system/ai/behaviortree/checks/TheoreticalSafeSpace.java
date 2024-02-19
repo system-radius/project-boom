@@ -1,5 +1,6 @@
-package com.radius.system.ai.behaviortree.tasks;
+package com.radius.system.ai.behaviortree.checks;
 
+import com.radius.system.ai.behaviortree.tasks.FindSpace;
 import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
