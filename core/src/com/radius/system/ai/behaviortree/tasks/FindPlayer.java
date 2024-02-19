@@ -17,6 +17,10 @@ public class FindPlayer extends Solidifier {
 
     private final int id, fireThreshold;
 
+    private Point srcPoint;
+
+    private int range;
+
     public FindPlayer(int id, int fireThreshold, BoardState boardState) {
         super(fireThreshold);
         this.id = id;
@@ -28,7 +32,7 @@ public class FindPlayer extends Solidifier {
     public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
         super.Evaluate(depth, delta, boardCost);
 
-        Point srcPoint = (Point) GetData(NodeKeys.SOURCE_POINT);
+        srcPoint = (Point) GetData(NodeKeys.SOURCE_POINT);
         if (srcPoint == null) {
             //System.out.println("[" + depth + ": FindPlayer] Returning failure!");
             GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
@@ -36,29 +40,89 @@ public class FindPlayer extends Solidifier {
         }
 
         int pathCount = Integer.MAX_VALUE;
+        range = players.get(id).GetFirePower();
         Player target = null;
-
+        List<Point> path = null;
         for (Player player : players) {
             if (id == player.id || !player.IsAlive()) {
                 continue;
             }
 
-            List<Point> path = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, player.GetWorldX(), player.GetWorldY());
+            path = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, player.GetWorldX(), player.GetWorldY());
+            if (path == null) {
+                continue;
+            }
+            int preProcessPathCount = path.size();
+            path = FindRangedPath(path);
+            if (path == null) {
+                System.out.println("No path found after post process (?)");
+                continue;
+            }
+            int postProcessPathCount = path.size();
+            System.out.println("Pre: " + preProcessPathCount + ", post: " + postProcessPathCount);
             if (path != null && path.size() < pathCount && !(boardCost[player.GetWorldX()][player.GetWorldY()] > fireThreshold)) {
                 target = player;
                 pathCount = path.size();
             }
         }
 
-        if (target == null) {
+        if (target == null || path == null) {
             //System.out.println("[" + depth + ": FindPlayer] Returning failure!");
             GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
             return NodeState.FAILURE;
         }
 
-        Point targetPoint = new Point(null, target.GetWorldX(), target.GetWorldY(), 0, 0, 0);
-        GetRoot().SetData(NodeKeys.TARGET_POINT, targetPoint);
-        //System.out.println("[" + depth + ": FindPlayer] Returning success! Found player at: " + targetPoint.x + ", " + targetPoint.y + "!");
+        Point targetPoint = srcPoint;
+        if (path.size() > 0) {
+            targetPoint = path.get(path.size() - 1);
+            //System.out.println("[" + depth + ": FindPlayer] Returning success! Found player at: " + targetPoint.x + ", " + targetPoint.y + "!");
+        }
+        GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
         return NodeState.SUCCESS;
+    }
+
+    private List<Point> FindRangedPath(List<Point> path) {
+
+        if (path == null) {
+            return null;
+        }
+
+        // Fix the path so that a portion is removed based on the player's range.
+        Point lastPoint = path.remove(path.size() - 1);
+        boolean xDiff, yDiff, xDiffTrack = false, yDiffTrack = false;
+        for (int i = 1; i < range; i++) {
+            if (path.size() == 0) {
+                xDiff = srcPoint.x != lastPoint.x;
+                yDiff = srcPoint.y != lastPoint.y;
+
+                if ((xDiffTrack && yDiff) || (yDiffTrack && xDiff)) {
+                    path.add(lastPoint);
+                }
+
+                break;
+            }
+            Point currentPoint = path.get(path.size() - 1);
+            xDiff = currentPoint.x != lastPoint.x;
+            yDiff = currentPoint.y != lastPoint.y;
+
+            if (xDiff && !xDiffTrack) {
+                xDiffTrack = true;
+                if (yDiffTrack) {
+                    path.add(lastPoint);
+                    break;
+                }
+            }
+
+            if (yDiff && !yDiffTrack) {
+                yDiffTrack = true;
+                if (xDiffTrack) {
+                    path.add(lastPoint);
+                    break;
+                }
+            }
+            lastPoint = path.remove(path.size() - 1);
+        }
+
+        return path;
     }
 }
