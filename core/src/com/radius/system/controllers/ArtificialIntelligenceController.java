@@ -103,7 +103,8 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
         if (player.IsDead() && deathReset) {
             deathReset = false;
-            Restart();
+            tree.Restart();
+            currentPath = null;
         } else if (player.IsAlive() && !deathReset) {
             deathReset = true;
         }
