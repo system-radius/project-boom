@@ -48,18 +48,7 @@ public class FindPlayer extends Solidifier {
                 continue;
             }
 
-            path = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, player.GetWorldX(), player.GetWorldY());
-            if (path == null) {
-                continue;
-            }
-            int preProcessPathCount = path.size();
-            path = FindRangedPath(path);
-            if (path == null) {
-                System.out.println("No path found after post process (?)");
-                continue;
-            }
-            int postProcessPathCount = path.size();
-            System.out.println("Pre: " + preProcessPathCount + ", post: " + postProcessPathCount);
+            path = FindRangedPath(AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, player.GetWorldX(), player.GetWorldY()));
             if (path != null && path.size() < pathCount && !(boardCost[player.GetWorldX()][player.GetWorldY()] > fireThreshold)) {
                 target = player;
                 pathCount = path.size();
