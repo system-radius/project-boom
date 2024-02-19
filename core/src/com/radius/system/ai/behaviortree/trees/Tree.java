@@ -1,8 +1,22 @@
 package com.radius.system.ai.behaviortree.trees;
 
+import com.radius.system.ai.behaviortree.NodeKeys;
+import com.radius.system.ai.behaviortree.checks.HasTargetPoint;
+import com.radius.system.ai.behaviortree.checks.IsPlantingBomb;
+import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
+import com.radius.system.ai.behaviortree.nodes.Selector;
+import com.radius.system.ai.behaviortree.nodes.Sequencer;
+import com.radius.system.ai.behaviortree.tasks.FindBombArea;
+import com.radius.system.ai.behaviortree.tasks.FindBonus;
+import com.radius.system.ai.behaviortree.tasks.FindPlayer;
+import com.radius.system.ai.behaviortree.tasks.FindSpace;
+import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
+import com.radius.system.ai.behaviortree.tasks.PlantBomb;
 import com.radius.system.states.BoardState;
 import com.radius.system.objects.BoomUpdatable;
+
+import java.util.ArrayList;
 
 public abstract class Tree implements BoomUpdatable {
 
@@ -12,7 +26,7 @@ public abstract class Tree implements BoomUpdatable {
 
     private final int[][] boardCost;
 
-    private Node root;
+    private final Node root;
 
     public Tree(int id, int fireThreshold, BoardState boardState) {
 
@@ -48,6 +62,50 @@ public abstract class Tree implements BoomUpdatable {
         }
     }
 
-    protected abstract Node SetupTree();
+    protected Node SetupTree() {
+        Node root = new Selector();
+        root.AttachChild(new IsPlantingBomb());
+        root.AttachChild(ConstructDefenseTree());
+        root.AttachChild(ConstructFindBonusTree());
+        root.AttachChild(ConstructAttackPlayerTree());
+        root.AttachChild(ConstructBombAreaTree());
+        return root;
+    }
+
+    protected Node ConstructDefenseTree() {
+        Node root = new Sequencer();
+        root.AttachChild(new OnFirePath(fireThreshold));
+        root.AttachChild(new FindSpace());
+        root.AttachChild(new MoveToTarget());
+
+        return root;
+    }
+
+    protected Node ConstructFindBonusTree() {
+        Node root = new Sequencer();
+        root.AttachChild(new FindBonus(fireThreshold, boardState));
+        root.AttachChild(new MoveToTarget());
+
+        return root;
+    }
+
+    protected Node ConstructAttackPlayerTree() {
+        Node root = new Sequencer();
+        root.AttachChild(new FindPlayer(id, fireThreshold, boardState));
+        root.AttachChild(new MoveToTarget(new PlantBomb()));
+
+        return root;
+    }
+
+    protected Node ConstructBombAreaTree() {
+        Node findBombAreaTarget = new Selector();
+        findBombAreaTarget.AttachChild(new HasTargetPoint());
+        findBombAreaTarget.AttachChild(new FindBombArea(fireThreshold, boardState, boardState.GetPlayers().get(id)));
+
+        Node root = new Sequencer();
+        root.AttachChild(findBombAreaTarget);
+        root.AttachChild(new MoveToTarget(new PlantBomb()));
+        return root;
+    }
 
 }

@@ -6,6 +6,10 @@ import java.util.List;
 
 public class Selector extends Node {
 
+    public Selector(Node... children) {
+        super(children);
+    }
+
     @Override
     public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
         for (Node node : children) {

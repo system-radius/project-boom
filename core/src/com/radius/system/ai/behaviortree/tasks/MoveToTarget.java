@@ -11,6 +11,10 @@ import java.util.List;
 
 public class MoveToTarget extends Selector {
 
+    public MoveToTarget(Node... children) {
+        super(children);
+    }
+
     @Override
     public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
 

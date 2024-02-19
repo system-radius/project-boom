@@ -18,10 +18,10 @@ public abstract class Node {
     protected List<Node> children = new ArrayList<>();
 
     public Node() {
-        this(new ArrayList<>());
+
     }
 
-    public Node(List<Node> children) {
+    public Node(Node... children) {
         for (Node child : children) {
             AttachChild(child);
         }
