@@ -579,6 +579,10 @@ public class Player extends Entity {
         return state != PlayerState.DEAD && state != PlayerState.DYING;
     }
 
+    public boolean IsDead() {
+        return state == PlayerState.DEAD;
+    }
+
     @Override
     public void dispose() {
         spriteSheet.dispose();

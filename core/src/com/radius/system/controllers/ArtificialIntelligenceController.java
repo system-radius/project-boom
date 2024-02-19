@@ -25,6 +25,8 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     private List<Point> currentPath;
 
+    private boolean deathReset;
+
     public ArtificialIntelligenceController(int id, BoardState boardState, PlayerConfig config, float scale) {
         super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
         targetPoint = new Point(null, -1, -1);
@@ -98,6 +100,14 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     @Override
     public void Update(float delta) {
+
+        if (player.IsDead() && deathReset) {
+            deathReset = false;
+            Restart();
+        } else if (player.IsAlive() && !deathReset) {
+            deathReset = true;
+        }
+
         UpdateTree(delta);
         player.MoveAlongX(movementVector.x);
         player.MoveAlongY(movementVector.y);
