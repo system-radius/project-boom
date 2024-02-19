@@ -12,8 +12,8 @@ public class GlobalConstants {
 
     public static final int WORLD_AREA = (int)(WORLD_WIDTH * WORLD_HEIGHT);
 
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 
-    public static boolean GODMODE = true;
+    public static boolean GODMODE = false;
 
 }
