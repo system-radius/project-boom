@@ -17,6 +17,8 @@ import java.util.List;
 
 public class ArtificialIntelligenceController extends BoomPlayerController {
 
+    private static final Color[] TRACKER_COLORS = new Color[]{Color.BLACK, Color.GOLD, Color.RED, Color.BLACK};
+
     private final Vector2 movementVector = new Vector2(0, 0);
 
     private final Point targetPoint, pastTarget, srcPoint;
@@ -130,10 +132,12 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
             return;
         }
 
-        renderer.setColor(Color.RED);
         float scale = GlobalConstants.WORLD_SCALE;
+        float offset = player.id * (scale / 5);
+
+        renderer.setColor(TRACKER_COLORS[player.id]);
         for (Point point : currentPath) {
-            renderer.rect(point.x * scale, point.y * scale, scale, scale);
+            renderer.rect((point.x * scale) + offset / 2, (point.y * scale) + offset / 2, scale - offset, scale - offset);
         }
     }
 
