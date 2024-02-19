@@ -28,6 +28,11 @@ public abstract class Node {
     }
 
     public void Restart() {
+
+        for (Node child : children) {
+            child.Restart();
+        }
+
         data.clear();
     }
 
