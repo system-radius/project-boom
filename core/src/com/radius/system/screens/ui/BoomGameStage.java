@@ -22,9 +22,11 @@ import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.RestartEventListener;
 import com.radius.system.events.TimerEventListener;
 import com.radius.system.events.listeners.ButtonPressListener;
+import com.radius.system.events.listeners.FirePathListener;
 import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.listeners.StatChangeListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
+import com.radius.system.events.parameters.FirePathEvent;
 import com.radius.system.events.parameters.MovementEvent;
 import com.radius.system.screens.ui.buttons.GameButton;
 import com.radius.system.screens.ui.hud.BoomHUD;
@@ -35,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BoomGameStage extends Stage implements ButtonPressListener {
+public class BoomGameStage extends Stage implements ButtonPressListener, FirePathListener {
 
     private final static float BUTTON_POSITION_Y_DIVIDER = 6f;
 
@@ -55,7 +57,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final Joystick joystick;
 
-    private final Texture pauseScreen;
+    private final Texture pauseScreen, warningSign;
 
     private final BitmapFont debugFont;
 
@@ -65,7 +67,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final float scale, buttonPositionMultiplier = 5f, gameButtonSize, pauseButtonSize;
 
-    private boolean isTouching, paused;
+    private boolean isTouching, paused, firePathNotification;
 
     private int joystickPointer = -1;
 
@@ -86,6 +88,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
         joystick = new Joystick(0, 0, scale);
         pauseScreen = GlobalAssets.LoadTexture(GlobalAssets.BACKGROUND_TEXTURE_PATH);
+        warningSign = GlobalAssets.LoadTexture(GlobalAssets.WARNING_SIGN_PATH);
 
         this.addActor(hud);
         this.addActor(timer = new TimerDisplay(0, 0, scale / 1.5f, scale / 1.5f));
@@ -222,36 +225,47 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     @Override
     public void draw() {
-        if (paused) {
-            DrawPausedOverlay();
-        }
-        super.draw();
-        if (!paused) {
-            DrawJoystick();
-        }
-    }
-
-    private void DrawJoystick() {
         Batch batch = getBatch();
         batch.setProjectionMatrix(getCamera().combined);
+        batch.begin();
+
+        if (paused) {
+            DrawPausedOverlay(batch);
+        }
+
+        batch.end();
+        super.draw();
 
         batch.begin();
-        batch.setColor(1, 1, 1, 0.5f);
-        joystick.Draw(batch);
-        debugFont.draw(getBatch(), "(" + touchVector.x + ", " + touchVector.y + ")", 0, scale);
-        batch.setColor(1, 1, 1, 1f);
+        if (!paused) {
+            DrawNotification(batch);
+            DrawJoystick(batch);
+        }
+
         batch.end();
     }
 
-    private void DrawPausedOverlay() {
-        Batch batch = getBatch();
-        batch.setProjectionMatrix(getCamera().combined);
+    private void DrawNotification(Batch batch) {
+        if (firePathNotification) {
+            Viewport viewport = getViewport();
+            float worldWidth = viewport.getWorldWidth() / 2, worldHeight = viewport.getWorldHeight() / 2;
+            float signWidth = warningSign.getWidth(), signHeight = warningSign.getHeight();
+            batch.draw(warningSign, worldWidth - signWidth / 2, worldHeight - signHeight / 2, signWidth, signHeight);
+        }
+    }
 
-        batch.begin();
+    private void DrawJoystick(Batch batch) {
+
+        batch.setColor(1, 1, 1, 0.5f);
+        joystick.Draw(batch);
+        //debugFont.draw(getBatch(), "(" + touchVector.x + ", " + touchVector.y + ")", 0, scale);
+        batch.setColor(1, 1, 1, 1f);
+    }
+
+    private void DrawPausedOverlay(Batch batch) {
         batch.setColor(1, 1, 1, 0.5f);
         batch.draw(pauseScreen, 0, 0, getViewport().getWorldWidth(), getViewport().getWorldHeight());
         batch.setColor(1, 1, 1, 1f);
-        batch.end();
     }
 
     @Override
@@ -390,6 +404,17 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
     private void FireMovementEvent() {
         for (MovementEventListener listener : movementEventListeners) {
             listener.OnMove(movementEvent);
+        }
+    }
+
+    @Override
+    public void OnFirePathTrigger(FirePathEvent event) {
+        if (event.onFirePath && !firePathNotification) {
+            System.out.println("Fire path notification: ON");
+            firePathNotification = true;
+        } else if (firePathNotification && !event.onFirePath) {
+            System.out.println("Fire path notification: OFF");
+            firePathNotification = false;
         }
     }
 }

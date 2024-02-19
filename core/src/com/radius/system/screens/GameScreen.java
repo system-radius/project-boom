@@ -57,7 +57,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
     private BitmapFont font;
 
-    private boolean maxZoomOut = true;
+    private boolean maxZoomOut = false;
 
     public GameScreen() {
         font = FontUtils.GetFont((int) WORLD_SCALE / 2, Color.WHITE, 1, Color.BLACK);
@@ -82,6 +82,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
         stage.AddMovementEventListener(controller);
         stage.AddButtonPressListener(controller);
+        controller.AddFirePathEventListener(stage);
 
         Player player = controller.GetPlayer();
         player.AddCoordinateEventListener(mainCamera);
@@ -148,7 +149,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
     private void InitializeGameState() {
 
         List<PlayerConfig> configs = new ArrayList<>();
-        configs.add(CreatePlayerConfig(true, true));
+        configs.add(CreatePlayerConfig(false, true));
         configs.add(CreatePlayerConfig(false, false));
         configs.add(CreatePlayerConfig(false, true));
         configs.add(CreatePlayerConfig(false, true));
@@ -216,10 +217,11 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         float x = (uiCamera.position.x - uiViewport.getWorldWidth() / 2f);
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
-        //font.draw(spriteBatch, "(" + mainViewport.getWorldWidth() + ", " + mainViewport.getWorldHeight() + ")" , x, y);
-        //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
-        //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
-
+        if (GlobalConstants.DEBUG) {
+            font.draw(spriteBatch, "(" + (mainCamera.position.x / WORLD_SCALE) + ", " + (mainCamera.position.y / WORLD_SCALE) + ")", x, y);
+            //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
+            //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
+        }
         spriteBatch.end();
     }
 

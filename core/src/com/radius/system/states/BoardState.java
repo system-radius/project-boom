@@ -188,14 +188,12 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         }
     }
 
+    public int[][] GetBoardCost() {
+        return boardCost;
+    }
+
     public void CompileBoardCost(int[][] boardCost, int fireThreshold, int id) {
         for (int i = 0; i < BOARD_WIDTH; i++) {
-            /*
-            for (int j = 0; j < BOARD_HEIGHT; j++) {
-                boardCost[i][j] = this.boardCost[i][j] > fireThreshold ? -1 : this.boardCost[i][j];
-            }
-
-             */
             System.arraycopy(this.boardCost[i], 0, boardCost[i], 0, BOARD_HEIGHT);
         }
 
