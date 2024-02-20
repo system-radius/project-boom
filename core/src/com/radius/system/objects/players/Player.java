@@ -201,6 +201,7 @@ public class Player extends Entity implements FirePathListener {
         bombStock = 1;
         firePower = 1;
         speedLevel = 1;
+        life = 3;
         movementSpeed = baseSpeed + speedLevel * baseSpeedIncrease;
         bombType = BombType.NORMAL;
         if (godmode) {
@@ -324,6 +325,8 @@ public class Player extends Entity implements FirePathListener {
         velocity.x = velocity.y = 0;
         invulnerableTime = 0f;
         invulnerable = true;
+        life--;
+        FireStatChange(BonusType.LIFE, life);
     }
 
     private void UpdateDirection() {
@@ -598,7 +601,7 @@ public class Player extends Entity implements FirePathListener {
 
     @Override
     public void Burn() {
-        if (PlayerState.DYING.equals(state) || PlayerState.DEAD.equals(state) || invulnerable) {
+        if (PlayerState.DYING.equals(state) || PlayerState.DEAD.equals(state) || invulnerable || life < 0) {
             return;
         }
 
@@ -661,7 +664,7 @@ public class Player extends Entity implements FirePathListener {
 
     private void UpdateRespawn(float delta) {
         respawnTime += delta;
-        if (respawnTime >= DEATH_TIMER) {
+        if (respawnTime >= DEATH_TIMER && life > 0) {
             Respawn();
         }
     }

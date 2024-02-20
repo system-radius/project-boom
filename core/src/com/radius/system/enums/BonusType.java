@@ -16,7 +16,9 @@ public enum BonusType {
 
     IMPACT_BOMB(6),
 
-    EMPTY(7);
+    LIFE(7),
+
+    EMPTY(-1);
 
     private int type;
 

@@ -31,6 +31,7 @@ public class BoomHUD extends HeadsUpDisplay {
         HeadsUpDisplayIcon item;
 
         switch (bonusType) {
+            case LIFE:
             case BOMB_STOCK:
             case FIRE_POWER:
             case FLASH_FIRE:

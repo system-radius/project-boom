@@ -14,7 +14,7 @@ public class BombDisplayIcon extends HeadsUpDisplayIcon {
     private final int displayIndex = 1;
 
     public BombDisplayIcon(BonusType bonusType, float x, float y, float width, float height) {
-        super(ICONS[bonusType.GetType()], x, y, width, height);
+        super(ICONS[0], x, y, width, height);
         icon = BOMBS[0][displayIndex];
     }
 

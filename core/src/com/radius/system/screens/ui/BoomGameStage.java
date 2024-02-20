@@ -78,6 +78,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         this.debugFont = FontUtils.GetFont((int) scale / 2, Color.WHITE, 1, Color.BLACK);
 
         this.hud = new BoomHUD(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight() / 9f);
+        hud.AddItem(BonusType.LIFE);
         hud.AddItem(BonusType.BOMB_STOCK);
         hud.AddItem(BonusType.FIRE_POWER);
         hud.AddItem(BonusType.MOVEMENT_SPEED);
