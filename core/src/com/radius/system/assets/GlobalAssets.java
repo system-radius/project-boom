@@ -35,6 +35,8 @@ public class GlobalAssets {
 
     public static final String BUTTON_RESTART_TEXTURE_PATH = "img/restart.png";
 
+    public static final String BUTTON_CANCEL_TEXTURE_PATH = "img/cancel.png";
+
     public static final String BACKGROUND_TEXTURE_PATH = "img/background.png";
 
     public static final String WARNING_SIGN_PATH = "img/warning_sign.png";

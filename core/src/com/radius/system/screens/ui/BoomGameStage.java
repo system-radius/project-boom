@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.assets.GlobalAssets;
 import com.radius.system.assets.GlobalConstants;
@@ -22,10 +23,12 @@ import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.RestartEventListener;
 import com.radius.system.events.TimerEventListener;
 import com.radius.system.events.listeners.ButtonPressListener;
+import com.radius.system.events.listeners.EndGameEventListener;
 import com.radius.system.events.listeners.FirePathListener;
 import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.listeners.StatChangeListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
+import com.radius.system.events.parameters.EndGameEvent;
 import com.radius.system.events.parameters.FirePathEvent;
 import com.radius.system.events.parameters.MovementEvent;
 import com.radius.system.screens.ui.buttons.GameButton;
@@ -37,7 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BoomGameStage extends Stage implements ButtonPressListener {
+public class BoomGameStage extends Stage implements ButtonPressListener, EndGameEventListener {
 
     private final static float BUTTON_POSITION_Y_DIVIDER = 6f;
 
@@ -51,7 +54,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final BoomHUD hud;
 
-    private final GameButton aButton, bButton, pauseButton, playButton, restartButton;
+    private final GameButton aButton, bButton, pauseButton, playButton, restartButton, cancelButton;
 
     private final TimerDisplay timer;
 
@@ -59,7 +62,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final Texture pauseScreen, warningSign;
 
-    private final BitmapFont debugFont;
+    private final BitmapFont debugFont, winnerAnnouncement;
 
     private final MovementEvent movementEvent;
 
@@ -67,7 +70,11 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final float scale, buttonPositionMultiplier = 5f, gameButtonSize, pauseButtonSize;
 
-    private boolean isTouching, paused;
+    private float worldWidth, worldHeight;
+
+    private boolean isTouching, paused, gameConcluded;
+
+    private String conclusionMessage;
 
     private int joystickPointer = -1;
 
@@ -76,6 +83,9 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         this.scale = scale;
         this.touchVector = new Vector3(0, 0, 0);
         this.debugFont = FontUtils.GetFont((int) scale / 2, Color.WHITE, 1, Color.BLACK);
+        this.winnerAnnouncement = FontUtils.GetFont((int) scale, Color.WHITE, 4, Color.BLACK);
+        worldWidth = viewport.getWorldWidth();
+        worldHeight = viewport.getWorldHeight();
 
         this.hud = new BoomHUD(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight() / 9f);
         hud.AddItem(BonusType.LIFE);
@@ -98,6 +108,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         this.addActor(bButton = CreateGameButton(GlobalAssets.BUTTON_B_TEXTURE_PATH, ButtonType.B, 0, viewport.getWorldHeight() / BUTTON_POSITION_Y_DIVIDER, gameButtonSize, 0.5f));
         this.addActor(playButton = CreateGameButton(GlobalAssets.BUTTON_PLAY_TEXTURE_PATH, ButtonType.PLAY, 0, 0, pauseButtonSize, 1));
         this.addActor(restartButton = CreateGameButton(GlobalAssets.BUTTON_RESTART_TEXTURE_PATH, ButtonType.RESTART, 0, 0, pauseButtonSize, 1));
+        this.addActor(cancelButton = CreateGameButton(GlobalAssets.BUTTON_CANCEL_TEXTURE_PATH, ButtonType.CANCEL, 0, 0, pauseButtonSize, 1));
 
         for (ControlKeys key: ControlKeys.values()) {
             pressedKeys.put(key, false);
@@ -119,37 +130,45 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
     public void Restart() {
         timer.StartTimer(600);
         paused = false;
+        gameConcluded = false;
         SetButtonStates();
     }
 
     public void Resize() {
 
-        Viewport viewport = getViewport();
-        float width = viewport.getWorldWidth(), height = viewport.getWorldHeight();
         float pauseButtonsOffset = scale;
+        worldWidth = getViewport().getWorldWidth();
+        worldHeight = getViewport().getWorldHeight();
 
-        hud.setPosition(hud.getX(), viewport.getWorldHeight() - hud.getHeight());
-        hud.setWidth(width);
+        hud.setPosition(hud.getX(), worldHeight - hud.getHeight());
+        hud.setWidth(worldWidth);
 
-        timer.setPosition(width - timer.getWidth() * 6, height - hud.getHeight() / 2 - timer.getHeight() / 2);
+        timer.setPosition(worldWidth - timer.getWidth() * 6, worldHeight - hud.getHeight() / 2 - timer.getHeight() / 2);
 
-        pauseButton.setPosition(width - scale, height - hud.getHeight() / 2 - pauseButton.getHeight() / 2);
-        playButton.setPosition(width / 2 - pauseButtonSize - pauseButtonsOffset, height / 2 - pauseButtonSize / 2);
-        restartButton.setPosition(width / 2 + pauseButtonsOffset, height / 2 - pauseButtonSize / 2);
+        pauseButton.setPosition(worldWidth - scale, worldHeight - hud.getHeight() / 2 - pauseButton.getHeight() / 2);
 
-        aButton.setPosition(width - buttonPositionMultiplier / 2 * scale, aButton.getY());
-        bButton.setPosition(width - buttonPositionMultiplier * scale, bButton.getY());
+        playButton.setPosition(worldWidth / 2 - pauseButtonSize - pauseButtonsOffset, worldHeight / 2 - pauseButtonSize / 2);
+        restartButton.setPosition(worldWidth / 2 + pauseButtonsOffset, worldHeight / 2 - pauseButtonSize / 2);
+        if (gameConcluded) {
+            restartButton.setPosition(playButton.getX(), playButton.getY());
+        }
+        cancelButton.setPosition(worldWidth / 2 + pauseButtonsOffset, worldHeight / 2 - pauseButtonSize / 2);
+
+        aButton.setPosition(worldWidth - buttonPositionMultiplier / 2 * scale, aButton.getY());
+        bButton.setPosition(worldWidth - buttonPositionMultiplier * scale, bButton.getY());
 
         joystick.SetPosition( 2.5f * scale, 2.5f * scale, true);
     }
 
     private void SetButtonStates() {
-        aButton.setVisible(!paused);
-        bButton.setVisible(!paused);
-        pauseButton.setVisible(!paused);
+        aButton.setVisible(!paused && !gameConcluded);
+        bButton.setVisible(!paused && !gameConcluded);
+        pauseButton.setVisible(!paused && !gameConcluded);
 
         playButton.setVisible(paused);
-        restartButton.setVisible(paused);
+        restartButton.setVisible(paused || gameConcluded);
+        cancelButton.setVisible(gameConcluded);
+        Resize();
     }
 
     private boolean ProcessKeyInput(ControlKeys currentKey, float directionality, boolean isPressed) {
@@ -212,7 +231,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
     }
 
     public boolean IsPaused() {
-        return paused;
+        return paused || gameConcluded;
     }
 
     @Override
@@ -230,19 +249,26 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
         batch.setProjectionMatrix(getCamera().combined);
         batch.begin();
 
-        if (paused) {
+        if (paused || gameConcluded) {
             DrawPausedOverlay(batch);
+            DrawConclusionMessage(batch);
         }
 
         batch.end();
         super.draw();
 
         batch.begin();
-        if (!paused) {
+        if (!paused && !gameConcluded) {
             DrawJoystick(batch);
         }
 
         batch.end();
+    }
+
+    private void DrawConclusionMessage(Batch batch) {
+        if (gameConcluded) {
+            winnerAnnouncement.draw(batch, conclusionMessage, worldWidth / 2, worldHeight - scale * 1.5f, scale, Align.center, false);
+        }
     }
 
     private void DrawJoystick(Batch batch) {
@@ -384,6 +410,17 @@ public class BoomGameStage extends Stage implements ButtonPressListener {
             default:
                 FireButtonEvent(event);
         }
+    }
+
+    @Override
+    public void OnEndGameTrigger(EndGameEvent event) {
+        gameConcluded = true;
+        if (event.playerName != null) {
+            conclusionMessage = event.playerName + " is the last one standing!   ";
+        } else {
+            conclusionMessage = GlobalConstants.TIED_MESSAGE;
+        }
+        SetButtonStates();
     }
 
     private void FireButtonEvent(ButtonPressEvent event) {

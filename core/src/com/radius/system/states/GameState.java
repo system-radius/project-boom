@@ -9,10 +9,13 @@ import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.events.RestartEventListener;
+import com.radius.system.events.listeners.EndGameEventListener;
+import com.radius.system.events.parameters.EndGameEvent;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.blocks.HardBlock;
 import com.radius.system.objects.blocks.SoftBlock;
+import com.radius.system.objects.players.Player;
 import com.radius.system.objects.players.PlayerConfig;
 
 import java.util.ArrayList;
@@ -31,10 +34,15 @@ public class GameState implements Disposable, RestartEventListener {
 
     private final List<BoomPlayerController> controllers = new ArrayList<>();
 
+    private final List<EndGameEventListener> endGameEventListeners = new ArrayList<>();
+
+    private final EndGameEvent endGameEvent;
+
     private int mainPlayer = -1;
 
     public GameState() {
         boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT, (int) WORLD_SCALE);
+        endGameEvent = new EndGameEvent();
     }
 
     public void AddPlayers(List<PlayerConfig> configs) {
@@ -138,6 +146,30 @@ public class GameState implements Disposable, RestartEventListener {
         for (BoomPlayerController controller : controllers) {
             controller.Update(delta);
         }
+
+        if (!ContinueGame()) {
+            FireEndGameEvent();
+        }
+    }
+
+    public boolean ContinueGame() {
+        boolean hasOneAlive = false;
+        for (BoomPlayerController controller : controllers) {
+            Player player = controller.GetPlayer();
+            if (player.GetRemainingLife() >= 0 && player.IsAlive()) {
+                if (!hasOneAlive) {
+                    hasOneAlive = true;
+                    endGameEvent.playerName = player.name;
+                } else {
+                    // Return true as there are still more than one player alive.
+                    endGameEvent.playerName = null;
+                    return true;
+                }
+            }
+        }
+
+        // The game is to be terminated.
+        return false;
     }
 
     public void Draw(Batch batch) {
@@ -164,5 +196,16 @@ public class GameState implements Disposable, RestartEventListener {
     @Override
     public void OnRestart() {
         RestartField();
+    }
+
+    public void AddEndGameEventListener(EndGameEventListener listener) {
+        if (endGameEventListeners.contains(listener)) return;
+        endGameEventListeners.add(listener);
+    }
+
+    private void FireEndGameEvent() {
+        for (EndGameEventListener listener : endGameEventListeners) {
+            listener.OnEndGameTrigger(endGameEvent);
+        }
     }
 }

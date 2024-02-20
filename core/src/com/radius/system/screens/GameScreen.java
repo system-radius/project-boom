@@ -72,6 +72,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
     private void InitializeEvents() {
         stage.AddButtonPressListener(this);
+        gameState.AddEndGameEventListener(stage);
         HumanPlayerController controller = gameState.GetMainController();
         if (controller == null) {
             float newZoom = ComputeZoomValue();

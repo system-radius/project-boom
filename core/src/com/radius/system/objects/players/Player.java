@@ -154,7 +154,9 @@ public class Player extends Entity implements FirePathListener {
 
     public final int id;
 
-    private String name, spritePath;
+    public final String name;
+
+    private String spritePath;
 
     private final BitmapFont playerNameFont;
 
@@ -192,7 +194,6 @@ public class Player extends Entity implements FirePathListener {
 
     public void Reset() {
 
-        this.name = godmode ? "Zero" : "Player" + (id + 1);
         if (godmode) {
             this.spritePath = "img/player_5.png";
         }
@@ -364,6 +365,10 @@ public class Player extends Entity implements FirePathListener {
 
         burnRect.setPosition(x + fixedThinWidth / fixedDividerOffset, y + fixedThinHeight / fixedDividerOffset);
         collisionRect.setPosition(x - fixedThinWidth / (fixedDividerCoordinator * fixedDividerOffset), y - fixedThinHeight / (fixedDividerCoordinator * fixedDividerOffset));
+    }
+
+    public int GetRemainingLife() {
+        return life;
     }
 
     public int GetFirePower() {
@@ -704,7 +709,7 @@ public class Player extends Entity implements FirePathListener {
             DrawFireNotification(batch);
         }
 
-        playerNameFont.draw(batch, name, position.x * size.x, position.y * size.y, scale, Align.center, false);
+        playerNameFont.draw(batch, "[" + GetRemainingLife() + "]", position.x * size.x, position.y * size.y, scale, Align.center, false);
     }
 
     @Override

@@ -7,7 +7,9 @@ public enum ButtonType {
     B(1),
     PAUSE(2),
     PLAY(3),
-    RESTART(4);
+    RESTART(4),
+
+    CANCEL(5);
 
     private final int id;
 
