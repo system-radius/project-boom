@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BoomGameStage extends Stage implements ButtonPressListener, FirePathListener {
+public class BoomGameStage extends Stage implements ButtonPressListener {
 
     private final static float BUTTON_POSITION_Y_DIVIDER = 6f;
 
@@ -67,7 +67,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener, FirePat
 
     private final float scale, buttonPositionMultiplier = 5f, gameButtonSize, pauseButtonSize;
 
-    private boolean isTouching, paused, firePathNotification;
+    private boolean isTouching, paused;
 
     private int joystickPointer = -1;
 
@@ -238,20 +238,10 @@ public class BoomGameStage extends Stage implements ButtonPressListener, FirePat
 
         batch.begin();
         if (!paused) {
-            DrawNotification(batch);
             DrawJoystick(batch);
         }
 
         batch.end();
-    }
-
-    private void DrawNotification(Batch batch) {
-        if (firePathNotification) {
-            Viewport viewport = getViewport();
-            float worldWidth = viewport.getWorldWidth() / 2, worldHeight = viewport.getWorldHeight() / 2;
-            float signWidth = warningSign.getWidth(), signHeight = warningSign.getHeight();
-            batch.draw(warningSign, worldWidth - signWidth / 2, worldHeight - signHeight / 2, signWidth, signHeight);
-        }
     }
 
     private void DrawJoystick(Batch batch) {
@@ -404,17 +394,6 @@ public class BoomGameStage extends Stage implements ButtonPressListener, FirePat
     private void FireMovementEvent() {
         for (MovementEventListener listener : movementEventListeners) {
             listener.OnMove(movementEvent);
-        }
-    }
-
-    @Override
-    public void OnFirePathTrigger(FirePathEvent event) {
-        if (event.onFirePath && !firePathNotification) {
-            System.out.println("Fire path notification: ON");
-            firePathNotification = true;
-        } else if (firePathNotification && !event.onFirePath) {
-            System.out.println("Fire path notification: OFF");
-            firePathNotification = false;
         }
     }
 }

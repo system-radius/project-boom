@@ -82,11 +82,11 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
         stage.AddMovementEventListener(controller);
         stage.AddButtonPressListener(controller);
-        controller.AddFirePathEventListener(stage);
 
         Player player = controller.GetPlayer();
         player.AddCoordinateEventListener(mainCamera);
         player.AddStatChangeListeners(stage.GetStatChangeListeners());
+        controller.AddFirePathEventListener(player);
 
         mainCamera.SetWatchId(player.id);
     }
@@ -149,7 +149,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
     private void InitializeGameState() {
 
         List<PlayerConfig> configs = new ArrayList<>();
-        configs.add(CreatePlayerConfig(false, true));
+        configs.add(CreatePlayerConfig(true, true));
         configs.add(CreatePlayerConfig(false, false));
         configs.add(CreatePlayerConfig(false, true));
         configs.add(CreatePlayerConfig(false, true));

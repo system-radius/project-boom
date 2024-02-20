@@ -3,6 +3,8 @@ package com.radius.system.controllers;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.radius.system.assets.GlobalConstants;
+import com.radius.system.enums.BoardRep;
+import com.radius.system.enums.Direction;
 import com.radius.system.events.listeners.FirePathListener;
 import com.radius.system.events.parameters.FirePathEvent;
 import com.radius.system.states.BoardState;
@@ -22,7 +24,7 @@ public class HumanPlayerController extends BoomPlayerController implements Movem
 
     private final int id;
 
-    private FirePathEvent firePathEvent;
+    private final FirePathEvent firePathEvent;
 
     public HumanPlayerController(int id, BoardState boardState, PlayerConfig config, float scale) {
         super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale, GlobalConstants.GODMODE));
@@ -70,14 +72,74 @@ public class HumanPlayerController extends BoomPlayerController implements Movem
 
         int[][] boardCost = boardState.GetBoardCost();
         int x = player.GetWorldX(), y = player.GetWorldY();
-        if (boardCost[x][y] > 1 && !firePathEvent.onFirePath) {
-            firePathEvent.onFirePath = true;
+        if (boardCost[x][y] > GlobalConstants.WORLD_AREA / 2) {
+            DetectDirectionality();
             FireOnFirePathEvent();
         } else if (boardCost[x][y] <= 1 && firePathEvent.onFirePath) {
-            firePathEvent.onFirePath = false;
+            ResetFirePathEvent();
             FireOnFirePathEvent();
         }
 
+    }
+
+    private void DetectDirectionality() {
+        int detectionRangeX = 8, detectionRangeY = 4;
+        int x = player.GetWorldX(), y = player.GetWorldY();
+
+        detectionRangeX += AdjustAxialDetectionRange(detectionRangeX, x, (int)GlobalConstants.WORLD_WIDTH);
+        detectionRangeY += AdjustAxialDetectionRange(detectionRangeY, y, (int)GlobalConstants.WORLD_HEIGHT);
+
+        firePathEvent.onFirePath = true;
+        firePathEvent.hasNorth = DetectBombAtCoordinate(x, y + detectionRangeY, Direction.NORTH);
+        firePathEvent.hasSouth = DetectBombAtCoordinate(x, y - detectionRangeY, Direction.SOUTH);
+        firePathEvent.hasWest = DetectBombAtCoordinate(x - detectionRangeX, y, Direction.WEST);
+        firePathEvent.hasEast = DetectBombAtCoordinate(x + detectionRangeX, y, Direction.EAST);
+    }
+
+    private int AdjustAxialDetectionRange(int detectionRange, int position, int limit) {
+        int additionalRange = 0;
+        if (position - detectionRange < 0) {
+            while (position - detectionRange + additionalRange < 0) {
+                additionalRange++;
+            }
+        } else if (position + detectionRange >= limit) {
+            while (position + detectionRange - additionalRange >= limit) {
+                additionalRange++;
+            }
+        }
+
+        return additionalRange;
+    }
+
+    private void ResetFirePathEvent() {
+        firePathEvent.onFirePath = false;
+        firePathEvent.hasNorth = false;
+        firePathEvent.hasSouth = false;
+        firePathEvent.hasWest = false;
+        firePathEvent.hasEast = false;
+    }
+
+    private boolean DetectBombAtCoordinate(int x, int y, Direction direction) {
+        if (x < 0 || y < 0 || x >= GlobalConstants.WORLD_WIDTH || y >= GlobalConstants.WORLD_HEIGHT) {
+            return false;
+        }
+
+        if (BoardRep.BOMB.equals(boardState.GetBoardEntry(x, y))) {
+            return true;
+        }
+
+        switch (direction) {
+            case NORTH:
+                return DetectBombAtCoordinate(x, y + 1, direction);
+            case SOUTH:
+                return DetectBombAtCoordinate(x, y - 1, direction);
+            case WEST:
+                return DetectBombAtCoordinate(x - 1, y, direction);
+            case EAST:
+                return DetectBombAtCoordinate(x + 1, y, direction);
+        }
+
+        return false;
     }
 
     @Override

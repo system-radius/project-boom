@@ -12,6 +12,9 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
+import com.radius.system.assets.GlobalAssets;
+import com.radius.system.events.listeners.FirePathListener;
+import com.radius.system.events.parameters.FirePathEvent;
 import com.radius.system.states.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
@@ -36,7 +39,7 @@ import com.radius.system.utils.FontUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Player extends Entity {
+public class Player extends Entity implements FirePathListener {
 
     private static final float FRAME_DURATION_MOVING = 1f / 10f;
 
@@ -85,6 +88,8 @@ public class Player extends Entity {
 
     private final Vector2 respawnPoint;
 
+    private FirePathEvent firePathEvent;
+
     /**
      * The top collision bound.
      */
@@ -115,7 +120,7 @@ public class Player extends Entity {
     /**
      * The loaded sprite sheet for this player.
      */
-    private Texture spriteSheet;
+    private Texture spriteSheet, warningSign;
 
     /**
      * The current scale value, provided on the creation of this object, relevant for the creation
@@ -178,6 +183,7 @@ public class Player extends Entity {
         bombs = new ArrayList<>();
         movementEvent = new MovementEvent(id, respawnPoint.x, respawnPoint.y);
         statChangeEvent = new StatChangeEvent(id);
+        firePathEvent = new FirePathEvent(id);
     }
 
     public void ActivateGodMode() {
@@ -252,6 +258,8 @@ public class Player extends Entity {
         animations.add(CreateAnimation(allFrames, Direction.WEST.GetIndex(), FRAME_DURATION_MOVING, true));
         animations.add(CreateAnimation(allFrames, Direction.EAST.GetIndex(), FRAME_DURATION_MOVING, true));
         animations.add(CreateAnimation(allFrames, Direction.DEAD.GetIndex(), FRAME_DURATION_DYING, false));
+
+        warningSign = GlobalAssets.LoadTexture(GlobalAssets.WARNING_SIGN_PATH);
     }
 
     private Animation<TextureRegion> CreateAnimation(TextureRegion[][] allFrames, int direction, float frameDuration, boolean enableLoop) {
@@ -658,6 +666,27 @@ public class Player extends Entity {
         }
     }
 
+    private void DrawFireNotification(Batch batch) {
+
+        float x = position.x  * scale, y = position.y  * scale;
+
+        batch.setColor(1, 1, 1, 0.5f);
+        DrawFireNotification(batch, warningSign, x, y + scale, scale, scale, firePathEvent.hasNorth);
+        DrawFireNotification(batch, warningSign, x, y - scale, scale, scale, firePathEvent.hasSouth);
+        DrawFireNotification(batch, warningSign, x - scale, y, scale, scale, firePathEvent.hasWest);
+        DrawFireNotification(batch, warningSign, x + scale, y, scale, scale, firePathEvent.hasEast);
+        batch.setColor(1, 1, 1, 1f);
+
+    }
+
+    private void DrawFireNotification(Batch batch, Texture texture, float x, float y, float width, float height, boolean draw) {
+        if (!draw) {
+            return;
+        }
+
+        batch.draw(texture, x, y, width, height);
+    }
+
     @Override
     public void Draw(Batch batch) {
 
@@ -666,6 +695,10 @@ public class Player extends Entity {
             batch.draw(activeAnimation.getKeyFrame(animationElapsedTime), position.x * size.x, position.y * size.y, size.x, size.y);
         } else {
             batch.draw(GetActiveKeyFrame(), scaledPosition.x, scaledPosition.y, size.x, size.y);
+        }
+
+        if (firePathEvent.onFirePath) {
+            DrawFireNotification(batch);
         }
 
         playerNameFont.draw(batch, name, position.x * size.x, position.y * size.y, scale, Align.center, false);
@@ -706,5 +739,10 @@ public class Player extends Entity {
         for (BombTypeChangeListener listener : bombTypeChangeListeners) {
             listener.OnBombTypeChange(bombType);
         }
+    }
+
+    @Override
+    public void OnFirePathTrigger(FirePathEvent event) {
+        firePathEvent = event;
     }
 }
