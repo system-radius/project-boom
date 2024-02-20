@@ -86,14 +86,14 @@ public class HumanPlayerController extends BoomPlayerController implements Movem
         int detectionRangeX = 8, detectionRangeY = 4;
         int x = player.GetWorldX(), y = player.GetWorldY();
 
-        detectionRangeX += AdjustAxialDetectionRange(detectionRangeX, x, (int)GlobalConstants.WORLD_WIDTH);
-        detectionRangeY += AdjustAxialDetectionRange(detectionRangeY, y, (int)GlobalConstants.WORLD_HEIGHT);
+        int offScreenX = detectionRangeX + AdjustAxialDetectionRange(detectionRangeX, x, (int)GlobalConstants.WORLD_WIDTH);
+        int offScreenY = detectionRangeY + AdjustAxialDetectionRange(detectionRangeY, y, (int)GlobalConstants.WORLD_HEIGHT);
 
         firePathEvent.onFirePath = true;
-        firePathEvent.hasNorth = DetectBombAtCoordinate(x, y + detectionRangeY, Direction.NORTH);
-        firePathEvent.hasSouth = DetectBombAtCoordinate(x, y - detectionRangeY, Direction.SOUTH);
-        firePathEvent.hasWest = DetectBombAtCoordinate(x - detectionRangeX, y, Direction.WEST);
-        firePathEvent.hasEast = DetectBombAtCoordinate(x + detectionRangeX, y, Direction.EAST);
+        firePathEvent.hasNorth = !DetectBombAtCoordinate(x, y, detectionRangeX, 1, Direction.SOUTH) && DetectBombAtCoordinate(x, y + offScreenY, Direction.NORTH);
+        firePathEvent.hasSouth = !DetectBombAtCoordinate(x, y, detectionRangeX, 1, Direction.NORTH) && DetectBombAtCoordinate(x, y - offScreenY, Direction.SOUTH);
+        firePathEvent.hasWest = !DetectBombAtCoordinate(x, y, detectionRangeX, 1, Direction.EAST) && DetectBombAtCoordinate(x - offScreenX, y, Direction.WEST);
+        firePathEvent.hasEast = !DetectBombAtCoordinate(x, y, detectionRangeX, 1, Direction.WEST) && DetectBombAtCoordinate(x + offScreenX, y, Direction.EAST);
     }
 
     private int AdjustAxialDetectionRange(int detectionRange, int position, int limit) {
@@ -120,7 +120,11 @@ public class HumanPlayerController extends BoomPlayerController implements Movem
     }
 
     private boolean DetectBombAtCoordinate(int x, int y, Direction direction) {
-        if (x < 0 || y < 0 || x >= GlobalConstants.WORLD_WIDTH || y >= GlobalConstants.WORLD_HEIGHT) {
+        return DetectBombAtCoordinate(x, y, -1, -1, direction);
+    }
+
+    private boolean DetectBombAtCoordinate(int x, int y, int range, int counter, Direction direction) {
+        if (x < 0 || y < 0 || x >= GlobalConstants.WORLD_WIDTH || y >= GlobalConstants.WORLD_HEIGHT || (range > 0 && counter > range)) {
             return false;
         }
 
@@ -130,13 +134,13 @@ public class HumanPlayerController extends BoomPlayerController implements Movem
 
         switch (direction) {
             case NORTH:
-                return DetectBombAtCoordinate(x, y + 1, direction);
+                return DetectBombAtCoordinate(x, y + 1, range, counter + 1, direction);
             case SOUTH:
-                return DetectBombAtCoordinate(x, y - 1, direction);
+                return DetectBombAtCoordinate(x, y - 1, range, counter + 1, direction);
             case WEST:
-                return DetectBombAtCoordinate(x - 1, y, direction);
+                return DetectBombAtCoordinate(x - 1, y, range, counter + 1, direction);
             case EAST:
-                return DetectBombAtCoordinate(x + 1, y, direction);
+                return DetectBombAtCoordinate(x + 1, y, range, counter + 1, direction);
         }
 
         return false;
