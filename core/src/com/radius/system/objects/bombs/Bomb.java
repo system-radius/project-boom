@@ -104,7 +104,7 @@ public class Bomb extends Block {
 
     private float thinWidth, thinHeight;
 
-    private final float boundsOffset = 0.1f;
+    private final float boundsOffset = 0f;
 
     public Bomb(Player player, float x, float y, float width, float height, float scale) {
         this(BombType.NORMAL, player, x, y, width, height, scale);

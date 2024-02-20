@@ -203,15 +203,14 @@ public class Player extends Entity implements FirePathListener {
         firePower = 1;
         speedLevel = 1;
         life = 3;
-        movementSpeed = baseSpeed + speedLevel * baseSpeedIncrease;
         bombType = BombType.NORMAL;
         if (godmode) {
             bombStock = BOMB_STOCK_LIMIT;
             firePower = FIRE_POWER_LIMIT;
             speedLevel = (int)(SPEED_LIMIT / baseSpeedIncrease);
-            movementSpeed = baseSpeed + speedLevel * baseSpeedIncrease;
             bombType = BombType.GODMODE;
         }
+        movementSpeed = baseSpeed + speedLevel * baseSpeedIncrease;
         bombs.clear();
 
         FireStatChange(BonusType.BOMB_STOCK, bombStock);
@@ -219,9 +218,9 @@ public class Player extends Entity implements FirePathListener {
         FireStatChange(BonusType.MOVEMENT_SPEED, speedLevel);
         FireBombChangeEvent();
 
-        FixBounds();
-
         Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
+
+        FixBounds();
     }
 
     private void FixBounds() {
@@ -231,8 +230,8 @@ public class Player extends Entity implements FirePathListener {
         float width = 1f;
         float height = 1f;
 
-        float fixedDivider = 1.1f;
-        //float divider = (1.1f + SPEED_LIMIT) - movementSpeed;
+        float fixedDivider = 1f;
+        float divider = (1.1f + (SPEED_LIMIT / baseSpeedIncrease)) - speedLevel;
 
         thinWidth = (width / (fixedDivider * 2));
         thinHeight = (height / (fixedDivider * 2));
@@ -241,7 +240,7 @@ public class Player extends Entity implements FirePathListener {
         fixedThinHeight = (height / (fixedDivider * fixedDividerOffset));
 
         burnRect = RefreshRectangle(burnRect, x, y, width - fixedThinWidth, height - fixedThinHeight);
-        collisionRect = RefreshRectangle(collisionRect, x, y, width + fixedThinWidth / fixedDividerCoordinator, height + fixedThinHeight / fixedDividerCoordinator);
+        collisionRect = RefreshRectangle(collisionRect, x, y, width - fixedThinWidth / fixedDividerCoordinator, height - fixedThinHeight / fixedDividerCoordinator);
 
         northRect = RefreshRectangle(northRect, x, y, width - (thinWidth * fixedDividerOffset), thinHeight / fixedDividerOffset);
         southRect = RefreshRectangle(southRect, x, y, width - (thinWidth * fixedDividerOffset), thinHeight / fixedDividerOffset);
@@ -364,7 +363,7 @@ public class Player extends Entity implements FirePathListener {
         westRect.setPosition(x, y + (fixedThinHeight / fixedDividerOffset) / verticalDivider);
 
         burnRect.setPosition(x + fixedThinWidth / fixedDividerOffset, y + fixedThinHeight / fixedDividerOffset);
-        collisionRect.setPosition(x - fixedThinWidth / (fixedDividerCoordinator * fixedDividerOffset), y - fixedThinHeight / (fixedDividerCoordinator * fixedDividerOffset));
+        collisionRect.setPosition(x + fixedThinWidth / (fixedDividerCoordinator * fixedDividerOffset), y + fixedThinHeight / (fixedDividerCoordinator * fixedDividerOffset));
     }
 
     public int GetRemainingLife() {
