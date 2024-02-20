@@ -25,6 +25,7 @@ import com.radius.system.events.TimerEventListener;
 import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.EndGameEventListener;
 import com.radius.system.events.listeners.FirePathListener;
+import com.radius.system.events.listeners.LoadingEventListener;
 import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.listeners.StatChangeListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
@@ -40,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BoomGameStage extends Stage implements ButtonPressListener, EndGameEventListener {
+public class BoomGameStage extends Stage implements ButtonPressListener, EndGameEventListener, LoadingEventListener {
 
     private final static float BUTTON_POSITION_Y_DIVIDER = 6f;
 
@@ -72,7 +73,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
 
     private float worldWidth, worldHeight;
 
-    private boolean isTouching, paused, gameConcluded;
+    private boolean isTouching, paused, gameConcluded, loading;
 
     private String conclusionMessage;
 
@@ -234,6 +235,10 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
         return paused || gameConcluded;
     }
 
+    public boolean IsLoading() {
+        return loading;
+    }
+
     @Override
     public void act(float delta) {
         super.act(delta);
@@ -262,7 +267,16 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
             DrawJoystick(batch);
         }
 
+        if (loading) {
+            DrawLoadingOverlay(batch);
+        }
+
         batch.end();
+    }
+
+    private void DrawLoadingOverlay(Batch batch) {
+        batch.draw(pauseScreen, 0, 0, worldWidth, worldHeight);
+        winnerAnnouncement.draw(batch, "Loading...", worldWidth / 2, worldHeight / 2, scale, Align.center, false);
     }
 
     private void DrawConclusionMessage(Batch batch) {
@@ -433,5 +447,15 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
         for (MovementEventListener listener : movementEventListeners) {
             listener.OnMove(movementEvent);
         }
+    }
+
+    @Override
+    public void OnLoadStart() {
+        loading = true;
+    }
+
+    @Override
+    public void OnLoadFinish() {
+        loading = false;
     }
 }

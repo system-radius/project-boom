@@ -10,6 +10,7 @@ import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.events.RestartEventListener;
 import com.radius.system.events.listeners.EndGameEventListener;
+import com.radius.system.events.listeners.LoadingEventListener;
 import com.radius.system.events.parameters.EndGameEvent;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
@@ -30,15 +31,23 @@ public class GameState implements Disposable, RestartEventListener {
 
     private final float WORLD_SCALE = GlobalConstants.WORLD_SCALE;
 
+    private final float loadLimit = 1f;
+
     private final BoardState boardState;
 
     private final List<BoomPlayerController> controllers = new ArrayList<>();
 
     private final List<EndGameEventListener> endGameEventListeners = new ArrayList<>();
 
+    private final List<LoadingEventListener> loadingEventListeners = new ArrayList<>();
+
     private final EndGameEvent endGameEvent;
 
     private int mainPlayer = -1;
+
+    private float loadCounter = 0;
+
+    private boolean loading = false;
 
     public GameState() {
         boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT, (int) WORLD_SCALE);
@@ -80,6 +89,7 @@ public class GameState implements Disposable, RestartEventListener {
 
     public void RestartField() {
 
+        FireOnLoadStartEvent();
         boardState.ClearBoard();
 
         for (BoomPlayerController controller : controllers) {
@@ -141,7 +151,17 @@ public class GameState implements Disposable, RestartEventListener {
         return ((x >= WORLD_WIDTH - 3 || x <= 2) && (y >= WORLD_HEIGHT - 3 || y <= 2));
     }
 
+    public void UpdateLoading(float delta) {
+        loadCounter += delta;
+        loading = loadCounter < loadLimit;
+
+        if (!loading) {
+            FireOnLoadFinishEvent();
+        }
+    }
+
     public void Update(float delta) {
+
         boardState.Update(delta);
         for (BoomPlayerController controller : controllers) {
             controller.Update(delta);
@@ -206,6 +226,26 @@ public class GameState implements Disposable, RestartEventListener {
     private void FireEndGameEvent() {
         for (EndGameEventListener listener : endGameEventListeners) {
             listener.OnEndGameTrigger(endGameEvent);
+        }
+    }
+
+    public void AddLoadingEventListener(LoadingEventListener listener) {
+        if (loadingEventListeners.contains(listener)) return;
+        loadingEventListeners.add(listener);
+    }
+
+    private void FireOnLoadFinishEvent() {
+        for (LoadingEventListener listener : loadingEventListeners) {
+            listener.OnLoadFinish();
+        }
+    }
+
+    private void FireOnLoadStartEvent() {
+        loading = true;
+        loadCounter = 0;
+
+        for (LoadingEventListener listener : loadingEventListeners) {
+            listener.OnLoadStart();
         }
     }
 }

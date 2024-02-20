@@ -73,6 +73,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
     private void InitializeEvents() {
         stage.AddButtonPressListener(this);
         gameState.AddEndGameEventListener(stage);
+        gameState.AddLoadingEventListener(stage);
         HumanPlayerController controller = gameState.GetMainController();
         if (controller == null) {
             float newZoom = ComputeZoomValue();
@@ -99,6 +100,8 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(multiplexer);
+
+        stage.OnLoadStart();
     }
 
     private void InitializeView() {
@@ -150,7 +153,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
     private void InitializeGameState() {
 
         List<PlayerConfig> configs = new ArrayList<>();
-        configs.add(CreatePlayerConfig(true, true));
+        configs.add(CreatePlayerConfig(false, true));
         configs.add(CreatePlayerConfig(false, false));
         configs.add(CreatePlayerConfig(false, true));
         configs.add(CreatePlayerConfig(false, true));
@@ -187,6 +190,12 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         if (stage.IsPaused()) {
             return;
         }
+
+        if (stage.IsLoading()) {
+            gameState.UpdateLoading(delta);
+            return;
+        }
+
         gameState.Update(delta);
         stage.act(delta);
     }
