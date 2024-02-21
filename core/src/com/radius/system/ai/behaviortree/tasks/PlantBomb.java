@@ -13,7 +13,7 @@ public class PlantBomb extends Node {
     @Override
     public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
         GetRoot().SetData(NodeKeys.PLANT_BOMB, true);
-        GetRoot().ClearData(NodeKeys.TARGET_POINT);
+        ClearFullData(NodeKeys.TARGET_POINT);
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
 
         return NodeState.SUCCESS;

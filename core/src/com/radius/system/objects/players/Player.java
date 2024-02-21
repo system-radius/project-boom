@@ -144,7 +144,7 @@ public class Player extends Entity implements FirePathListener {
 
     private float deathTime, respawnTime, invulnerableTime;
 
-    private boolean invulnerable = false, useRespawnPoint = false;
+    private boolean invulnerable = false, useRespawnPoint = true;
 
     private int bombStock = 0, firePower = 0, speedLevel = 0;
 

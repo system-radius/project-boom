@@ -4,6 +4,7 @@ import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.nodes.Solidifier;
 import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
+import com.radius.system.enums.BoardRep;
 import com.radius.system.states.BoardState;
 import com.radius.system.enums.NodeState;
 import com.radius.system.objects.players.Player;
@@ -11,6 +12,8 @@ import com.radius.system.objects.players.Player;
 import java.util.List;
 
 public class FindPlayer extends Solidifier {
+
+    private final BoardState boardState;
 
     private final List<Player> players;
 
@@ -25,6 +28,7 @@ public class FindPlayer extends Solidifier {
         this.playerId = id;
         this.fireThreshold = fireThreshold;
         this.players = boardState.GetPlayers();
+        this.boardState = boardState;
 
         this.id = "[!] FindPlayer";
     }
@@ -61,16 +65,21 @@ public class FindPlayer extends Solidifier {
             //System.out.println("[" + depth + ": FindPlayer] Returning failure!");
             GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
             GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
+            //System.out.println("[" + displayId + "] Failed to select target!");
             return NodeState.FAILURE;
         }
 
         Point targetPoint = srcPoint;
         if (path.size() > 0) {
             targetPoint = path.get(path.size() - 1);
+            if (BoardRep.BOMB.equals(boardState.GetBoardEntry(targetPoint.x, targetPoint.y))) {
+                return NodeState.FAILURE;
+            }
             //System.out.println("[" + depth + ": FindPlayer] Returning success! Found player at: " + targetPoint.x + ", " + targetPoint.y + "!");
         }
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
+        //System.out.println("[" + displayId + "] Target point acquired: " + targetPoint);
         return NodeState.SUCCESS;
     }
 

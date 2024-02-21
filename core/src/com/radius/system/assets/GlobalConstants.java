@@ -12,7 +12,7 @@ public class GlobalConstants {
 
     public static final int WORLD_AREA = (int)(WORLD_WIDTH * WORLD_HEIGHT);
 
-    public static final String TIED_MESSAGE = "Every one has lost!";
+    public static final String TIED_MESSAGE = "Every one has lost!  ";
 
     public static boolean DEBUG = true;
 

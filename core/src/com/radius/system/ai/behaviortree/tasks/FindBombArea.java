@@ -61,14 +61,14 @@ public class FindBombArea extends Solidifier {
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
-            //System.out.println("Failed to select target!");
+            //System.out.println("[" + displayId + "] Failed to select target!");
             GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             return NodeState.FAILURE;
         }
 
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
-        //System.out.println(targetPoint + " Selected target point: " + maxBurnCount);
+        //System.out.println("[" + displayId + "]  Target point acquired: " + targetPoint + " ---> " + maxBurnCount);
         return NodeState.SUCCESS;
     }
 
@@ -83,7 +83,7 @@ public class FindBombArea extends Solidifier {
 
         Map<Direction, Integer> rangeMapping = AssessBombArea(point.x, point.y);
 
-        boolean hasMoreBurnCount = currentBurnCount > maxBurnCount;
+        boolean hasMoreBurnCount = currentBurnCount > maxBurnCount && BoardRep.EMPTY.equals(boardState.GetBoardEntry(point.x, point.y));
         //System.out.println(point + " Accepted by super: " + acceptedBySuper + ", has more burn count (" + currentBurnCount + " > " + maxBurnCount + "): " + hasMoreBurnCount);
 
         boolean acceptPoint = false;
@@ -106,6 +106,10 @@ public class FindBombArea extends Solidifier {
         int[][] modifiedBoardCost = new int[width][height];
         for (int i = 0; i < boardCost.length; i++) {
             System.arraycopy(boardCost[i], 0, modifiedBoardCost[i], 0, boardCost[i].length);
+        }
+
+        if (BoardRep.BOMB.equals(boardState.GetBoardEntry(srcPoint.x, srcPoint.y))) {
+            modifiedBoardCost[srcPoint.x][srcPoint.y] = -1;
         }
 
         int x = point.x, y = point.y;

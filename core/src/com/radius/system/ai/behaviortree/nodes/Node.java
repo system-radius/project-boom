@@ -117,4 +117,27 @@ public abstract class Node {
 
         return false;
     }
+
+    public final boolean ClearFullData(String key) {
+        Node root = GetRoot();
+        return root.ClearDataFromSelf(key) || root.ClearDataFromChildren(key);
+    }
+
+    private boolean ClearDataFromSelf(String key) {
+        if (data.containsKey(key)) {
+            data.remove(key);
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean ClearDataFromChildren(String key) {
+        boolean clearedData = false;
+        for (Node child : children) {
+            clearedData = clearedData || child.ClearDataFromSelf(key) || child.ClearDataFromChildren(key);
+        }
+
+        return clearedData;
+    }
 }

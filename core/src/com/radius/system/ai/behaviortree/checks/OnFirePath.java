@@ -26,11 +26,14 @@ public class OnFirePath extends Node {
         if (boardCost[srcPoint.x][srcPoint.y] > threshold) {
             GetRoot().SetData(NodeKeys.ON_FIRE_PATH, true);
             GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
+            //System.out.println("[" + displayId + "] On fire path: TRUE");
             return NodeState.SUCCESS;
         }
 
         GetRoot().ClearData(NodeKeys.ON_FIRE_PATH);
+        ClearData(NodeKeys.TARGET_POINT);
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
+        //System.out.println("[" + displayId + "] On fire path: FALSE");
         return NodeState.FAILURE;
     }
 }

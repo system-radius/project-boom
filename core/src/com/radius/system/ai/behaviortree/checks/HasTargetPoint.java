@@ -17,9 +17,11 @@ public class HasTargetPoint extends Node {
         Point targetPoint = (Point) GetParent(1).GetData(NodeKeys.TARGET_POINT, false);
         if (targetPoint == null) {
             GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
+            //System.out.println("[" + displayId + "] No target point found!");
             return NodeState.FAILURE;
         }
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
+        //System.out.println("[" + displayId + "] Already has target: " + targetPoint);
         return NodeState.SUCCESS;
     }
 }

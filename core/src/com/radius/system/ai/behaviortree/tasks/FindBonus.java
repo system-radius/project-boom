@@ -37,12 +37,14 @@ public class FindBonus extends Solidifier {
 
         if (targetPoint == null) {
             GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
+            //System.out.println("[" + displayId + "] Failed to select target!");
             return NodeState.FAILURE;
         }
 
         //System.out.println("Target point for find bonus: " + targetPoint);
         GetRoot().SetData(NodeKeys.TARGET_POINT, targetPoint);
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
+        //System.out.println("[" + displayId + "] Target point acquired: " + targetPoint);
         return NodeState.SUCCESS;
     }
 

@@ -29,6 +29,8 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     private boolean deathReset;
 
+    private String activeNode = null;
+
     public ArtificialIntelligenceController(int id, BoardState boardState, PlayerConfig config, float scale) {
         super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
         targetPoint = new Point(null, -1, -1);
@@ -41,6 +43,13 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         Object value = tree.GetData(NodeKeys.ACTIVE_NODE);
         if (value == null) {
             return "No Active node!";
+        }
+
+        String display = value.toString();
+
+        if (!display.equals(activeNode)) {
+            //System.out.println(display);
+            activeNode = display;
         }
 
         return value.toString();
@@ -109,13 +118,21 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         }
     }
 
+    private void Reset() {
+        tree.Restart();
+        currentPath = null;
+    }
+
     @Override
     public void Update(float delta) {
 
+        if (player.GetRemainingLife() == 0) {
+            return;
+        }
+
         if (player.IsDead() && deathReset) {
             deathReset = false;
-            tree.Restart();
-            currentPath = null;
+            Reset();
         } else if (player.IsAlive() && !deathReset) {
             deathReset = true;
         }

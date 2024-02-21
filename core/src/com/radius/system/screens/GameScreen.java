@@ -155,14 +155,13 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
     private void InitializeGameState() {
 
         List<PlayerConfig> configs = new ArrayList<>();
-        configs.add(CreatePlayerConfig(true, true));
+
+        configs.add(CreatePlayerConfig(false, true));
         configs.add(CreatePlayerConfig(false, false));
-        /*
         configs.add(CreatePlayerConfig(false, true));
         configs.add(CreatePlayerConfig(false, true));
+        /**/
 
-
-         */
         gameState = new GameState();
         gameState.AddPlayers(configs);
     }
@@ -238,7 +237,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
                 BoomPlayerController controller = controllers.get(i);
                 if (controller instanceof ArtificialIntelligenceController) {
                     String display = ((ArtificialIntelligenceController) controller).GetActiveNode();
-                    font.draw(spriteBatch, display, WORLD_SCALE / 2f, WORLD_SCALE / 2 + WORLD_SCALE * i);
+                    font.draw(spriteBatch, i + ": " + display, WORLD_SCALE / 2f, WORLD_SCALE / 2 + WORLD_SCALE * i);
                 }
             }
             //font.draw(spriteBatch, "(" + (mainCamera.position.x / WORLD_SCALE) + ", " + (mainCamera.position.y / WORLD_SCALE) + ")", x, y);

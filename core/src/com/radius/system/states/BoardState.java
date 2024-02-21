@@ -167,8 +167,9 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
             }
         }
 
-        for (Bomb bomb : bombs) {
+        for (int i = bombs.size() - 1;  i >= 0; i--) {
 
+            Bomb bomb = bombs.get(i);
             int x = bomb.GetWorldX(), y = bomb.GetWorldY();
             Map<Direction, Integer> fireRanges = bomb.GetRangeValues();
 

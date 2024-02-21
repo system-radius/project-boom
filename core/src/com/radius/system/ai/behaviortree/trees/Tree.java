@@ -71,6 +71,7 @@ public abstract class Tree implements BoomUpdatable {
         root.AttachChild(ConstructAttackPlayerTree());
         root.AttachChild(ConstructBombAreaTree());
         root.AttachChild(ConstructDefenseTree(2));
+        root.AttachChild(ConstructDefenseTree(2));
 
         return root;
     }
