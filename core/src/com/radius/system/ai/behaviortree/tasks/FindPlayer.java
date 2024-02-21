@@ -72,10 +72,10 @@ public class FindPlayer extends Solidifier {
         Point targetPoint = srcPoint;
         if (path.size() > 0) {
             targetPoint = path.get(path.size() - 1);
-            if (BoardRep.BOMB.equals(boardState.GetBoardEntry(targetPoint.x, targetPoint.y))) {
-                return NodeState.FAILURE;
-            }
             //System.out.println("[" + depth + ": FindPlayer] Returning success! Found player at: " + targetPoint.x + ", " + targetPoint.y + "!");
+        }
+        if (BoardRep.BOMB.equals(boardState.GetBoardEntry(targetPoint.x, targetPoint.y))) {
+            return NodeState.FAILURE;
         }
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
