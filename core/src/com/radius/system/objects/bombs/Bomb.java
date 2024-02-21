@@ -215,10 +215,12 @@ public class Bomb extends Block {
         fireRanges.put(Direction.WEST, rangeWest);
         fireRanges.put(Direction.EAST, rangeEast);
 
-        fireStreamNorthBound = RefreshRectangle(fireStreamNorthBound, intX, intYPlus1, 1, (rangeNorth - 1));
-        fireStreamSouthBound = RefreshRectangle(fireStreamSouthBound, intX, intYPlus1 - rangeSouth, 1, (rangeSouth - 1));
-        fireStreamWestBound = RefreshRectangle(fireStreamWestBound, intXPlus1 - rangeWest, intY, (rangeWest - 1), 1);
-        fireStreamEastBound = RefreshRectangle(fireStreamEastBound, intXPlus1, intY, (rangeEast - 1), 1);
+        float widthOffset = 0.5f, heightOffset = 0.5f, reduction = 1.25f;
+
+        fireStreamNorthBound = RefreshRectangle(fireStreamNorthBound, intX + widthOffset / 2, intYPlus1, widthOffset, (rangeNorth - reduction));
+        fireStreamSouthBound = RefreshRectangle(fireStreamSouthBound, intX + widthOffset / 2, intYPlus1 - rangeSouth + heightOffset / 2, widthOffset, (rangeSouth - reduction));
+        fireStreamWestBound = RefreshRectangle(fireStreamWestBound, intXPlus1 - rangeWest + widthOffset / 2, intY + heightOffset / 2, (rangeWest - reduction), heightOffset);
+        fireStreamEastBound = RefreshRectangle(fireStreamEastBound, intXPlus1, intY + heightOffset / 2, (rangeEast - reduction), heightOffset);
         fireStreamCenterBound = RefreshRectangle(fireStreamCenterBound, intX, intY, 1, 1);
     }
 
@@ -528,6 +530,7 @@ public class Bomb extends Block {
     }
 
     private void DrawRect(ShapeRenderer renderer, Rectangle rect) {
+        if (rect == null) return;
         renderer.rect(rect.x * size.x, rect.y * size.y, rect.width * size.x, rect.height * size.y);
     }
 
