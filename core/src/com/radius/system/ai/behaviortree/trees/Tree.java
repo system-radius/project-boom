@@ -64,21 +64,23 @@ public abstract class Tree implements BoomUpdatable {
     }
 
     protected Node SetupTree() {
-        Node root = new Selector();
+        Node root = new Selector("[+] ROOT");
         //root.AttachChild(new IsPlantingBomb());
-        root.AttachChild(ConstructDefenseTree());
+        root.AttachChild(ConstructDefenseTree(fireThreshold));
         root.AttachChild(ConstructFindBonusTree());
         root.AttachChild(ConstructAttackPlayerTree());
         root.AttachChild(ConstructBombAreaTree());
+        root.AttachChild(ConstructDefenseTree(2));
+
         return root;
     }
 
-    protected Node ConstructDefenseTree() {
-        Node findSafeSpaceTarget = new Selector();
+    protected Node ConstructDefenseTree(int fireThreshold) {
+        Node findSafeSpaceTarget = new Selector("[+] FindSpace");
         findSafeSpaceTarget.AttachChild(new HasTargetPoint());
         findSafeSpaceTarget.AttachChild(new FindSafeSpace(fireThreshold));
 
-        Node root = new Sequencer();
+        Node root = new Sequencer("[>] Defense" + fireThreshold);
         root.AttachChild(new OnFirePath(fireThreshold));
         root.AttachChild(findSafeSpaceTarget);
         root.AttachChild(new MoveToTarget());
@@ -87,7 +89,7 @@ public abstract class Tree implements BoomUpdatable {
     }
 
     protected Node ConstructFindBonusTree() {
-        Node root = new Sequencer();
+        Node root = new Sequencer("[>] Bonus");
         root.AttachChild(new FindBonus(fireThreshold, boardState));
         root.AttachChild(new MoveToTarget());
 
@@ -95,7 +97,7 @@ public abstract class Tree implements BoomUpdatable {
     }
 
     protected Node ConstructAttackPlayerTree() {
-        Node root = new Sequencer();
+        Node root = new Sequencer("[>] AttackP");
         root.AttachChild(new FindPlayer(id, fireThreshold, boardState));
         root.AttachChild(new MoveToTarget(new PlantBomb()));
 
@@ -103,11 +105,11 @@ public abstract class Tree implements BoomUpdatable {
     }
 
     protected Node ConstructBombAreaTree() {
-        Node findBombAreaTarget = new Selector();
+        Node findBombAreaTarget = new Selector("[+] FindArea");
         findBombAreaTarget.AttachChild(new HasTargetPoint());
         findBombAreaTarget.AttachChild(new FindBombArea(fireThreshold, boardState, boardState.GetPlayers().get(id)));
 
-        Node root = new Sequencer();
+        Node root = new Sequencer("[>] AttackA");
         root.AttachChild(findBombAreaTarget);
         root.AttachChild(new MoveToTarget(new PlantBomb()));
         return root;

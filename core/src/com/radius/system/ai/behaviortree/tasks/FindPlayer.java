@@ -1,7 +1,6 @@
 package com.radius.system.ai.behaviortree.tasks;
 
 import com.radius.system.ai.behaviortree.NodeKeys;
-import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Solidifier;
 import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
@@ -15,7 +14,7 @@ public class FindPlayer extends Solidifier {
 
     private final List<Player> players;
 
-    private final int id, fireThreshold;
+    private final int playerId, fireThreshold;
 
     private Point srcPoint;
 
@@ -23,9 +22,11 @@ public class FindPlayer extends Solidifier {
 
     public FindPlayer(int id, int fireThreshold, BoardState boardState) {
         super(fireThreshold);
-        this.id = id;
+        this.playerId = id;
         this.fireThreshold = fireThreshold;
         this.players = boardState.GetPlayers();
+
+        this.id = "[!] FindPlayer";
     }
 
     @Override
@@ -36,15 +37,16 @@ public class FindPlayer extends Solidifier {
         if (srcPoint == null) {
             //System.out.println("[" + depth + ": FindPlayer] Returning failure!");
             GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
+            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             return NodeState.FAILURE;
         }
 
         int pathCount = Integer.MAX_VALUE;
-        range = players.get(id).GetFirePower();
+        range = players.get(playerId).GetFirePower();
         Player target = null;
         List<Point> path = null;
         for (Player player : players) {
-            if (id == player.id || !player.IsAlive()) {
+            if (playerId == player.id || !player.IsAlive()) {
                 continue;
             }
 
@@ -58,6 +60,7 @@ public class FindPlayer extends Solidifier {
         if (target == null || path == null) {
             //System.out.println("[" + depth + ": FindPlayer] Returning failure!");
             GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
+            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             return NodeState.FAILURE;
         }
 
@@ -67,6 +70,7 @@ public class FindPlayer extends Solidifier {
             //System.out.println("[" + depth + ": FindPlayer] Returning success! Found player at: " + targetPoint.x + ", " + targetPoint.y + "!");
         }
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
+        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
         return NodeState.SUCCESS;
     }
 

@@ -14,6 +14,8 @@ public class NodeKeys {
 
     public static final String POTENTIAL_TARGET_POINT = "potentialTargetPoint";
 
+    public static final String ACTIVE_NODE = "activeNode";
+
     private NodeKeys(){
 
     }

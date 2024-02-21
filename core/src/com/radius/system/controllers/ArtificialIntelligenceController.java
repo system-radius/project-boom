@@ -34,7 +34,16 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         targetPoint = new Point(null, -1, -1);
         pastTarget = new Point(null, -1, -1);
         srcPoint = new Point(null, player.GetWorldX(), player.GetWorldY());
-        tree = new DefaultTree(id, 2, boardState);
+        tree = new DefaultTree(id, GlobalConstants.WORLD_AREA - (GlobalConstants.WORLD_AREA / 4), boardState);
+    }
+
+    public String GetActiveNode() {
+        Object value = tree.GetData(NodeKeys.ACTIVE_NODE);
+        if (value == null) {
+            return "No Active node!";
+        }
+
+        return value.toString();
     }
 
     @Override

@@ -25,6 +25,7 @@ public class FindSafeSpace extends Solidifier {
     public FindSafeSpace(int fireThreshold) {
         super(fireThreshold);
         theoryCrafter = new TheoreticalSafeSpaceCounter();
+        id = "[!] FindSafeSpace";
     }
 
     @Override
@@ -33,6 +34,7 @@ public class FindSafeSpace extends Solidifier {
 
         srcPoint = (Point) GetData(NodeKeys.SOURCE_POINT);
         if (srcPoint == null) {
+            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             return NodeState.FAILURE;
         }
 
@@ -46,10 +48,12 @@ public class FindSafeSpace extends Solidifier {
 
         if (targetPoint == null) {
             //System.out.println("[FindSafeSpace] Failed to select target!");
+            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             return NodeState.FAILURE;
         }
 
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
+        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
         //System.out.println(" = = = final target point: (" + targetPoint.x + ", " + targetPoint.y + ") = = =");
         return NodeState.SUCCESS;
     }

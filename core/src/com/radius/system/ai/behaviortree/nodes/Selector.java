@@ -6,8 +6,13 @@ import java.util.List;
 
 public class Selector extends Node {
 
-    public Selector(Node... children) {
+    public Selector(String id) {
+        this.id = id;
+    }
+
+    public Selector(String id, Node... children) {
         super(children);
+        this.id = id;
     }
 
     @Override

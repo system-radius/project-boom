@@ -39,6 +39,8 @@ public class FindBombArea extends Solidifier {
         this.boardState = boardState;
         this.player = player;
 
+        id = "[!] FindBombArea";
+
         theoryCrafter = new TheoreticalSafeSpace();
     }
 
@@ -48,6 +50,7 @@ public class FindBombArea extends Solidifier {
 
         srcPoint = (Point) GetRoot().GetData(NodeKeys.SOURCE_POINT);
         if (srcPoint == null || player.GetAvailableBombs() <= 0) {
+            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE?");
             return NodeState.FAILURE;
         }
 
@@ -59,10 +62,12 @@ public class FindBombArea extends Solidifier {
 
         if (targetPoint == null) {
             //System.out.println("Failed to select target!");
+            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             return NodeState.FAILURE;
         }
 
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
+        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
         //System.out.println(targetPoint + " Selected target point: " + maxBurnCount);
         return NodeState.SUCCESS;
     }

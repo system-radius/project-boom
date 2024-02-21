@@ -12,7 +12,7 @@ import java.util.List;
 public class MoveToTarget extends Selector {
 
     public MoveToTarget(Node... children) {
-        super(children);
+        super("[!] MoveToTarget", children);
     }
 
     @Override
@@ -22,6 +22,7 @@ public class MoveToTarget extends Selector {
         Point dstPoint = (Point) GetData(NodeKeys.TARGET_POINT);
         if (srcPoint == null || dstPoint == null) {
             //System.out.println("[" + depth + ": MoveToTarget] Returning failure due to null target point!");
+            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             return NodeState.FAILURE;
         }
 
@@ -31,12 +32,14 @@ public class MoveToTarget extends Selector {
         if (currentPath != null) {
             if (currentPath.size() == 1 && currentPath.get(0).IsEqualPosition(srcPoint)) {
                 ClearData(NodeKeys.TARGET_POINT);
+                GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
                 if (children.size() > 0) {
                     return super.Evaluate(depth, delta, boardCost);
                 }
             }
         }
         //System.out.println("[" + depth + ": MoveToTarget] Returning running!");
+        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": RUNNING");
         return NodeState.RUNNING;
     }
 }

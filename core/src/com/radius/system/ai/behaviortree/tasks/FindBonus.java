@@ -19,6 +19,7 @@ public class FindBonus extends Solidifier {
     public FindBonus(int fireThreshold, BoardState boardState) {
         super(fireThreshold);
         this.boardState = boardState;
+        id = "[!] FindBonus";
     }
 
     @Override
@@ -27,6 +28,7 @@ public class FindBonus extends Solidifier {
 
         srcPoint = (Point) GetRoot().GetData(NodeKeys.SOURCE_POINT);
         if (srcPoint == null) {
+            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             return NodeState.FAILURE;
         }
 
@@ -34,11 +36,13 @@ public class FindBonus extends Solidifier {
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
+            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             return NodeState.FAILURE;
         }
 
         //System.out.println("Target point for find bonus: " + targetPoint);
         GetRoot().SetData(NodeKeys.TARGET_POINT, targetPoint);
+        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
         return NodeState.SUCCESS;
     }
 

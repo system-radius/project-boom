@@ -6,6 +6,15 @@ import java.util.List;
 
 public class Sequencer extends Node {
 
+    public Sequencer(String id) {
+        this.id = id;
+    }
+
+    public Sequencer(String id, Node... children) {
+        super(children);
+        this.id = id;
+    }
+
     @Override
     public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
         boolean anyRunning = false;

@@ -15,10 +15,11 @@ public abstract class Node {
 
     protected NodeState state;
 
+    protected String id, displayId;
+
     protected List<Node> children = new ArrayList<>();
 
     public Node() {
-
     }
 
     public Node(Node... children) {
@@ -38,7 +39,15 @@ public abstract class Node {
 
     public void AttachChild(Node child) {
         child.parent = this;
+        RefreshId(id);
         children.add(child);
+    }
+
+    public void RefreshId(String parentId) {
+        this.displayId = parentId + " -> " + this.id;
+        for (Node child : children) {
+            child.RefreshId(this.displayId);
+        }
     }
 
     public abstract NodeState Evaluate(int depth, float delta, int[][] boardCost);

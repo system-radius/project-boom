@@ -11,6 +11,8 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.assets.GlobalConstants;
+import com.radius.system.controllers.ArtificialIntelligenceController;
+import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.enums.ButtonType;
 import com.radius.system.events.listeners.ButtonPressListener;
@@ -57,10 +59,10 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
     private BitmapFont font;
 
-    private boolean maxZoomOut = false;
+    private boolean maxZoomOut = true;
 
     public GameScreen() {
-        font = FontUtils.GetFont((int) WORLD_SCALE / 2, Color.WHITE, 1, Color.BLACK);
+        font = FontUtils.GetFont((int) WORLD_SCALE / 4, Color.WHITE, 1, Color.BLACK);
 
         InitializeView();
         InitializeStage();
@@ -155,9 +157,12 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         List<PlayerConfig> configs = new ArrayList<>();
         configs.add(CreatePlayerConfig(true, true));
         configs.add(CreatePlayerConfig(false, false));
+        /*
         configs.add(CreatePlayerConfig(false, true));
         configs.add(CreatePlayerConfig(false, true));
 
+
+         */
         gameState = new GameState();
         gameState.AddPlayers(configs);
     }
@@ -228,7 +233,15 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
         if (GlobalConstants.DEBUG) {
-            font.draw(spriteBatch, "(" + (mainCamera.position.x / WORLD_SCALE) + ", " + (mainCamera.position.y / WORLD_SCALE) + ")", x, y);
+            List<BoomPlayerController> controllers = gameState.GetControllers();
+            for (int i = 0; i < controllers.size(); i++) {
+                BoomPlayerController controller = controllers.get(i);
+                if (controller instanceof ArtificialIntelligenceController) {
+                    String display = ((ArtificialIntelligenceController) controller).GetActiveNode();
+                    font.draw(spriteBatch, display, WORLD_SCALE / 2f, WORLD_SCALE / 2 + WORLD_SCALE * i);
+                }
+            }
+            //font.draw(spriteBatch, "(" + (mainCamera.position.x / WORLD_SCALE) + ", " + (mainCamera.position.y / WORLD_SCALE) + ")", x, y);
             //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
             //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
         }
