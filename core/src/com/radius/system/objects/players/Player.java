@@ -156,7 +156,7 @@ public class Player extends Entity implements FirePathListener {
 
     public final String name;
 
-    private String spritePath;
+    private String spritePath, displayedName;
 
     private final BitmapFont playerNameFont;
 
@@ -331,6 +331,7 @@ public class Player extends Entity implements FirePathListener {
 
         ChangeBombType(BombType.NORMAL);
         FireStatChange(BonusType.LIFE, life);
+        displayedName = name + "\n[" + GetRemainingLife() + "] ";
     }
 
     private void UpdateDirection() {
@@ -626,6 +627,10 @@ public class Player extends Entity implements FirePathListener {
             return;
         }
 
+        if (life == 0) {
+            displayedName = name + "\n[x]";
+        }
+
         state = PlayerState.DYING;
         animationElapsedTime = deathTime = respawnTime = 0f;
     }
@@ -725,7 +730,7 @@ public class Player extends Entity implements FirePathListener {
             DrawFireNotification(batch);
         }
 
-        playerNameFont.draw(batch, "[" + GetRemainingLife() + "]", position.x * size.x, position.y * size.y, scale, Align.center, false);
+        playerNameFont.draw(batch, displayedName, position.x * size.x, position.y * size.y, scale, Align.center, false);
     }
 
     @Override
