@@ -148,7 +148,7 @@ public class Player extends Entity implements FirePathListener {
 
     private int bombStock = 0, firePower = 0, speedLevel = 0;
 
-    private final float baseSpeedIncrease = 0.5f, baseSpeed = 1.5f;
+    private final float baseSpeedIncrease = 0.5f, baseSpeed = 2f;
 
     private BombType bombType = null;
 
@@ -381,6 +381,10 @@ public class Player extends Entity implements FirePathListener {
 
     public int GetAvailableBombs() {
         return bombStock - bombs.size();
+    }
+
+    public float GetMovementSpeed() {
+        return movementSpeed;
     }
 
     public Rectangle GetBurnRect() {

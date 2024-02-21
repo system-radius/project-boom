@@ -10,7 +10,7 @@ public abstract class Entity extends AnimatedGameObject {
 
     public final Vector2 past;
 
-    protected float movementSpeed = 0.75f;
+    protected float movementSpeed = 1f;
 
     public Entity(BoardRep rep, float x, float y, float width, float height) {
         super(rep, x, y, width, height);
