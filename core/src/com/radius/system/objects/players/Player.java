@@ -367,7 +367,7 @@ public class Player extends Entity implements FirePathListener {
     }
 
     public int GetRemainingLife() {
-        return life;
+        return life + (!IsDead() ? 1 : 0);
     }
 
     public int GetFirePower() {

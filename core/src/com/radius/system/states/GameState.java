@@ -176,7 +176,7 @@ public class GameState implements Disposable, RestartEventListener {
         boolean hasOneAlive = false;
         for (BoomPlayerController controller : controllers) {
             Player player = controller.GetPlayer();
-            if (player.GetRemainingLife() >= 0 && player.IsAlive()) {
+            if (player.GetRemainingLife() > 0) {
                 if (!hasOneAlive) {
                     hasOneAlive = true;
                     endGameEvent.playerName = player.name;
