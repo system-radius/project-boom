@@ -58,7 +58,7 @@ public class Player extends Entity implements FirePathListener {
     /**
      * The maximum speed that a player can have.
      */
-    public static final float SPEED_LIMIT = 7.5f;
+    public static final int SPEED_LIMIT = 10;
 
     /**
      * The timer until the player respawns after dying.
@@ -207,7 +207,7 @@ public class Player extends Entity implements FirePathListener {
         if (godmode) {
             bombStock = BOMB_STOCK_LIMIT;
             firePower = FIRE_POWER_LIMIT;
-            speedLevel = (int)(SPEED_LIMIT / baseSpeedIncrease);
+            speedLevel = SPEED_LIMIT;
             bombType = BombType.GODMODE;
         }
         movementSpeed = baseSpeed + speedLevel * baseSpeedIncrease;
@@ -232,12 +232,12 @@ public class Player extends Entity implements FirePathListener {
 
         float fixedDivider = 1.1f;
         float balancer = 2f;
-        float divider = 12f - speedLevel;
+        float divider = SPEED_LIMIT - speedLevel;
 
         divider = divider == 0 ? balancer + 0.1f : balancer + divider;
 
-        thinWidth = (width / divider);
-        thinHeight = (height / divider);
+        thinWidth = (width / divider) * fixedDivider;
+        thinHeight = (height / divider) * fixedDivider;
 
         fixedThinWidth = (width / (fixedDivider * fixedDividerOffset));
         fixedThinHeight = (height / (fixedDivider * fixedDividerOffset));
@@ -486,8 +486,7 @@ public class Player extends Entity implements FirePathListener {
     }
 
     public void IncreaseMovementSpeed() {
-        if (baseSpeed + (baseSpeedIncrease * (speedLevel + 1)) > SPEED_LIMIT) {
-            movementSpeed = SPEED_LIMIT;
+        if (speedLevel + 1 > SPEED_LIMIT) {
             return;
         }
 
