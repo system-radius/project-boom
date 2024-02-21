@@ -417,8 +417,6 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
                 SetButtonStates();
                 break;
             case RESTART:
-                GlobalConstants.DEBUG = GlobalConstants.GODMODE = true;
-                System.out.println("Restart button pressed!");
             case A:
             case B:
             default:

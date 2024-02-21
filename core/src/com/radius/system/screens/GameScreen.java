@@ -262,7 +262,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         if (!ButtonType.RESTART.equals(event.buttonType)) {
             return;
         }
-        gameState.ActivateGodMode();
+        //gameState.ActivateGodMode();
         gameState.RestartField();
         stage.Restart();
     }
