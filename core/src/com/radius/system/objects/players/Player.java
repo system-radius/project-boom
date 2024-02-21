@@ -150,7 +150,7 @@ public class Player extends Entity implements FirePathListener {
 
     private final float baseSpeedIncrease = 0.5f, baseSpeed = 1.5f;
 
-    private BombType bombType = BombType.NORMAL;
+    private BombType bombType = null;
 
     public final int id;
 
@@ -216,7 +216,6 @@ public class Player extends Entity implements FirePathListener {
         FireStatChange(BonusType.BOMB_STOCK, bombStock);
         FireStatChange(BonusType.FIRE_POWER, firePower);
         FireStatChange(BonusType.MOVEMENT_SPEED, speedLevel);
-        FireBombChangeEvent();
 
         Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
 
@@ -329,6 +328,8 @@ public class Player extends Entity implements FirePathListener {
         invulnerableTime = 0f;
         invulnerable = true;
         life--;
+
+        ChangeBombType(BombType.NORMAL);
         FireStatChange(BonusType.LIFE, life);
     }
 
@@ -502,11 +503,25 @@ public class Player extends Entity implements FirePathListener {
             return;
         }
 
-        if (this.bombType == bombType) {
+        if (this.bombType == bombType && !BombType.NORMAL.equals(bombType)) {
             IncreaseBombStock();
+            return;
         }
+
         this.bombType = bombType;
-        FireBombChangeEvent();
+        BonusType bonusType = BonusType.EMPTY;
+        switch (bombType) {
+            case PIERCE:
+                bonusType = BonusType.PIERCE_BOMB;
+                break;
+            case IMPACT:
+                bonusType = BonusType.IMPACT_BOMB;
+                break;
+            case REMOTE:
+                bonusType = BonusType.REMOTE_MINE;
+                break;
+        }
+        FireStatChange(bonusType, bombType.GetType());
     }
 
     public BombType GetBombType() {
@@ -741,12 +756,6 @@ public class Player extends Entity implements FirePathListener {
         statChangeEvent.value = value;
         for (StatChangeListener listener : statChangeListeners) {
             listener.OnStatChange(statChangeEvent);
-        }
-    }
-
-    private void FireBombChangeEvent() {
-        for (BombTypeChangeListener listener : bombTypeChangeListeners) {
-            listener.OnBombTypeChange(bombType);
         }
     }
 

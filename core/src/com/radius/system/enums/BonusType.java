@@ -2,21 +2,21 @@ package com.radius.system.enums;
 
 public enum BonusType {
 
-    BOMB_STOCK(0),
+    LIFE(0),
 
-    FIRE_POWER(1),
+    BOMB_STOCK(1),
 
-    FLASH_FIRE(2),
+    FIRE_POWER(2),
 
-    MOVEMENT_SPEED(3),
+    FLASH_FIRE(3),
 
-    REMOTE_MINE(4),
+    MOVEMENT_SPEED(4),
 
-    PIERCE_BOMB(5),
+    REMOTE_MINE(5),
 
-    IMPACT_BOMB(6),
+    PIERCE_BOMB(6),
 
-    LIFE(7),
+    IMPACT_BOMB(7),
 
     EMPTY(-1);
 
