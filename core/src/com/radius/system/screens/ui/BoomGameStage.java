@@ -420,8 +420,8 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
             case A:
             case B:
             default:
-                FireButtonEvent(event);
         }
+        FireButtonEvent(event);
     }
 
     @Override
