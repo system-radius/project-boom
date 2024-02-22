@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class GameMode implements Disposable, RestartEventListener {
+public class GameMode implements Disposable {
 
     private final float WORLD_WIDTH = GlobalConstants.WORLD_WIDTH;
 
@@ -32,21 +32,17 @@ public class GameMode implements Disposable, RestartEventListener {
 
     private final float WORLD_SCALE = GlobalConstants.WORLD_SCALE;
 
-    private final float loadLimit = 1f;
-
     private final BoardState boardState;
 
     private final List<BoomPlayerController> controllers = new ArrayList<>();
 
     private final List<EndGameEventListener> endGameEventListeners = new ArrayList<>();
 
-    private final List<LoadingEventListener> loadingEventListeners = new ArrayList<>();
-
     private final EndGameEvent endGameEvent;
 
-    private int mainPlayer = -1;
+    private Thread restartThread;
 
-    private float loadCounter = 0;
+    private int mainPlayer = -1;
 
     private boolean loading = false;
 
@@ -88,16 +84,26 @@ public class GameMode implements Disposable, RestartEventListener {
         return controllers;
     }
 
-    public void RestartField() {
+    public void Restart(float delta) {
+        loading = true;
+        restartThread = new Thread(() -> RestartField(delta));
+        restartThread.start();
+    }
 
-        FireOnLoadStartEvent();
-        boardState.ClearBoard();
-
+    private void RestartControllers() {
         for (BoomPlayerController controller : controllers) {
             controller.Restart();
-
+            controller.ResetPlayer();
         }
+    }
 
+    public void RestartField(float delta) {
+        RestartField(delta, false);
+    }
+
+    public void RestartField(float delta, boolean secondTime) {
+
+        boardState.ClearBoard();
         float spacing = 2f; // Allows for leaving spaces when generating hard blocks.
         int fieldIndex = new Random(System.currentTimeMillis()).nextInt(7);
 
@@ -115,6 +121,38 @@ public class GameMode implements Disposable, RestartEventListener {
 
         //RandomizeBonus();
         RandomizeField(fieldIndex);
+
+        // Sleep for half a second to let the board complete its stuff.
+        Sleep(0.5f);
+        RestartControllers();
+
+        // Sleep for a second to finish restarting the controllers.
+        Sleep(1);
+        try {
+            Update(delta);
+        } catch (Exception e) {
+            e.printStackTrace();
+            RestartControllers();
+        }
+
+        FinishLoading();
+    }
+
+    private void Sleep(float sleepRate) {
+        try {
+            Thread.sleep((long)(sleepRate * 1000));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void FinishLoading() {
+        loading = false;
+        try {
+            restartThread.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void RandomizeBonus() {
@@ -152,13 +190,8 @@ public class GameMode implements Disposable, RestartEventListener {
         return ((x >= WORLD_WIDTH - 3 || x <= 2) && (y >= WORLD_HEIGHT - 3 || y <= 2));
     }
 
-    public void UpdateLoading(float delta) {
-        loadCounter += delta;
-        loading = loadCounter < loadLimit;
-
-        if (!loading) {
-            FireOnLoadFinishEvent();
-        }
+    public boolean IsDoneLoading() {
+        return !loading;
     }
 
     public void Update(float delta) {
@@ -214,11 +247,6 @@ public class GameMode implements Disposable, RestartEventListener {
         }
     }
 
-    @Override
-    public void OnRestart() {
-        RestartField();
-    }
-
     public void AddEndGameEventListener(EndGameEventListener listener) {
         if (endGameEventListeners.contains(listener)) return;
         endGameEventListeners.add(listener);
@@ -227,26 +255,6 @@ public class GameMode implements Disposable, RestartEventListener {
     private void FireEndGameEvent() {
         for (EndGameEventListener listener : endGameEventListeners) {
             listener.OnEndGameTrigger(endGameEvent);
-        }
-    }
-
-    public void AddLoadingEventListener(LoadingEventListener listener) {
-        if (loadingEventListeners.contains(listener)) return;
-        loadingEventListeners.add(listener);
-    }
-
-    private void FireOnLoadFinishEvent() {
-        for (LoadingEventListener listener : loadingEventListeners) {
-            listener.OnLoadFinish();
-        }
-    }
-
-    private void FireOnLoadStartEvent() {
-        loading = true;
-        loadCounter = 0;
-
-        for (LoadingEventListener listener : loadingEventListeners) {
-            listener.OnLoadStart();
         }
     }
 }
