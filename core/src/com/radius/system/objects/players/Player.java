@@ -120,7 +120,7 @@ public class Player extends Entity implements FirePathListener {
     /**
      * The loaded sprite sheet for this player.
      */
-    private Texture spriteSheet, warningSign;
+    private Texture warningSign;
 
     /**
      * The current scale value, provided on the creation of this object, relevant for the creation
@@ -216,9 +216,6 @@ public class Player extends Entity implements FirePathListener {
         FireStatChange(BonusType.BOMB_STOCK, bombStock);
         FireStatChange(BonusType.FIRE_POWER, firePower);
         FireStatChange(BonusType.MOVEMENT_SPEED, speedLevel);
-
-
-        FixBounds();
     }
 
     private void FixBounds() {
@@ -252,8 +249,8 @@ public class Player extends Entity implements FirePathListener {
     }
 
     private void LoadAsset(String spriteSheetPath) {
-        spriteSheet = new Texture(Gdx.files.internal(spriteSheetPath));
-        TextureRegion[][] allFrames = TextureRegion.split(spriteSheet, 32, 32);
+        //spriteSheet = new Texture(Gdx.files.internal(spriteSheetPath));
+        TextureRegion[][] allFrames = GlobalAssets.LoadTextureRegion(spriteSheetPath, 32, 32);
 
         animations.add(CreateAnimation(allFrames, Direction.SOUTH.GetIndex(), FRAME_DURATION_MOVING, true));
         animations.add(CreateAnimation(allFrames, Direction.NORTH.GetIndex(), FRAME_DURATION_MOVING, true));
@@ -319,6 +316,8 @@ public class Player extends Entity implements FirePathListener {
     public void Respawn(float x, float y) {
         position.x = x;
         position.y = y;
+
+        FixBounds();
 
         state = PlayerState.IDLE;
         direction = Direction.SOUTH;
@@ -621,7 +620,6 @@ public class Player extends Entity implements FirePathListener {
 
     @Override
     public void dispose() {
-        spriteSheet.dispose();
     }
 
     @Override
