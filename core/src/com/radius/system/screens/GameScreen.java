@@ -10,12 +10,15 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.controllers.ArtificialIntelligenceController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.enums.ButtonType;
+import com.radius.system.enums.GameState;
 import com.radius.system.events.listeners.ButtonPressListener;
+import com.radius.system.events.listeners.LoadingEventListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.objects.players.Player;
 import com.radius.system.objects.players.PlayerConfig;
@@ -40,15 +43,19 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
     private final float VIEWPORT_HEIGHT = 9f;
 
     //private final float ZOOM = 0.25785f;
-    private final float ZOOM = 0.5f;
+    private final float ZOOM = 0.5f, preloadLimit = 1f;
 
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
+
+    private final List<LoadingEventListener> loadingEventListeners = new ArrayList<>();
+
+    private GameState gameState;
 
     private BoomGameStage stage;
 
     private GameCamera mainCamera;
 
-    private GameMode gameState;
+    private GameMode gameMode;
 
     private OrthographicCamera uiCamera;
 
@@ -58,7 +65,9 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
     private BitmapFont font;
 
-    private boolean maxZoomOut = true;
+    private boolean maxZoomOut = true, startedOnce = true;
+
+    private float preloadBuffer = 0f;
 
     public GameScreen() {
         font = FontUtils.GetFont((int) WORLD_SCALE / 4, Color.WHITE, 1, Color.BLACK);
@@ -68,14 +77,14 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         InitializeGameState();
         InitializeEvents();
 
-        gameState.RestartField();
+        gameState = GameState.START;
     }
 
     private void InitializeEvents() {
         stage.AddButtonPressListener(this);
-        gameState.AddEndGameEventListener(stage);
-        gameState.AddLoadingEventListener(stage);
-        HumanPlayerController controller = gameState.GetMainController();
+        gameMode.AddEndGameEventListener(stage);
+        this.AddLoadingEventListener(stage);
+        HumanPlayerController controller = gameMode.GetMainController();
         if (controller == null) {
             float newZoom = ComputeZoomValue();
             mainCamera.SetZoom(newZoom);
@@ -161,8 +170,8 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         configs.add(CreatePlayerConfig(false, true));
         /**/
 
-        gameState = new GameMode();
-        gameState.AddPlayers(configs);
+        gameMode = new GameMode();
+        gameMode.AddPlayers(configs);
     }
 
     private PlayerConfig CreatePlayerConfig(boolean human, boolean randomizeSprite) {
@@ -190,22 +199,49 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
     @Override
     public void Update(float delta) {
-        if (stage.IsPaused()) {
-            return;
-        }
 
-        if (stage.IsLoading()) {
-            gameState.UpdateLoading(delta);
-            return;
+        switch (gameState) {
+            case START:
+                // Do things that need to be done only once, then set state to restart.
+                if (preloadBuffer < preloadLimit) {
+                    preloadBuffer += delta;
+                    return;
+                }
+                gameState = GameState.RESTART;
+                preloadBuffer = 0;
+                break;
+            case RESTART:
+                gameState = GameState.LOADING;
+                FireOnLoadStartEvent();
+                gameMode.Restart(delta);
+                stage.Restart();
+                break;
+            case LOADING:
+                // Wait for loading to complete.
+                if (gameMode.IsDoneLoading()) {
+                    gameState = GameState.LOAD_FINISH;
+                    FireOnLoadFinishEvent();
+                }
+                break;
+            case LOAD_FINISH:
+                // Basically a marker to start playing.
+                gameState = GameState.PLAYING;
+                break;
+            case PLAYING:
+                gameMode.Update(delta);
+                stage.act(delta);
+                break;
+            case PAUSED:
+                // Do nothing when paused;
+                break;
         }
-
-        gameState.Update(delta);
-        stage.act(delta);
     }
 
     @Override
     public void Draw(SpriteBatch spriteBatch) {
-        DrawObjects(spriteBatch);
+        if (GameState.PLAYING.equals(gameState) || GameState.PAUSED.equals(gameState)) {
+            DrawObjects(spriteBatch);
+        }
         DrawUI(spriteBatch);
         stage.draw();
     }
@@ -215,7 +251,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         spriteBatch.setProjectionMatrix(mainCamera.projection);
         spriteBatch.setTransformMatrix(mainCamera.view);
         mainViewport.apply();
-        gameState.Draw(spriteBatch);
+        gameMode.Draw(spriteBatch);
 
         spriteBatch.end();
     }
@@ -231,7 +267,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
         if (GlobalConstants.DEBUG) {
-            List<BoomPlayerController> controllers = gameState.GetControllers();
+            List<BoomPlayerController> controllers = gameMode.GetControllers();
             for (int i = 0; i < controllers.size(); i++) {
                 BoomPlayerController controller = controllers.get(i);
                 if (controller instanceof ArtificialIntelligenceController) {
@@ -248,13 +284,14 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
     @Override
     public void DrawDebug(ShapeRenderer renderer) {
+        if (!GameState.PLAYING.equals(gameState)) return;
         renderer.setProjectionMatrix(mainCamera.projection);
         renderer.setTransformMatrix(mainCamera.view);
         mainViewport.apply();
 
         renderer.begin(ShapeRenderer.ShapeType.Line);
 
-        gameState.DrawDebug(renderer);
+        gameMode.DrawDebug(renderer);
 
         renderer.end();
     }
@@ -264,17 +301,43 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         super.dispose();
         font.dispose();
         stage.dispose();
-        gameState.dispose();
+        gameMode.dispose();
         FontUtils.Dispose();
     }
 
     @Override
     public void OnButtonPress(ButtonPressEvent event) {
-        if (!ButtonType.RESTART.equals(event.buttonType)) {
-            return;
+
+        switch(event.buttonType) {
+            case RESTART:
+                //gameState.ActivateGodMode();
+                gameState = GameState.RESTART;
+                startedOnce = true;
+                break;
+            case PAUSE:
+                gameState = GameState.PAUSED;
+                break;
+            case PLAY:
+                gameState = GameState.PLAYING;
+                break;
+
         }
-        //gameState.ActivateGodMode();
-        gameState.RestartField();
-        stage.Restart();
+    }
+
+    public void AddLoadingEventListener(LoadingEventListener listener) {
+        if (loadingEventListeners.contains(listener)) return;
+        loadingEventListeners.add(listener);
+    }
+
+    private void FireOnLoadStartEvent() {
+        for (LoadingEventListener listener : loadingEventListeners) {
+            listener.OnLoadStart();
+        }
+    }
+
+    private void FireOnLoadFinishEvent() {
+        for (LoadingEventListener listener : loadingEventListeners) {
+            listener.OnLoadFinish();
+        }
     }
 }
