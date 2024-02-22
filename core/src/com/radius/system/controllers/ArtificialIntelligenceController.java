@@ -57,7 +57,6 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     @Override
     public void Restart() {
-        super.Restart();
         tree.Restart();
         currentPath = null;
     }
@@ -118,11 +117,6 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         }
     }
 
-    private void Reset() {
-        tree.Restart();
-        currentPath = null;
-    }
-
     @Override
     public void Update(float delta) {
 
@@ -132,7 +126,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
         if (player.IsDead() && deathReset) {
             deathReset = false;
-            Reset();
+            Restart();
         } else if (player.IsAlive() && !deathReset) {
             deathReset = true;
         }
