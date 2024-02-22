@@ -20,6 +20,9 @@ public abstract class BoomPlayerController implements Disposable {
     }
 
     public void Restart() {
+    }
+
+    public void ResetPlayer() {
         player.Reset();
     }
 
