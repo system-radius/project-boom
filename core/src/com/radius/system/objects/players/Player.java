@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.Align;
 import com.radius.system.assets.GlobalAssets;
 import com.radius.system.events.listeners.FirePathListener;
 import com.radius.system.events.parameters.FirePathEvent;
-import com.radius.system.states.BoardState;
+import com.radius.system.objects.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
 import com.radius.system.enums.BonusType;

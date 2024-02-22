@@ -7,7 +7,7 @@ import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.Direction;
 import com.radius.system.events.listeners.FirePathListener;
 import com.radius.system.events.parameters.FirePathEvent;
-import com.radius.system.states.BoardState;
+import com.radius.system.objects.BoardState;
 import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.parameters.ButtonPressEvent;

@@ -12,7 +12,7 @@ import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.NodeState;
 import com.radius.system.objects.players.Player;
-import com.radius.system.states.BoardState;
+import com.radius.system.objects.BoardState;
 
 import java.util.HashMap;
 import java.util.List;

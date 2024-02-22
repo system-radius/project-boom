@@ -1,4 +1,4 @@
-package com.radius.system.states;
+package com.radius.system.modes;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -12,6 +12,7 @@ import com.radius.system.events.RestartEventListener;
 import com.radius.system.events.listeners.EndGameEventListener;
 import com.radius.system.events.listeners.LoadingEventListener;
 import com.radius.system.events.parameters.EndGameEvent;
+import com.radius.system.objects.BoardState;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.blocks.HardBlock;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class GameState implements Disposable, RestartEventListener {
+public class GameMode implements Disposable, RestartEventListener {
 
     private final float WORLD_WIDTH = GlobalConstants.WORLD_WIDTH;
 
@@ -49,7 +50,7 @@ public class GameState implements Disposable, RestartEventListener {
 
     private boolean loading = false;
 
-    public GameState() {
+    public GameMode() {
         boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT, (int) WORLD_SCALE);
         endGameEvent = new EndGameEvent();
     }

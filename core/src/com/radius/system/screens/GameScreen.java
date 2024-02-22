@@ -16,13 +16,12 @@ import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.enums.ButtonType;
 import com.radius.system.events.listeners.ButtonPressListener;
-import com.radius.system.events.listeners.StatChangeListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.objects.players.Player;
 import com.radius.system.objects.players.PlayerConfig;
 import com.radius.system.screens.ui.BoomGameStage;
 import com.radius.system.screens.ui.GameCamera;
-import com.radius.system.states.GameState;
+import com.radius.system.modes.GameMode;
 import com.radius.system.utils.FontUtils;
 
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
     private GameCamera mainCamera;
 
-    private GameState gameState;
+    private GameMode gameState;
 
     private OrthographicCamera uiCamera;
 
@@ -162,7 +161,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         configs.add(CreatePlayerConfig(false, true));
         /**/
 
-        gameState = new GameState();
+        gameState = new GameMode();
         gameState.AddPlayers(configs);
     }
 
