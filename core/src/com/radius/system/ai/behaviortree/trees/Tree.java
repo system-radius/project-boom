@@ -65,7 +65,7 @@ public abstract class Tree implements BoomUpdatable {
 
     protected Node SetupTree() {
         Node root = new Selector("[+] ROOT");
-        //root.AttachChild(new IsPlantingBomb());
+        root.AttachChild(new IsPlantingBomb());
         root.AttachChild(ConstructDefenseTree(fireThreshold));
         root.AttachChild(ConstructFindBonusTree());
         root.AttachChild(ConstructAttackPlayerTree());
