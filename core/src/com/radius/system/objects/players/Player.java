@@ -193,17 +193,17 @@ public class Player extends Entity implements FirePathListener {
     }
 
     public void Reset() {
+        life = 3;
+        bombStock = 1;
+        firePower = 1;
+        speedLevel = 1;
+        bombType = BombType.NORMAL;
 
+        Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
         if (godmode) {
             this.spritePath = "img/player_5.png";
         }
         LoadAsset(this.spritePath);
-
-        bombStock = 1;
-        firePower = 1;
-        speedLevel = 1;
-        life = 3;
-        bombType = BombType.NORMAL;
         if (godmode) {
             bombStock = BOMB_STOCK_LIMIT;
             firePower = FIRE_POWER_LIMIT;
@@ -217,7 +217,6 @@ public class Player extends Entity implements FirePathListener {
         FireStatChange(BonusType.FIRE_POWER, firePower);
         FireStatChange(BonusType.MOVEMENT_SPEED, speedLevel);
 
-        Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
 
         FixBounds();
     }
