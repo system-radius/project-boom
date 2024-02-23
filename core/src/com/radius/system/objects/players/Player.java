@@ -395,6 +395,7 @@ public class Player extends Entity implements FirePathListener {
     }
 
     public void Collide(List<Block> blocks) {
+
         for (Block block : blocks) {
 
             if (block instanceof Bonus && (block.GetWorldX() == GetWorldX() && block.GetWorldY() == GetWorldY())) {
@@ -422,10 +423,10 @@ public class Player extends Entity implements FirePathListener {
 
         Rectangle blockBounds = block.GetBounds();
 
-        float blockX = blockBounds.x;
-        float blockY = blockBounds.y;
-        float blockWidth = blockBounds.width;
-        float blockHeight = blockBounds.height;
+        float blockX = block.GetWorldX();
+        float blockY = block.GetWorldY();
+        float blockWidth = block.size.x/scale;
+        float blockHeight = block.size.y/scale;
 
         boolean collideX = false, collideY = false;
 
