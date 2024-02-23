@@ -21,7 +21,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     private final Vector2 movementVector = new Vector2(0, 0);
 
-    private final Point targetPoint, pastTarget, srcPoint;
+    private final Point targetPoint, pastTarget;
 
     private final Tree tree;
 
@@ -35,7 +35,6 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
         targetPoint = new Point(null, -1, -1);
         pastTarget = new Point(null, -1, -1);
-        srcPoint = new Point(null, player.GetWorldX(), player.GetWorldY());
         tree = new DefaultTree(id, GlobalConstants.WORLD_AREA - (GlobalConstants.WORLD_AREA / 4), boardState);
     }
 
@@ -62,7 +61,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     }
 
     private void UpdateTree(float delta) {
-        tree.SetData("srcPoint", srcPoint);
+        tree.SetSourcePoint(player.GetWorldX(), player.GetWorldY());
         tree.Update(delta);
         UpdateMovement();
     }
@@ -136,9 +135,6 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         player.MoveAlongY(movementVector.y);
         player.Update(delta);
         player.Collide(boardState.GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
-
-        srcPoint.x = player.GetWorldX();
-        srcPoint.y = player.GetWorldY();
     }
 
     @Override
