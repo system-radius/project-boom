@@ -18,8 +18,10 @@ import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.enums.ButtonType;
 import com.radius.system.enums.GameState;
 import com.radius.system.events.listeners.ButtonPressListener;
+import com.radius.system.events.listeners.EndGameEventListener;
 import com.radius.system.events.listeners.LoadingEventListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
+import com.radius.system.events.parameters.EndGameEvent;
 import com.radius.system.objects.players.Player;
 import com.radius.system.objects.players.PlayerConfig;
 import com.radius.system.screens.ui.BoomGameStage;
@@ -30,7 +32,7 @@ import com.radius.system.utils.FontUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameScreen extends AbstractScreen implements ButtonPressListener {
+public class GameScreen extends AbstractScreen implements ButtonPressListener, EndGameEventListener {
 
     private final float WORLD_WIDTH = GlobalConstants.WORLD_WIDTH;
 
@@ -65,7 +67,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
 
     private BitmapFont font;
 
-    private boolean maxZoomOut = true, startedOnce = true;
+    private boolean maxZoomOut = true;
 
     private float preloadBuffer = 0f;
 
@@ -83,6 +85,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
     private void InitializeEvents() {
         stage.AddButtonPressListener(this);
         gameMode.AddEndGameEventListener(stage);
+        gameMode.AddEndGameEventListener(this);
         this.AddLoadingEventListener(stage);
         HumanPlayerController controller = gameMode.GetMainController();
         if (controller == null) {
@@ -312,7 +315,6 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
             case RESTART:
                 //gameState.ActivateGodMode();
                 gameState = GameState.RESTART;
-                startedOnce = true;
                 break;
             case PAUSE:
                 gameState = GameState.PAUSED;
@@ -339,5 +341,10 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener {
         for (LoadingEventListener listener : loadingEventListeners) {
             listener.OnLoadFinish();
         }
+    }
+
+    @Override
+    public void OnEndGameTrigger(EndGameEvent event) {
+        gameState = GameState.PAUSED;
     }
 }
