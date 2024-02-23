@@ -1,5 +1,7 @@
 package com.radius.system.ai.behaviortree.nodes;
 
+import com.radius.system.ai.behaviortree.NodeKeys;
+import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.NodeState;
 
 import java.util.ArrayList;
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class Node {
+
+    private static final String FAILURE = ": FAILURE", SUCCESS = ": SUCCESS", RUNNING = ": RUNNING";
 
     private final Map<String, Object> data = new HashMap<>();
 
@@ -19,13 +23,28 @@ public abstract class Node {
 
     protected List<Node> children = new ArrayList<>();
 
+    protected int weight ;
+
     public Node() {
     }
 
-    public Node(Node... children) {
+    public Node(String id, Node... children) {
+        this.id = id;
         for (Node child : children) {
             AttachChild(child);
         }
+    }
+
+    public int ComputeWeight() {
+        int childrenWeight = 0;
+
+        for (Node child : children) {
+            // Only the success/running node states are to be considered.
+            if (NodeState.FAILURE.equals(child.state)) continue;
+            childrenWeight += child.ComputeWeight();
+        }
+
+        return weight + childrenWeight;
     }
 
     public void Restart() {
@@ -39,7 +58,7 @@ public abstract class Node {
 
     public void AttachChild(Node child) {
         child.parent = this;
-        RefreshId(id);
+        child.RefreshId(id);
         children.add(child);
     }
 
@@ -50,7 +69,9 @@ public abstract class Node {
         }
     }
 
-    public abstract NodeState Evaluate(int depth, float delta, int[][] boardCost);
+    public abstract NodeState Evaluate(Point srcPoint, int[][] boardCost);
+
+    public abstract void Execute();
 
     public void SetData(String key, Object value) {
         data.put(key, value);
@@ -139,5 +160,20 @@ public abstract class Node {
         }
 
         return clearedData;
+    }
+
+    public NodeState Failure() {
+        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + FAILURE);
+        return state = NodeState.FAILURE;
+    }
+
+    public NodeState Success() {
+        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + SUCCESS);
+        return state = NodeState.SUCCESS;
+    }
+
+    public NodeState Running() {
+        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + RUNNING);
+        return state = NodeState.RUNNING;
     }
 }

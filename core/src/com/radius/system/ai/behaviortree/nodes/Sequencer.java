@@ -1,5 +1,6 @@
 package com.radius.system.ai.behaviortree.nodes;
 
+import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.NodeState;
 
 import java.util.List;
@@ -11,15 +12,14 @@ public class Sequencer extends Node {
     }
 
     public Sequencer(String id, Node... children) {
-        super(children);
-        this.id = id;
+        super(id, children);
     }
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
         boolean anyRunning = false;
         for (Node node : children) {
-            switch (node.Evaluate(depth + 1, delta, boardCost)) {
+            switch (node.Evaluate(srcPoint, boardCost)) {
                 case FAILURE:
                     state = NodeState.FAILURE;
                     return state;
@@ -36,5 +36,13 @@ public class Sequencer extends Node {
 
         state = anyRunning ? NodeState.RUNNING : NodeState.SUCCESS;
         return state;
+    }
+
+    @Override
+    public void Execute() {
+        // The fact that this method is called means that all children from this node succeeded.
+        for (Node child : children) {
+            child.Execute();
+        }
     }
 }

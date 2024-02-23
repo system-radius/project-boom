@@ -2,6 +2,7 @@ package com.radius.system.ai.behaviortree.nodes;
 
 import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.tasks.FindSpace;
+import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.NodeState;
 
 public abstract class Solidifier extends FindSpace {
@@ -13,7 +14,7 @@ public abstract class Solidifier extends FindSpace {
     }
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
         Boolean onFirePath = (Boolean) GetRoot().GetData(NodeKeys.ON_FIRE_PATH);
         if (onFirePath == null || !onFirePath) {
             Solidify(boardCost);

@@ -1,6 +1,7 @@
 package com.radius.system.ai.behaviortree.tasks;
 
 import com.radius.system.ai.behaviortree.NodeKeys;
+import com.radius.system.ai.behaviortree.nodes.NoExecuteNode;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
@@ -9,30 +10,26 @@ import com.radius.system.enums.NodeState;
 
 import java.util.List;
 
-public class FindSpace extends Node {
+public class FindSpace extends NoExecuteNode {
 
     protected Point srcPoint;
 
     protected int lowestCost;
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
 
-        srcPoint = (Point) GetData(NodeKeys.SOURCE_POINT);
-        if (srcPoint == null) {
-            return NodeState.FAILURE;
-        }
-
+        this.srcPoint = srcPoint;
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
-            return NodeState.FAILURE;
+            return state = NodeState.FAILURE;
         }
 
         GetRoot().SetData(NodeKeys.TARGET_POINT, targetPoint);
         //System.out.println("final target point: (" + targetPoint.x + ", " + targetPoint.y + ")");
-        return NodeState.SUCCESS;
+        return state = NodeState.SUCCESS;
     }
 
     protected Point SelectTarget(List<Point> spaces) {

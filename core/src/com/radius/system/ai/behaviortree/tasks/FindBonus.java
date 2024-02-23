@@ -22,29 +22,22 @@ public class FindBonus extends Solidifier {
     }
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
-        super.Evaluate(depth, delta, boardCost);
-
-        srcPoint = (Point) GetRoot().GetData(NodeKeys.SOURCE_POINT);
-        if (srcPoint == null) {
-            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
-            return NodeState.FAILURE;
-        }
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+        super.Evaluate(srcPoint, boardCost);
+        this.srcPoint = srcPoint;
 
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
-            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             //System.out.println("[" + displayId + "] Failed to select target!");
-            return NodeState.FAILURE;
+            return Failure();
         }
 
         //System.out.println("Target point for find bonus: " + targetPoint);
         GetRoot().SetData(NodeKeys.TARGET_POINT, targetPoint);
-        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
         //System.out.println("[" + displayId + "] Target point acquired: " + targetPoint);
-        return NodeState.SUCCESS;
+        return Success();
     }
 
     @Override

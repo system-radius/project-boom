@@ -13,28 +13,18 @@ public class TheoreticalSafeSpace extends FindSpace {
     private int[][] boardCost;
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
-
-        if (srcPoint == null) {
-            //System.out.println("[TheoryCraftSafeSpace] No source point found!");
-            return NodeState.FAILURE;
-        }
-
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+        this.srcPoint = srcPoint;
         this.boardCost = boardCost;
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
-        return targetPoint == null ? NodeState.FAILURE : NodeState.SUCCESS;
-        //System.out.println("[TheoryCraftSafeSpace]" + srcPoint + " Result: " + result);
+        return targetPoint == null ? Failure() : Success();
     }
 
     @Override
     protected boolean AcceptPoint(Point point) {
         //System.out.println(point + " board cost: " + boardCost[point.x][point.y]);
         return super.AcceptPoint(point) && boardCost[point.x][point.y] == 1;
-    }
-
-    public void SetSourcePoint(Point point) {
-        this.srcPoint = point;
     }
 }

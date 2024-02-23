@@ -18,10 +18,6 @@ public class FindSafeSpace extends Solidifier {
 
     private int[][] boardCost;
 
-    private float delta;
-
-    private int depth;
-
     public FindSafeSpace(int fireThreshold) {
         super(fireThreshold);
         theoryCrafter = new TheoreticalSafeSpaceCounter();
@@ -29,17 +25,9 @@ public class FindSafeSpace extends Solidifier {
     }
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
         //super.Evaluate(depth, delta, boardCost);
-
-        srcPoint = (Point) GetData(NodeKeys.SOURCE_POINT);
-        if (srcPoint == null) {
-            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
-            return NodeState.FAILURE;
-        }
-
-        this.depth = depth;
-        this.delta = delta;
+        this.srcPoint = srcPoint;
         this.boardCost = boardCost;
 
         ((TheoreticalSafeSpaceCounter) theoryCrafter).ResetSpaceCount();
@@ -48,14 +36,12 @@ public class FindSafeSpace extends Solidifier {
 
         if (targetPoint == null) {
             //System.out.println("[" + displayId + "] Failed to select target!");
-            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
-            return NodeState.FAILURE;
+            return Failure();
         }
 
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
-        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
         //System.out.println("[" + displayId + "] Target point acquired: " + targetPoint);
-        return NodeState.SUCCESS;
+        return Success();
     }
 
     @Override
@@ -64,8 +50,7 @@ public class FindSafeSpace extends Solidifier {
         boolean acceptPoint = false;
 
         if (acceptedBySuper) {
-            ((TheoreticalSafeSpace) theoryCrafter).SetSourcePoint(point);
-            NodeState state = theoryCrafter.Evaluate(depth, delta, ModifyBoardCost());
+            NodeState state = theoryCrafter.Evaluate(point, ModifyBoardCost());
             acceptPoint = NodeState.SUCCESS.equals(state);
         }
 

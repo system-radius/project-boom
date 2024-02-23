@@ -28,9 +28,7 @@ public class FindBombArea extends Solidifier {
 
     private int[][] boardCost;
 
-    private float delta;
-
-    private int maxBurnCount = 0, currentBurnCount, range, depth;
+    private int maxBurnCount = 0, currentBurnCount, range;
 
     private boolean hasPierceBomb;
 
@@ -45,31 +43,26 @@ public class FindBombArea extends Solidifier {
     }
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
-        super.Evaluate(depth, delta, boardCost);
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+        super.Evaluate(srcPoint, boardCost);
+        this.srcPoint = srcPoint;
 
-        srcPoint = (Point) GetRoot().GetData(NodeKeys.SOURCE_POINT);
-        if (srcPoint == null || player.GetAvailableBombs() <= 0) {
-            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE?");
-            return NodeState.FAILURE;
+        if (player.GetAvailableBombs() <= 0) {
+            return Failure();
         }
 
-        this.depth = depth;
-        this.delta = delta;
         this.boardCost = boardCost;
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
             //System.out.println("[" + displayId + "] Failed to select target!");
-            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
-            return NodeState.FAILURE;
+            return Failure();
         }
 
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
-        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
         //System.out.println("[" + displayId + "]  Target point acquired: " + targetPoint + " ---> " + maxBurnCount);
-        return NodeState.SUCCESS;
+        return Success();
     }
 
     @Override
@@ -89,9 +82,7 @@ public class FindBombArea extends Solidifier {
         boolean acceptPoint = false;
 
         if (hasMoreBurnCount) {
-            //System.out.println(point + " Accepted preliminarily!");
-            ((TheoreticalSafeSpace) theoryCrafter).SetSourcePoint(point);
-            NodeState state = theoryCrafter.Evaluate(depth, delta, ModifyBoardCost(rangeMapping, point));
+            NodeState state = theoryCrafter.Evaluate(point, ModifyBoardCost(rangeMapping, point));
             acceptPoint = NodeState.SUCCESS.equals(state);
             if (acceptPoint) {
                 maxBurnCount = currentBurnCount;

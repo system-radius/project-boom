@@ -12,24 +12,14 @@ public class TheoreticalSafeSpaceCounter extends TheoreticalSafeSpace {
     private int spaceCount = 0;
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
-
-        if (srcPoint == null) {
-            //System.out.println("[TheoryCraftSafeSpace] No source point found!");
-            return NodeState.FAILURE;
-        }
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
 
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         int currentSafeSpaceCount = spaces.size();
-        //System.out.println(srcPoint + " Spaces found: " + spaces.size());
-
         boolean hasMoreSpace = currentSafeSpaceCount > spaceCount;
         spaceCount = hasMoreSpace ? currentSafeSpaceCount : spaceCount;
 
-        //System.out.println(srcPoint + " result: " + (hasMoreSpace ? NodeState.SUCCESS : NodeState.FAILURE));
-
-        return hasMoreSpace ? NodeState.SUCCESS : NodeState.FAILURE;
-        //System.out.println("[TheoryCraftSafeSpace]" + srcPoint + " Result: " + result);
+        return hasMoreSpace ? Success() : Failure();
     }
 
     public void ResetSpaceCount() {

@@ -16,14 +16,12 @@ public class MoveToTarget extends Selector {
     }
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
 
-        Point srcPoint = (Point) GetData(NodeKeys.SOURCE_POINT);
         Point dstPoint = (Point) GetData(NodeKeys.TARGET_POINT);
-        if (srcPoint == null || dstPoint == null) {
-            //System.out.println("[" + depth + ": MoveToTarget] Returning failure due to null target point!");
-            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
-            return NodeState.FAILURE;
+        if (dstPoint == null) {
+            //System.out.println(displayId + " Returning failure due to null target point!");
+            return Failure();
         }
 
         List<Point> currentPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, dstPoint.x, dstPoint.y);
@@ -31,15 +29,14 @@ public class MoveToTarget extends Selector {
 
         if (currentPath != null) {
             if (currentPath.size() == 1 && currentPath.get(0).IsEqualPosition(srcPoint)) {
-                GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
+                Success();
                 if (children.size() > 0) {
-                    return super.Evaluate(depth, delta, boardCost);
+                    return super.Evaluate(srcPoint, boardCost);
                 }
                 ClearFullData(NodeKeys.TARGET_POINT);
             }
         }
         //System.out.println("[" + depth + ": MoveToTarget] Returning running!");
-        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": RUNNING " + dstPoint);
-        return NodeState.RUNNING;
+        return Running();
     }
 }

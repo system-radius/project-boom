@@ -12,6 +12,7 @@ import com.radius.system.ai.behaviortree.tasks.FindPlayer;
 import com.radius.system.ai.behaviortree.tasks.FindSafeSpace;
 import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
 import com.radius.system.ai.behaviortree.tasks.PlantBomb;
+import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.objects.BoardState;
 import com.radius.system.objects.BoomUpdatable;
 
@@ -25,12 +26,16 @@ public abstract class Tree implements BoomUpdatable {
 
     private final Node root;
 
+    private final Point srcPoint;
+
     public Tree(int id, int fireThreshold, BoardState boardState) {
 
         this.id =  id;
         this.fireThreshold = fireThreshold;
         this.boardState = boardState;
         boardCost = new int[boardState.BOARD_WIDTH][boardState.BOARD_HEIGHT];
+
+        srcPoint = new Point(null, -1, -1);
 
         root = SetupTree();
     }
@@ -51,11 +56,16 @@ public abstract class Tree implements BoomUpdatable {
         return root.GetData(key);
     }
 
+    public void SetSourcePoint(int x, int y) {
+        srcPoint.x = x;
+        srcPoint.y = y;
+    }
+
     @Override
     public final void Update(float delta) {
         if (root != null) {
             boardState.CompileBoardCost(boardCost, fireThreshold, id);
-            root.Evaluate(0, delta, boardCost);
+            root.Evaluate(srcPoint, boardCost);
         }
     }
 
@@ -66,7 +76,6 @@ public abstract class Tree implements BoomUpdatable {
         root.AttachChild(ConstructFindBonusTree());
         root.AttachChild(ConstructAttackPlayerTree());
         root.AttachChild(ConstructBombAreaTree());
-        root.AttachChild(ConstructDefenseTree(2));
         root.AttachChild(ConstructDefenseTree(2));
 
         return root;

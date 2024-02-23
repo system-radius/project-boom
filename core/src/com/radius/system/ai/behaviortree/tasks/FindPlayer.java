@@ -19,8 +19,6 @@ public class FindPlayer extends Solidifier {
 
     private final int playerId, fireThreshold;
 
-    private Point srcPoint;
-
     private int range;
 
     public FindPlayer(int id, int fireThreshold, BoardState boardState) {
@@ -34,16 +32,9 @@ public class FindPlayer extends Solidifier {
     }
 
     @Override
-    public NodeState Evaluate(int depth, float delta, int[][] boardCost) {
-        super.Evaluate(depth, delta, boardCost);
-
-        srcPoint = (Point) GetData(NodeKeys.SOURCE_POINT);
-        if (srcPoint == null) {
-            //System.out.println("[" + depth + ": FindPlayer] Returning failure!");
-            GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
-            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
-            return NodeState.FAILURE;
-        }
+    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+        super.Evaluate(srcPoint, boardCost);
+        this.srcPoint = srcPoint;
 
         int pathCount = Integer.MAX_VALUE;
         range = players.get(playerId).GetFirePower();
@@ -62,25 +53,22 @@ public class FindPlayer extends Solidifier {
         }
 
         if (target == null || path == null) {
-            //System.out.println("[" + depth + ": FindPlayer] Returning failure!");
             GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
-            GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": FAILURE");
             //System.out.println("[" + displayId + "] Failed to select target!");
-            return NodeState.FAILURE;
+            return Failure();
         }
 
         Point targetPoint = srcPoint;
         if (path.size() > 0) {
             targetPoint = path.get(path.size() - 1);
-            //System.out.println("[" + depth + ": FindPlayer] Returning success! Found player at: " + targetPoint.x + ", " + targetPoint.y + "!");
         }
         if (BoardRep.BOMB.equals(boardState.GetBoardEntry(targetPoint.x, targetPoint.y))) {
-            return NodeState.FAILURE;
+            //System.out.println("[" + displayId + "] Failed to select target!");
+            return Failure();
         }
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
-        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
         //System.out.println("[" + displayId + "] Target point acquired: " + targetPoint);
-        return NodeState.SUCCESS;
+        return Success();
     }
 
     private List<Point> FindRangedPath(List<Point> path) {
