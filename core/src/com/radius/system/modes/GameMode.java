@@ -149,7 +149,7 @@ public class GameMode implements Disposable {
     private void FinishLoading() {
         loading = false;
         try {
-            restartThread.join();
+            restartThread.join(1000);
         } catch (Exception e) {
             e.printStackTrace();
         }
