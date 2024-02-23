@@ -209,6 +209,7 @@ public class Player extends Entity implements FirePathListener {
             firePower = FIRE_POWER_LIMIT;
             speedLevel = SPEED_LIMIT;
             bombType = BombType.GODMODE;
+            FixBounds();
         }
         movementSpeed = baseSpeed + speedLevel * baseSpeedIncrease;
         bombs.clear();
