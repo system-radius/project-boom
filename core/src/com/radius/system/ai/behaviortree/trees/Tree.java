@@ -4,6 +4,7 @@ import com.radius.system.ai.behaviortree.checks.HasTargetPoint;
 import com.radius.system.ai.behaviortree.checks.IsPlantingBomb;
 import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
+import com.radius.system.ai.behaviortree.nodes.RootSelector;
 import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.ai.behaviortree.nodes.Sequencer;
 import com.radius.system.ai.behaviortree.tasks.FindBombArea;
@@ -13,8 +14,13 @@ import com.radius.system.ai.behaviortree.tasks.FindSafeSpace;
 import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
 import com.radius.system.ai.behaviortree.tasks.PlantBomb;
 import com.radius.system.ai.pathfinding.Point;
+import com.radius.system.enums.NodeState;
 import com.radius.system.objects.BoardState;
 import com.radius.system.objects.BoomUpdatable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class Tree implements BoomUpdatable {
 
@@ -44,10 +50,6 @@ public abstract class Tree implements BoomUpdatable {
         root.Restart();
     }
 
-    public void SetData(String key, Object value) {
-        root.SetData(key, value);
-    }
-
     public boolean ClearData(String key) {
         return root.ClearData(key);
     }
@@ -65,29 +67,45 @@ public abstract class Tree implements BoomUpdatable {
     public final void Update(float delta) {
         if (root != null) {
             boardState.CompileBoardCost(boardCost, fireThreshold, id);
-            root.Evaluate(srcPoint, boardCost);
+            Evaluate(boardCost);
+        }
+    }
+
+    protected void Evaluate(int[][] boardCost) {
+        NodeState state = root.Evaluate(srcPoint, boardCost);
+        List<Node> children = root.GetChildren();
+        List<Node> consideredChildren = new ArrayList<>();
+        for (Node child : children) {
+            if (state.equals(child.GetState())) {
+                consideredChildren.add(child);
+            }
+        }
+
+        if (consideredChildren.size() > 0) {
+            Collections.sort(consideredChildren);
+            consideredChildren.get(0).Execute();
         }
     }
 
     protected Node SetupTree() {
-        Node root = new Selector("[+] ROOT");
+        Node root = new RootSelector("[+] ROOT");
         root.AttachChild(new IsPlantingBomb());
-        root.AttachChild(ConstructDefenseTree(fireThreshold));
+        root.AttachChild(ConstructDefenseTree(fireThreshold, false));
         root.AttachChild(ConstructFindBonusTree());
         root.AttachChild(ConstructAttackPlayerTree());
         root.AttachChild(ConstructBombAreaTree());
-        root.AttachChild(ConstructDefenseTree(2));
+        root.AttachChild(ConstructDefenseTree(2, true));
 
         return root;
     }
 
-    protected Node ConstructDefenseTree(int fireThreshold) {
+    protected Node ConstructDefenseTree(int fireThreshold, boolean backup) {
         Node findSafeSpaceTarget = new Selector("[+] FindSpace");
         findSafeSpaceTarget.AttachChild(new HasTargetPoint());
         findSafeSpaceTarget.AttachChild(new FindSafeSpace(fireThreshold));
 
         Node root = new Sequencer("[>] Defense" + fireThreshold);
-        root.AttachChild(new OnFirePath(fireThreshold));
+        root.AttachChild(new OnFirePath(fireThreshold, backup));
         root.AttachChild(findSafeSpaceTarget);
         root.AttachChild(new MoveToTarget());
 

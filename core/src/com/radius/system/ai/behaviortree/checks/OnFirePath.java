@@ -9,8 +9,15 @@ public class OnFirePath extends NoExecuteNode {
 
     private final int threshold;
 
+    private final boolean backup;
+
     public OnFirePath(int threshold) {
+        this(threshold, false);
+    }
+
+    public OnFirePath(int threshold, boolean backup) {
         this.threshold = threshold;
+        this.backup = backup;
         id = "[?] OnFirePath";
     }
 
@@ -19,7 +26,7 @@ public class OnFirePath extends NoExecuteNode {
 
         if (boardCost[srcPoint.x][srcPoint.y] > threshold) {
             GetRoot().SetData(NodeKeys.ON_FIRE_PATH, true);
-            return Success();
+            return Success(backup ? Short.MAX_VALUE : 0);
         }
 
         GetRoot().ClearData(NodeKeys.ON_FIRE_PATH);

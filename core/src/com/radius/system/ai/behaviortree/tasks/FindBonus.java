@@ -15,9 +15,16 @@ public class FindBonus extends Solidifier {
 
     private final BoardState boardState;
 
+    private final int defaultSuccessWeight;
+
     public FindBonus(int fireThreshold, BoardState boardState) {
+        this(-1, fireThreshold, boardState);
+    }
+
+    public FindBonus(int defaultSuccessWeight, int fireThreshold, BoardState boardState) {
         super(fireThreshold);
         this.boardState = boardState;
+        this.defaultSuccessWeight = defaultSuccessWeight;
         id = "[!] FindBonus";
     }
 
@@ -34,10 +41,15 @@ public class FindBonus extends Solidifier {
             return Failure();
         }
 
+        List<Point> path = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, targetPoint.x, targetPoint.y);
+        if (path == null) {
+            return Failure();
+        }
+
         //System.out.println("Target point for find bonus: " + targetPoint);
         GetRoot().SetData(NodeKeys.TARGET_POINT, targetPoint);
         //System.out.println("[" + displayId + "] Target point acquired: " + targetPoint);
-        return Success();
+        return Success(defaultSuccessWeight < 0 ? path.size() : defaultSuccessWeight);
     }
 
     @Override

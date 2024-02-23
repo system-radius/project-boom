@@ -8,17 +8,22 @@ import com.radius.system.enums.NodeState;
 import com.radius.system.objects.BoardState;
 import com.radius.system.objects.players.Player;
 
-public class PlantBomb extends NoExecuteNode {
+public class PlantBomb extends Node {
 
     public PlantBomb() {
         id = "[!] PlantBomb";
+        Success(0);
     }
 
     @Override
     public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+
+        return Success(0);
+    }
+
+    @Override
+    public void Execute() {
         GetRoot().SetData(NodeKeys.PLANT_BOMB, true);
         ClearFullData(NodeKeys.TARGET_POINT);
-
-        return Success();
     }
 }

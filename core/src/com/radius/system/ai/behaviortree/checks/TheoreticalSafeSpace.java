@@ -19,7 +19,7 @@ public class TheoreticalSafeSpace extends FindSpace {
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
-        return targetPoint == null ? Failure() : Success();
+        return targetPoint == null ? Failure() : Success(spaces.size());
     }
 
     @Override

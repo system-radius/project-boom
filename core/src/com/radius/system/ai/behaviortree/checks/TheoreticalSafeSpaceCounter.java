@@ -19,7 +19,7 @@ public class TheoreticalSafeSpaceCounter extends TheoreticalSafeSpace {
         boolean hasMoreSpace = currentSafeSpaceCount > spaceCount;
         spaceCount = hasMoreSpace ? currentSafeSpaceCount : spaceCount;
 
-        return hasMoreSpace ? Success() : Failure();
+        return hasMoreSpace ? Success(spaceCount) : Failure();
     }
 
     public void ResetSpaceCount() {

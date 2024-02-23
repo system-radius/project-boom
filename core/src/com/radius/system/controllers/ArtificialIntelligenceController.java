@@ -47,7 +47,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         String display = value.toString();
 
         if (!display.equals(activeNode)) {
-            //System.out.println(display);
+            System.out.println("[" + player.id + "]" + display);
             activeNode = display;
         }
 

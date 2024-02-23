@@ -60,9 +60,14 @@ public class FindBombArea extends Solidifier {
             return Failure();
         }
 
+        List<Point> path = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, targetPoint.x, targetPoint.y);
+        if (path == null) {
+            return Failure();
+        }
+
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
         //System.out.println("[" + displayId + "]  Target point acquired: " + targetPoint + " ---> " + maxBurnCount);
-        return Success();
+        return Success(path.size());
     }
 
     @Override

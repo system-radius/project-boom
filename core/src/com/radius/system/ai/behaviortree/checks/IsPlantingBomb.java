@@ -17,7 +17,7 @@ public class IsPlantingBomb extends NoExecuteNode {
 
         Boolean isPlantingBomb = (Boolean) GetRoot().GetData(NodeKeys.PLANT_BOMB);
         if (isPlantingBomb != null && isPlantingBomb) {
-            return Success();
+            return Success(0);
         }
 
         return Failure();

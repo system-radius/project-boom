@@ -30,7 +30,7 @@ public class HasTargetPoint extends NoExecuteNode {
         }
 
         //System.out.println("[" + displayId + "] Already has target: " + targetPoint);
-        return Success();
+        return Success(0);
     }
 
 }

@@ -11,6 +11,10 @@ import java.util.List;
 
 public class MoveToTarget extends Selector {
 
+    private List<Point> currentPath;
+
+    private Point srcPoint;
+
     public MoveToTarget(Node... children) {
         super("[!] MoveToTarget", children);
     }
@@ -18,25 +22,43 @@ public class MoveToTarget extends Selector {
     @Override
     public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
 
+        this.srcPoint = srcPoint;
         Point dstPoint = (Point) GetData(NodeKeys.TARGET_POINT);
         if (dstPoint == null) {
             //System.out.println(displayId + " Returning failure due to null target point!");
             return Failure();
         }
 
-        List<Point> currentPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, dstPoint.x, dstPoint.y);
+        currentPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, dstPoint.x, dstPoint.y);
+        if (currentPath != null) {
+            if (currentPath.size() == 1 && currentPath.get(0).IsEqualPosition(srcPoint)) {
+                Success(currentPath.size());
+                if (children.size() > 0) {
+                    super.Evaluate(srcPoint, boardCost);
+                }
+                ClearFullData(NodeKeys.TARGET_POINT);
+            }
+
+            return Running(Short.MAX_VALUE);
+        }
+        //System.out.println("[" + depth + ": MoveToTarget] Returning running!");
+
+        return Failure();
+    }
+
+    @Override
+    public void Execute() {
+
         GetRoot().SetData(NodeKeys.MOVEMENT_PATH, currentPath);
 
         if (currentPath != null) {
             if (currentPath.size() == 1 && currentPath.get(0).IsEqualPosition(srcPoint)) {
-                Success();
+                Success(currentPath.size());
                 if (children.size() > 0) {
-                    return super.Evaluate(srcPoint, boardCost);
+                    super.Execute();
                 }
                 ClearFullData(NodeKeys.TARGET_POINT);
             }
         }
-        //System.out.println("[" + depth + ": MoveToTarget] Returning running!");
-        return Running();
     }
 }

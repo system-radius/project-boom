@@ -66,9 +66,10 @@ public class FindPlayer extends Solidifier {
             //System.out.println("[" + displayId + "] Failed to select target!");
             return Failure();
         }
+
         GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
         //System.out.println("[" + displayId + "] Target point acquired: " + targetPoint);
-        return Success();
+        return Success(path.size());
     }
 
     private List<Point> FindRangedPath(List<Point> path) {

@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class Node {
+public abstract class Node implements Comparable<Node> {
 
     private static final String FAILURE = ": FAILURE", SUCCESS = ": SUCCESS", RUNNING = ": RUNNING";
 
@@ -17,7 +17,7 @@ public abstract class Node {
 
     public Node parent = null;
 
-    protected NodeState state;
+    protected NodeState state = NodeState.FAILURE;
 
     protected String id, displayId;
 
@@ -33,6 +33,14 @@ public abstract class Node {
         for (Node child : children) {
             AttachChild(child);
         }
+    }
+
+    public List<Node> GetChildren() {
+        return children;
+    }
+
+    public NodeState GetState() {
+        return state;
     }
 
     public int ComputeWeight() {
@@ -67,6 +75,10 @@ public abstract class Node {
         for (Node child : children) {
             child.RefreshId(this.displayId);
         }
+    }
+
+    public String GetDisplayId() {
+        return displayId;
     }
 
     public abstract NodeState Evaluate(Point srcPoint, int[][] boardCost);
@@ -167,13 +179,20 @@ public abstract class Node {
         return state = NodeState.FAILURE;
     }
 
-    public NodeState Success() {
+    public NodeState Success(int weight) {
+        this.weight = weight;
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + SUCCESS);
         return state = NodeState.SUCCESS;
     }
 
-    public NodeState Running() {
+    public NodeState Running(int weight) {
+        this.weight = weight;
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + RUNNING);
         return state = NodeState.RUNNING;
+    }
+
+    @Override
+    public int compareTo(Node that) {
+        return Long.compare(this.ComputeWeight(), that.ComputeWeight());
     }
 }
