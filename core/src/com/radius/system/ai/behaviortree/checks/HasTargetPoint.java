@@ -29,7 +29,6 @@ public class HasTargetPoint extends NoExecuteNode {
             return Failure();
         }
 
-        GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + ": SUCCESS");
         //System.out.println("[" + displayId + "] Already has target: " + targetPoint);
         return Success();
     }
