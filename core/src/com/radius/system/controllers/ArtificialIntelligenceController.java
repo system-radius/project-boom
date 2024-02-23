@@ -120,6 +120,10 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     public void Update(float delta) {
 
         if (player.GetRemainingLife() == 0) {
+            if (deathReset) {
+                Restart();
+                deathReset = false;
+            }
             return;
         }
 
@@ -130,11 +134,16 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
             deathReset = true;
         }
 
-        UpdateTree(delta);
+        // Continuously update the player regardless of death status.
         player.MoveAlongX(movementVector.x);
         player.MoveAlongY(movementVector.y);
         player.Update(delta);
         player.Collide(boardState.GetSurroundingBlocks(player.GetWorldX(), player.GetWorldY()));
+
+        if (!deathReset) {
+            return;
+        }
+        UpdateTree(delta);
     }
 
     @Override
