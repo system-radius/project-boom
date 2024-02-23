@@ -167,13 +167,14 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
             }
         }
 
-        for (int i = bombs.size() - 1;  i >= 0; i--) {
+        //for (int i = bombs.size() - 1;  i >= 0; i--) {
+            //Bomb bomb = bombs.get(i);
+        for (Bomb bomb : bombs) {
 
-            Bomb bomb = bombs.get(i);
             int x = bomb.GetWorldX(), y = bomb.GetWorldY();
             Map<Direction, Integer> fireRanges = bomb.GetRangeValues();
 
-            int cost = bomb.GetCost();
+            int cost = boardCost[x][y] > 1 ? boardCost[x][y] : bomb.GetCost();
 
             if (fireRanges.containsKey(Direction.NORTH))
                 SetCostInRange(boardCost, x, y, fireRanges.get(Direction.NORTH), 1, cost, Direction.NORTH);
