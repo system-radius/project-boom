@@ -4,7 +4,7 @@ import com.radius.system.ai.behaviortree.checks.IsPlantingBomb;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.assets.GlobalConstants;
-import com.radius.system.objects.BoardState;
+import com.radius.system.board.BoardState;
 
 public class BClassTree extends Tree {
     public BClassTree(int id, BoardState boardState) {

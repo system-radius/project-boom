@@ -5,7 +5,7 @@ import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.RootSelector;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.NodeState;
-import com.radius.system.objects.BoardState;
+import com.radius.system.board.BoardState;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -11,7 +11,7 @@ import com.radius.system.enums.BoardRep;
 import com.radius.system.events.OverTimeListener;
 import com.radius.system.events.listeners.EndGameEventListener;
 import com.radius.system.events.parameters.EndGameEvent;
-import com.radius.system.objects.BoardState;
+import com.radius.system.board.BoardState;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.blocks.HardBlock;

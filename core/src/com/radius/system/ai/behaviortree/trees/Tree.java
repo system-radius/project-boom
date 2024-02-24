@@ -1,10 +1,8 @@
 package com.radius.system.ai.behaviortree.trees;
 
 import com.radius.system.ai.behaviortree.checks.HasTargetPoint;
-import com.radius.system.ai.behaviortree.checks.IsPlantingBomb;
 import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
-import com.radius.system.ai.behaviortree.nodes.RootSelector;
 import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.ai.behaviortree.nodes.Sequencer;
 import com.radius.system.ai.behaviortree.tasks.FindBombArea;
@@ -15,11 +13,9 @@ import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
 import com.radius.system.ai.behaviortree.tasks.PlantBomb;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.NodeState;
-import com.radius.system.objects.BoardState;
+import com.radius.system.board.BoardState;
 import com.radius.system.objects.BoomUpdatable;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class Tree implements BoomUpdatable {

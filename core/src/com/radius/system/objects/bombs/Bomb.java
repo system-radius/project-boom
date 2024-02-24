@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.radius.system.assets.GlobalAssets;
 import com.radius.system.assets.GlobalConstants;
-import com.radius.system.objects.BoardState;
+import com.radius.system.board.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombState;
 import com.radius.system.enums.BombType;

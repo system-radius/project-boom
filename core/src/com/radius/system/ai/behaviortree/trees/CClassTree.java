@@ -2,7 +2,7 @@ package com.radius.system.ai.behaviortree.trees;
 
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
-import com.radius.system.objects.BoardState;
+import com.radius.system.board.BoardState;
 
 public class CClassTree extends Tree {
     public CClassTree(int id, BoardState boardState) {

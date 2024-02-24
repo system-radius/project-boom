@@ -1,6 +1,6 @@
 package com.radius.system.objects.bombs;
 
-import com.radius.system.objects.BoardState;
+import com.radius.system.board.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
