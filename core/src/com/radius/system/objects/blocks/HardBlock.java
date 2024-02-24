@@ -31,9 +31,9 @@ public class HardBlock extends Block {
     }
 
     @Override
-    public void Burn() {
+    public boolean Burn() {
         if (burning) {
-            return;
+            return false;
         }
 
         life --;
@@ -41,6 +41,8 @@ public class HardBlock extends Block {
         burning = life == 0;
         if (burning) {
             animationElapsedTime = 0f;
+            return true;
         }
+        return false;
     }
 }

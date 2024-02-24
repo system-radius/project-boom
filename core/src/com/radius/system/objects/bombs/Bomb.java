@@ -331,6 +331,10 @@ public class Bomb extends Block {
         return hasCollision;
     }
 
+    public Player GetOwner() {
+        return owner;
+    }
+
     public void Explode() {
 
         if (IsExploding()) {
@@ -413,14 +417,15 @@ public class Bomb extends Block {
     }
 
     @Override
-    public void Burn() {
+    public boolean Burn() {
 
         if (state == BombState.SET_TO_EXPLODE || state == BombState.EXPLODING) {
-            return;
+            return false;
         }
 
         state = BombState.SET_TO_EXPLODE;
         preExplosionTime = WAIT_TIMER - 0.1f;
+        return true;
     }
 
     @Override

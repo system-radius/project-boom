@@ -76,8 +76,12 @@ public class Bonus extends Block {
     }
 
     @Override
-    public void Burn() {
+    public boolean Burn() {
+        if (destroyed) {
+            return false;
+        }
         Destroy();
+        return true;
     }
 
 }

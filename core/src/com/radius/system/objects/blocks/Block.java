@@ -90,8 +90,9 @@ public class Block extends Entity {
     }
 
     @Override
-    public void Burn() {
+    public boolean Burn() {
         // Do nothing.
+        return false;
     }
 
     @Override
