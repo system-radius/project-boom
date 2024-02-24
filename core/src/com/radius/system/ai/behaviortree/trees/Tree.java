@@ -28,11 +28,11 @@ public abstract class Tree implements BoomUpdatable {
 
     protected final BoardState boardState;
 
-    private final int[][] boardCost;
+    protected final int[][] boardCost;
 
-    private final Node root;
+    protected final Node root;
 
-    private final Point srcPoint;
+    protected final Point srcPoint;
 
     public Tree(int id, int fireThreshold, BoardState boardState) {
 
@@ -74,30 +74,15 @@ public abstract class Tree implements BoomUpdatable {
     protected void Evaluate(int[][] boardCost) {
         NodeState state = root.Evaluate(srcPoint, boardCost);
         List<Node> children = root.GetChildren();
-        List<Node> consideredChildren = new ArrayList<>();
         for (Node child : children) {
             if (state.equals(child.GetState())) {
-                consideredChildren.add(child);
+                child.Execute();
+                break;
             }
         }
-
-        if (consideredChildren.size() > 0) {
-            Collections.sort(consideredChildren);
-            consideredChildren.get(0).Execute();
-        }
     }
 
-    protected Node SetupTree() {
-        Node root = new RootSelector("[+] ROOT");
-        root.AttachChild(new IsPlantingBomb());
-        root.AttachChild(ConstructDefenseTree(fireThreshold, false));
-        root.AttachChild(ConstructFindBonusTree());
-        root.AttachChild(ConstructAttackPlayerTree());
-        root.AttachChild(ConstructBombAreaTree());
-        root.AttachChild(ConstructDefenseTree(2, true));
-
-        return root;
-    }
+    protected abstract Node SetupTree();
 
     protected Node ConstructDefenseTree(int fireThreshold, boolean backup) {
         Node findSafeSpaceTarget = new Selector("[+] FindSpace");

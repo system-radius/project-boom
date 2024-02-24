@@ -5,7 +5,12 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.radius.system.ai.behaviortree.NodeKeys;
-import com.radius.system.ai.behaviortree.trees.DefaultTree;
+import com.radius.system.ai.behaviortree.trees.AClassTree;
+import com.radius.system.ai.behaviortree.trees.BClassTree;
+import com.radius.system.ai.behaviortree.trees.CClassTree;
+import com.radius.system.ai.behaviortree.trees.DClassTree;
+import com.radius.system.ai.behaviortree.trees.OmegaTree;
+import com.radius.system.ai.behaviortree.trees.SClassTree;
 import com.radius.system.ai.behaviortree.trees.Tree;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
@@ -35,7 +40,26 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
         targetPoint = new Point(null, -1, -1);
         pastTarget = new Point(null, -1, -1);
-        tree = new DefaultTree(id, GlobalConstants.WORLD_AREA - (GlobalConstants.WORLD_AREA / 4), boardState);
+        switch (config.botLevel) {
+            case S_CLASS:
+                tree = new SClassTree(id, boardState);
+                break;
+            case A_CLASS:
+                tree = new AClassTree(id, boardState);
+                break;
+            case B_CLASS:
+                tree = new BClassTree(id, boardState);
+                break;
+            case C_CLASS:
+                tree = new CClassTree(id, boardState);
+                break;
+            case D_CLASS:
+                tree = new DClassTree(id, boardState);
+                break;
+            case OMEGA:
+            default:
+                tree = new OmegaTree(id, boardState);
+        }
     }
 
     public String GetActiveNode() {
@@ -47,7 +71,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         String display = value.toString();
 
         if (!display.equals(activeNode)) {
-            System.out.println("[" + player.id + "]" + display);
+            //System.out.println("[" + player.id + "]" + display);
             activeNode = display;
         }
 

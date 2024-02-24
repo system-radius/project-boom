@@ -2,6 +2,7 @@ package com.radius.system.objects.players;
 
 import com.badlogic.gdx.math.Vector2;
 import com.radius.system.assets.GlobalConstants;
+import com.radius.system.enums.BotLevel;
 
 public class PlayerConfig {
 
@@ -14,9 +15,11 @@ public class PlayerConfig {
             new Vector2(1, GlobalConstants.WORLD_HEIGHT - 2), new Vector2(GlobalConstants.WORLD_WIDTH - 2, 1)
     };
 
+    public BotLevel botLevel = BotLevel.D_CLASS;
+
     public boolean isHuman = false;
 
-    public int playerSpriteIndex = 0;
+    public int playerSpriteIndex = -1;
 
     public void RandomizePlayerSprite() {
         playerSpriteIndex = (int)(Math.random() * PLAYER_SPRITE_PATHS.length);
@@ -27,6 +30,9 @@ public class PlayerConfig {
     }
 
     public Vector2 GetPlayerSpawnPoint(int index) {
+        if (playerSpriteIndex == -1) {
+            playerSpriteIndex = index;
+        }
         return PLAYER_SPAWN_POINTS[index];
     }
 
