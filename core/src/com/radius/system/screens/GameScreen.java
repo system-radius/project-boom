@@ -11,13 +11,11 @@ import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.controllers.ArtificialIntelligenceController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.enums.BotLevel;
-import com.radius.system.enums.ButtonType;
 import com.radius.system.enums.GameState;
 import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.EndGameEventListener;
@@ -32,6 +30,7 @@ import com.radius.system.modes.GameMode;
 import com.radius.system.utils.FontUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class GameScreen extends AbstractScreen implements ButtonPressListener, EndGameEventListener {
@@ -69,13 +68,17 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
     private BitmapFont font;
 
+    private Date startDate, endDate;
+
     private boolean maxZoomOut = true;
 
-    private float preloadBuffer = 0f;
+    private float preloadBuffer = 0f, speedMultiplier = 1f;
 
     private int[] wins;
 
-    private int matches;
+    private int matches, crashes;
+
+    private String matchResults, dateTime;
 
     public GameScreen() {
         font = FontUtils.GetFont((int) WORLD_SCALE / 4, Color.WHITE, 1, Color.BLACK);
@@ -100,6 +103,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
             float newZoom = ComputeZoomValue();
             mainCamera.SetZoom(newZoom);
             AdjustZoom(mainViewport, newZoom);
+            speedMultiplier = 1f;
             return;
         }
 
@@ -176,9 +180,9 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
         List<PlayerConfig> configs = new ArrayList<>();
 
         configs.add(CreatePlayerConfig(false, true, BotLevel.S_CLASS));
+        configs.add(CreatePlayerConfig(false, false, BotLevel.A_CLASS));
+        configs.add(CreatePlayerConfig(false, true, BotLevel.B_CLASS));
         configs.add(CreatePlayerConfig(false, false, BotLevel.D_CLASS));
-        configs.add(CreatePlayerConfig(false, true, BotLevel.A_CLASS));
-        configs.add(CreatePlayerConfig(false, false, BotLevel.B_CLASS));
         /**/
 
         wins = new int[configs.size()];
@@ -232,6 +236,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
                 FireOnLoadStartEvent();
                 gameMode.Restart(delta);
                 stage.Restart();
+                startDate = new Date(System.currentTimeMillis());
                 break;
             case LOADING:
                 // Wait for loading to complete.
@@ -245,8 +250,8 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
                 gameState = GameState.PLAYING;
                 break;
             case PLAYING:
-                gameMode.Update(delta * 1.5f);
-                stage.act(delta * 1.5f);
+                gameMode.Update(delta * speedMultiplier);
+                stage.act(delta * speedMultiplier);
                 break;
             case PAUSED:
             case COMPLETE:
@@ -293,27 +298,23 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
         if (GlobalConstants.DEBUG) {
-            if (GameState.COMPLETE.equals(gameState)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Match #");
-                sb.append(matches);
-                sb.append("\tWins: [");
-                for (int i = 0; i < wins.length; i++) {
-                    sb.append(wins[i]);
-                    if (i + 1 < wins.length) {
-                        sb.append(", ");
-                    }
-                }
-                sb.append("]");
-                font.draw(spriteBatch, sb.toString(), WORLD_SCALE/2f, WORLD_SCALE/2f);
+            if (GameState.COMPLETE.equals(gameState) || GameState.CONCLUDED.equals(gameState)) {
+                font.draw(spriteBatch, matchResults, WORLD_SCALE/2f, WORLD_SCALE);
+                font.draw(spriteBatch, dateTime, WORLD_SCALE/2f, WORLD_SCALE * 2);
             } else {
                 List<BoomPlayerController> controllers = gameMode.GetControllers();
                 for (int i = 0; i < controllers.size(); i++) {
                     BoomPlayerController controller = controllers.get(i);
                     if (controller instanceof ArtificialIntelligenceController) {
                         String display = ((ArtificialIntelligenceController) controller).GetActiveNode();
-                        font.draw(spriteBatch, i + ": " + display, WORLD_SCALE / 2f, WORLD_SCALE / 2 + WORLD_SCALE * i);
+                        font.draw(spriteBatch, (i + 1) + ": " + display, WORLD_SCALE / 2f, WORLD_SCALE / 2 + WORLD_SCALE * i);
                     }
+                }
+
+                if (matchResults == null) {
+                    font.draw(spriteBatch, "Match #" + (matches + 1) + " / Crashes: " + crashes, 0, uiViewport.getWorldHeight() - WORLD_SCALE);
+                } else {
+                    font.draw(spriteBatch, matchResults, 0, uiViewport.getWorldHeight() - WORLD_SCALE);
                 }
             }
             //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
@@ -352,7 +353,8 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
             case RESTART:
                 //gameState.ActivateGodMode();
                 gameState = GameState.RESTART;
-                preloadBuffer = matches = 0;
+                preloadBuffer = matches = crashes = 0;
+                gameMode.ResetKDStats();
                 break;
             case PAUSE:
                 gameState = GameState.PAUSED;
@@ -387,9 +389,53 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
         if (event.id >= 0) {
             wins[event.id]++;
         }
-        matches++;
 
-        if (matches >= 10) {
+        if (!event.crashed) {
+            matches++;
+        } else {
+            crashes++;
+        }
+
+        endDate = new Date(System.currentTimeMillis());
+        StringBuilder sb = new StringBuilder();
+        sb.append("Match #");
+        sb.append(matches);
+        sb.append(" / Crashes: ");
+        sb.append(crashes);
+        sb.append("\nWins: [");
+        for (int i = 0; i < wins.length; i++) {
+            sb.append("Player");
+            sb.append(i + 1);
+            sb.append(": ");
+            sb.append(wins[i]);
+            sb.append(" -> ");
+            sb.append(event.killCount[i]);
+            sb.append("/");
+            sb.append(event.deathCount[i]);
+            sb.append("/");
+            sb.append(event.selfBurn[i]);
+            if (i + 1 < wins.length) {
+                sb.append(",    ");
+            }
+        }
+        sb.append("]\t");
+        matchResults = sb.toString();
+        sb.clear();
+
+        System.out.println(matchResults);
+
+        if (startDate != null && endDate != null) {
+            sb.append("Start Time: ");
+            sb.append(startDate.toString());
+            sb.append("\nEnd Time: ");
+            sb.append(endDate.toString());
+            dateTime = sb.toString();
+            System.out.println(dateTime);
+        }
+
+        System.out.println("= = = = = = = =");
+
+        if (matches >= 100) {
             gameState = GameState.COMPLETE;
         }
     }
