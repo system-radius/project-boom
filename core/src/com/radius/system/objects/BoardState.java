@@ -234,7 +234,14 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
             Rectangle playerRect = player.GetBurnRect();
 
             if (bomb.HasContact(playerRect)) {
-                player.Burn();
+                if (player.Burn()) {
+                    Player killer = bomb.GetOwner();
+                    if (!player.equals(killer)) {
+                        killer.CreditKill();
+                    } else {
+                        player.CreditSelfBurn();
+                    }
+                }
             }
         }
     }
