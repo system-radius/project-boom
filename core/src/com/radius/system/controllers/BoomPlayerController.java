@@ -12,6 +12,8 @@ public abstract class BoomPlayerController implements Disposable {
 
     protected Player player;
 
+    protected int kills, deaths, selfBurn;
+
     public BoomPlayerController(BoardState boardState, Player player) {
         this.boardState = boardState;
         this.player = player;
@@ -26,8 +28,24 @@ public abstract class BoomPlayerController implements Disposable {
         player.Reset();
     }
 
+    public void ResetKDStats() {
+        kills = deaths = selfBurn = 0;
+    }
+
     public Player GetPlayer() {
         return player;
+    }
+
+    public int GetTotalKills() {
+        return kills += player.GetKills();
+    }
+
+    public int GetTotalDeaths() {
+        return deaths += player.GetDeaths();
+    }
+
+    public int GetTotalSelfBurn() {
+        return selfBurn += player.GetSelfBurn();
     }
 
     public final void PlantBomb() {

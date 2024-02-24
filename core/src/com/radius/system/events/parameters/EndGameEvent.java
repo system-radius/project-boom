@@ -6,4 +6,12 @@ public class EndGameEvent {
 
     public int id = -1;
 
+    public int[] killCount;
+
+    public int[] deathCount;
+
+    public int[] selfBurn;
+
+    public boolean crashed;
+
 }

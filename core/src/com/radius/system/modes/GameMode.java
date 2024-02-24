@@ -9,9 +9,7 @@ import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.events.OverTimeListener;
-import com.radius.system.events.RestartEventListener;
 import com.radius.system.events.listeners.EndGameEventListener;
-import com.radius.system.events.listeners.LoadingEventListener;
 import com.radius.system.events.parameters.EndGameEvent;
 import com.radius.system.objects.BoardState;
 import com.radius.system.objects.blocks.Block;
@@ -64,6 +62,10 @@ public class GameMode implements Disposable, OverTimeListener {
                 controllers.add(new ArtificialIntelligenceController(i, boardState, config, WORLD_SCALE));
             }
         }
+
+        endGameEvent.killCount = new int[configs.size()];
+        endGameEvent.deathCount = new int[configs.size()];
+        endGameEvent.selfBurn = new int[configs.size()];
 
     }
 
@@ -128,6 +130,7 @@ public class GameMode implements Disposable, OverTimeListener {
         RestartControllers();
         endGameEvent.playerName = null;
         endGameEvent.id = -1;
+        endGameEvent.crashed = false;
 
         // Sleep for a second to finish restarting the controllers.
         Sleep(1);
@@ -197,11 +200,21 @@ public class GameMode implements Disposable, OverTimeListener {
         return !loading;
     }
 
+    public void ResetKDStats() {
+        for (BoomPlayerController controller : controllers) {
+            controller.ResetKDStats();
+        }
+    }
+
     public void Update(float delta) {
 
-        boardState.Update(delta);
-        for (BoomPlayerController controller : controllers) {
-            controller.Update(delta);
+        try {
+            boardState.Update(delta);
+            for (BoomPlayerController controller : controllers) {
+                controller.Update(delta);
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+
         }
 
         if (!ContinueGame()) {
@@ -256,7 +269,19 @@ public class GameMode implements Disposable, OverTimeListener {
         endGameEventListeners.add(listener);
     }
 
+    private void FireCrashedEvent() {
+        endGameEvent.crashed = true;
+        FireEndGameEvent();
+    }
+
     private void FireEndGameEvent() {
+        for (BoomPlayerController controller : controllers) {
+            int id = controller.GetPlayer().id;
+            endGameEvent.killCount[id] = controller.GetTotalKills();
+            endGameEvent.deathCount[id] = controller.GetTotalDeaths();
+            endGameEvent.selfBurn[id] = controller.GetTotalSelfBurn();
+        }
+
         for (EndGameEventListener listener : endGameEventListeners) {
             listener.OnEndGameTrigger(endGameEvent);
         }

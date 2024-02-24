@@ -162,6 +162,8 @@ public class Player extends Entity implements FirePathListener {
 
     private boolean godmode;
 
+    private int kills, deaths, selfBurn;
+
     public Player(int id, Vector2 respawnPoint, String spritePath, float scale) {
         this(id, respawnPoint, spritePath, scale, false);
     }
@@ -197,6 +199,7 @@ public class Player extends Entity implements FirePathListener {
         bombStock = 1;
         firePower = 1;
         speedLevel = 1;
+        kills = deaths = selfBurn = 0;
         bombType = BombType.NORMAL;
 
         Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
@@ -374,6 +377,18 @@ public class Player extends Entity implements FirePathListener {
         return life + (!IsDead() ? 1 : 0);
     }
 
+    public int GetKills() {
+        return kills;
+    }
+
+    public int GetSelfBurn() {
+        return selfBurn;
+    }
+
+    public int GetDeaths() {
+        return deaths;
+    }
+
     public int GetFirePower() {
         return firePower;
     }
@@ -392,6 +407,14 @@ public class Player extends Entity implements FirePathListener {
 
     public Rectangle GetCollisionRect() {
         return collisionRect;
+    }
+
+    public void CreditKill() {
+        kills++;
+    }
+
+    public void CreditSelfBurn() {
+        selfBurn++;
     }
 
     public void Collide(List<Block> blocks) {
@@ -625,10 +648,12 @@ public class Player extends Entity implements FirePathListener {
     }
 
     @Override
-    public void Burn() {
+    public boolean Burn() {
         if (PlayerState.DYING.equals(state) || PlayerState.DEAD.equals(state) || invulnerable || life < 0) {
-            return;
+            return false;
         }
+
+        deaths++;
 
         if (life == 0) {
             displayedName = name + "\n[x]";
@@ -636,6 +661,7 @@ public class Player extends Entity implements FirePathListener {
 
         state = PlayerState.DYING;
         animationElapsedTime = deathTime = respawnTime = 0f;
+        return true;
     }
 
     @Override
