@@ -129,7 +129,7 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
     }
 
     public void Restart() {
-        timer.StartTimer(600);
+        timer.StartTimer(300);
         paused = false;
         gameConcluded = false;
         SetButtonStates();
