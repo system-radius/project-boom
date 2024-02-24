@@ -161,6 +161,10 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
         joystick.SetPosition( 2.5f * scale, 2.5f * scale, true);
     }
 
+    public TimerDisplay GetTimer() {
+        return timer;
+    }
+
     private void SetButtonStates() {
         aButton.setVisible(!paused && !gameConcluded);
         bButton.setVisible(!paused && !gameConcluded);

@@ -4,4 +4,6 @@ public class EndGameEvent {
 
     public String playerName;
 
+    public int id = -1;
+
 }

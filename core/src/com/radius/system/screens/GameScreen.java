@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -15,6 +16,7 @@ import com.radius.system.assets.GlobalConstants;
 import com.radius.system.controllers.ArtificialIntelligenceController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.controllers.HumanPlayerController;
+import com.radius.system.enums.BotLevel;
 import com.radius.system.enums.ButtonType;
 import com.radius.system.enums.GameState;
 import com.radius.system.events.listeners.ButtonPressListener;
@@ -45,7 +47,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
     private final float VIEWPORT_HEIGHT = 9f;
 
     //private final float ZOOM = 0.25785f;
-    private final float ZOOM = 0.5f, preloadLimit = 1f;
+    private final float ZOOM = 0.5f, preloadLimit = 1f, gameEndLimit = 3f;
 
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
@@ -71,6 +73,10 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
     private float preloadBuffer = 0f;
 
+    private int[] wins;
+
+    private int matches;
+
     public GameScreen() {
         font = FontUtils.GetFont((int) WORLD_SCALE / 4, Color.WHITE, 1, Color.BLACK);
 
@@ -80,10 +86,12 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
         InitializeEvents();
 
         gameState = GameState.START;
+        matches = 0;
     }
 
     private void InitializeEvents() {
         stage.AddButtonPressListener(this);
+        stage.GetTimer().AddOverTimeListener(gameMode);
         gameMode.AddEndGameEventListener(stage);
         gameMode.AddEndGameEventListener(this);
         this.AddLoadingEventListener(stage);
@@ -167,19 +175,25 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
         List<PlayerConfig> configs = new ArrayList<>();
 
-        configs.add(CreatePlayerConfig(false, true));
-        configs.add(CreatePlayerConfig(false, false));
-        configs.add(CreatePlayerConfig(false, true));
-        configs.add(CreatePlayerConfig(false, true));
+        configs.add(CreatePlayerConfig(false, true, BotLevel.S_CLASS));
+        configs.add(CreatePlayerConfig(false, false, BotLevel.D_CLASS));
+        configs.add(CreatePlayerConfig(false, true, BotLevel.A_CLASS));
+        configs.add(CreatePlayerConfig(false, false, BotLevel.B_CLASS));
         /**/
+
+        wins = new int[configs.size()];
 
         gameMode = new GameMode();
         gameMode.AddPlayers(configs);
     }
 
-    private PlayerConfig CreatePlayerConfig(boolean human, boolean randomizeSprite) {
+    private PlayerConfig CreatePlayerConfig(boolean human, boolean randomizeSprite, BotLevel botLevel) {
         PlayerConfig config = new PlayerConfig();
         config.isHuman = human;
+        if (!human) {
+            config.botLevel = botLevel;
+        }
+
         if (randomizeSprite) {
             config.RandomizePlayerSprite();
         }
@@ -231,11 +245,20 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
                 gameState = GameState.PLAYING;
                 break;
             case PLAYING:
-                gameMode.Update(delta);
-                stage.act(delta);
+                gameMode.Update(delta * 1.5f);
+                stage.act(delta * 1.5f);
                 break;
             case PAUSED:
+            case COMPLETE:
                 // Do nothing when paused;
+                break;
+            case CONCLUDED:
+                if (preloadBuffer < gameEndLimit) {
+                    preloadBuffer+= delta;
+                    return;
+                }
+                gameState = GameState.RESTART;
+                preloadBuffer = 0;
                 break;
         }
     }
@@ -270,15 +293,29 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
         float y = (uiCamera.position.y - uiViewport.getWorldHeight() / 2f) + WORLD_SCALE;
 
         if (GlobalConstants.DEBUG) {
-            List<BoomPlayerController> controllers = gameMode.GetControllers();
-            for (int i = 0; i < controllers.size(); i++) {
-                BoomPlayerController controller = controllers.get(i);
-                if (controller instanceof ArtificialIntelligenceController) {
-                    String display = ((ArtificialIntelligenceController) controller).GetActiveNode();
-                    font.draw(spriteBatch, i + ": " + display, WORLD_SCALE / 2f, WORLD_SCALE / 2 + WORLD_SCALE * i);
+            if (GameState.COMPLETE.equals(gameState)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Match #");
+                sb.append(matches);
+                sb.append("\tWins: [");
+                for (int i = 0; i < wins.length; i++) {
+                    sb.append(wins[i]);
+                    if (i + 1 < wins.length) {
+                        sb.append(", ");
+                    }
+                }
+                sb.append("]");
+                font.draw(spriteBatch, sb.toString(), WORLD_SCALE/2f, WORLD_SCALE/2f);
+            } else {
+                List<BoomPlayerController> controllers = gameMode.GetControllers();
+                for (int i = 0; i < controllers.size(); i++) {
+                    BoomPlayerController controller = controllers.get(i);
+                    if (controller instanceof ArtificialIntelligenceController) {
+                        String display = ((ArtificialIntelligenceController) controller).GetActiveNode();
+                        font.draw(spriteBatch, i + ": " + display, WORLD_SCALE / 2f, WORLD_SCALE / 2 + WORLD_SCALE * i);
+                    }
                 }
             }
-            //font.draw(spriteBatch, "(" + (mainCamera.position.x / WORLD_SCALE) + ", " + (mainCamera.position.y / WORLD_SCALE) + ")", x, y);
             //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
             //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
         }
@@ -315,6 +352,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
             case RESTART:
                 //gameState.ActivateGodMode();
                 gameState = GameState.RESTART;
+                preloadBuffer = matches = 0;
                 break;
             case PAUSE:
                 gameState = GameState.PAUSED;
@@ -345,6 +383,14 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
     @Override
     public void OnEndGameTrigger(EndGameEvent event) {
-        gameState = GameState.PAUSED;
+        gameState = GameState.CONCLUDED;
+        if (event.id >= 0) {
+            wins[event.id]++;
+        }
+        matches++;
+
+        if (matches >= 10) {
+            gameState = GameState.COMPLETE;
+        }
     }
 }

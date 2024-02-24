@@ -8,6 +8,7 @@ import com.radius.system.controllers.ArtificialIntelligenceController;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.enums.BoardRep;
+import com.radius.system.events.OverTimeListener;
 import com.radius.system.events.RestartEventListener;
 import com.radius.system.events.listeners.EndGameEventListener;
 import com.radius.system.events.listeners.LoadingEventListener;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class GameMode implements Disposable {
+public class GameMode implements Disposable, OverTimeListener {
 
     private final float WORLD_WIDTH = GlobalConstants.WORLD_WIDTH;
 
@@ -125,6 +126,8 @@ public class GameMode implements Disposable {
         // Sleep for half a second to let the board complete its stuff.
         Sleep(0.5f);
         RestartControllers();
+        endGameEvent.playerName = null;
+        endGameEvent.id = -1;
 
         // Sleep for a second to finish restarting the controllers.
         Sleep(1);
@@ -214,6 +217,7 @@ public class GameMode implements Disposable {
                 if (!hasOneAlive) {
                     hasOneAlive = true;
                     endGameEvent.playerName = player.name;
+                    endGameEvent.id = player.id;
                 } else {
                     // Return true as there are still more than one player alive.
                     endGameEvent.playerName = null;
@@ -256,5 +260,23 @@ public class GameMode implements Disposable {
         for (EndGameEventListener listener : endGameEventListeners) {
             listener.OnEndGameTrigger(endGameEvent);
         }
+    }
+
+    @Override
+    public void OverTime() {
+        int highestHP = Integer.MIN_VALUE;
+        for (BoomPlayerController controller : controllers) {
+            int hp = controller.GetPlayer().GetRemainingLife();
+            if (hp > highestHP) {
+                highestHP = hp;
+                endGameEvent.id = controller.GetPlayer().id;
+                endGameEvent.playerName = controller.GetPlayer().name;
+            } else if (hp == highestHP) {
+                endGameEvent.id = -1;
+                endGameEvent.playerName = null;
+            }
+        }
+
+        FireEndGameEvent();
     }
 }

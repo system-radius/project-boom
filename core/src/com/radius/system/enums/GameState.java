@@ -12,6 +12,10 @@ public enum GameState {
 
     PAUSED,
 
-    RESTART
+    RESTART,
+
+    CONCLUDED,
+
+    COMPLETE
 
 }
