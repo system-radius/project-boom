@@ -9,6 +9,10 @@ import java.util.Map;
 
 public class GlobalAssets {
 
+    public static final String[] PLAYER_TEXTURE_PATHS = new String[]{
+            "img/player_1.png", "img/player_2.png", "img/player_3.png", "img/player_4.png",
+    };
+
     public static final String BOMB_TEXTURE_PATH = "img/bomb.png";
 
     public static final int BOMB_TEXTURE_REGION_SIZE = 32;
@@ -41,12 +45,24 @@ public class GlobalAssets {
 
     public static final String WARNING_SIGN_PATH = "img/warning_sign.png";
 
+    public static final String BURN_TEST_PATH = "field/burn_test.png";
+
     private static final Map<String, Texture> textureMap = new HashMap<>();
 
     private static final Map<String, TextureRegion[][]> textureRegionMap = new HashMap<>();
 
     private GlobalAssets() {
 
+    }
+
+    public static void PreLoad() {
+        for (String path : PLAYER_TEXTURE_PATHS) {
+            LoadTexture(path);
+        }
+
+        LoadTexture(BOMB_TEXTURE_PATH);
+        LoadTexture(BLOCKS_TEXTURE_PATH);
+        LoadTexture(WARNING_SIGN_PATH);
     }
 
     public static Texture LoadTexture(String path) {
