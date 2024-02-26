@@ -1,23 +1,37 @@
 package com.radius.system.screens.game_ui.hud;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.radius.system.assets.GlobalAssets;
+import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.BonusType;
+import com.radius.system.enums.ButtonType;
+import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.StatChangeListener;
+import com.radius.system.events.parameters.ButtonPressEvent;
+import com.radius.system.utils.FontUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoomHUD extends HeadsUpDisplay {
+public class BoomHUD extends HeadsUpDisplay implements ButtonPressListener {
+
+    private final String gamePaused = "GAME PAUSED";
+
+    private final BitmapFont pausedTextRenderer;
 
     private final Texture background;
 
     private final List<StatChangeListener> statChangeListeners = new ArrayList<>();
 
+    private boolean isPaused;
+
     public BoomHUD(float x, float y, float width, float height) {
         super(x, y, width, height);
         background = GlobalAssets.LoadTexture(GlobalAssets.BACKGROUND_TEXTURE_PATH);
+        pausedTextRenderer = FontUtils.GetFont((int)(GlobalConstants.WORLD_SCALE * 0.75f), Color.WHITE, 3, Color.BLACK);
     }
 
     public void AddItem(BonusType bonusType) {
@@ -56,11 +70,28 @@ public class BoomHUD extends HeadsUpDisplay {
     @Override
     public void draw(Batch batch, float alpha) {
         batch.draw(background, getX(), getY(), getWidth(), getHeight());
-        super.draw(batch, alpha);
+        if (!isPaused) {
+            super.draw(batch, alpha);
+        } else {
+            batch.setColor(1, 1, 1, 1);
+            pausedTextRenderer.draw(batch, gamePaused, getX() + GlobalConstants.WORLD_SCALE / 2, getY() + getHeight() * 0.75f);
+        }
     }
 
     @Override
     public void dispose() {
         background.dispose();
+    }
+
+    @Override
+    public void OnButtonPress(ButtonPressEvent event) {
+        switch (event.buttonType) {
+            case PAUSE:
+                isPaused = true;
+                break;
+            case PLAY:
+                isPaused = false;
+                break;
+        }
     }
 }

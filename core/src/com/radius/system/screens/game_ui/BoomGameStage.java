@@ -111,6 +111,9 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
         SetButtonStates();
         movementEvent = new MovementEvent(-1, 0, 0);
         buttonPressEvent = new ButtonPressEvent();
+
+        this.AddButtonPressListener(hud);
+
         timer.StartTimer(600);
     }
 
