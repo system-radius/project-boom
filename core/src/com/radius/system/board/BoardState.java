@@ -24,17 +24,17 @@ import java.util.Map;
 
 public class BoardState implements BoomUpdatable, BoomDrawable {
 
-    public final int BOARD_WIDTH;
+    public int BOARD_WIDTH;
 
-    public final int BOARD_HEIGHT;
+    public int BOARD_HEIGHT;
 
-    private final AnimatedGameObject[][] board;
+    private AnimatedGameObject[][] board;
 
-    private final BoardRep[][] boardRep;
+    private BoardRep[][] boardRep;
 
-    private final int[][] boardCost;
+    private int[][] boardCost;
 
-    private final int scale;
+    private final float scale;
 
     private final List<Player> players;
 
@@ -42,19 +42,24 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
     private final BitmapFont font;
 
-    public BoardState(int boardWidth, int boardHeight, int scale) {
+    public BoardState(int boardWidth, int boardHeight, float scale) {
+        this.players = new ArrayList<>();
+        this.bombs = new ArrayList<>();
+        this.scale = scale;
+
+        Resize(boardWidth, boardHeight);
+
+        font = FontUtils.GetFont((int) GlobalConstants.WORLD_SCALE / 6, Color.WHITE, 1, Color.BLACK);
+    }
+
+    public void Resize(int boardWidth, int boardHeight) {
 
         this.board = new AnimatedGameObject[boardWidth][boardHeight];
         this.boardRep = new BoardRep[boardWidth][boardHeight];
         this.boardCost = new int[boardWidth][boardHeight];
-        this.players = new ArrayList<>();
-        this.bombs = new ArrayList<>();
 
         this.BOARD_WIDTH = boardWidth;
         this.BOARD_HEIGHT = boardHeight;
-        this.scale = scale;
-
-        font = FontUtils.GetFont((int) GlobalConstants.WORLD_SCALE / 6, Color.WHITE, 1, Color.BLACK);
 
         ClearBoard();
     }
