@@ -33,10 +33,6 @@ public class Point implements Comparable<Point> {
         return h + parentCost + selfCost;
     }
 
-    public boolean IsInvalid() {
-        return x < 0 || y < 0 || x >= GlobalConstants.WORLD_WIDTH || y >= GlobalConstants.WORLD_HEIGHT;
-    }
-
     public boolean IsEqualPosition(Point that) {
         return this.x == that.x && this.y == that.y;
     }
