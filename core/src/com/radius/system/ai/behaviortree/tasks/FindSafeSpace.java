@@ -26,7 +26,7 @@ public class FindSafeSpace extends Solidifier {
 
     @Override
     public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
-        //super.Evaluate(depth, delta, boardCost);
+        //super.Evaluate(srcPoint, boardCost);
         this.srcPoint = srcPoint;
         this.boardCost = boardCost;
 
