@@ -16,7 +16,7 @@ import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.board.BoardState;
 import com.radius.system.objects.players.Player;
-import com.radius.system.objects.players.PlayerConfig;
+import com.radius.system.configs.PlayerConfig;
 
 import java.util.List;
 

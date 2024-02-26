@@ -1,4 +1,4 @@
-package com.radius.system.objects.players;
+package com.radius.system.configs;
 
 import com.badlogic.gdx.math.Vector2;
 import com.radius.system.assets.GlobalConstants;
@@ -11,8 +11,7 @@ public class PlayerConfig {
     };
 
     private static final Vector2[] PLAYER_SPAWN_POINTS = new Vector2[] {
-        new Vector2(1, 1), new Vector2(GlobalConstants.WORLD_WIDTH - 2, GlobalConstants.WORLD_HEIGHT - 2),
-            new Vector2(1, GlobalConstants.WORLD_HEIGHT - 2), new Vector2(GlobalConstants.WORLD_WIDTH - 2, 1)
+        new Vector2(1, 1)
     };
 
     public BotLevel botLevel = BotLevel.D_CLASS;
