@@ -13,7 +13,7 @@ import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.events.parameters.MovementEvent;
 import com.radius.system.objects.players.Player;
-import com.radius.system.objects.players.PlayerConfig;
+import com.radius.system.configs.PlayerConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,8 +86,8 @@ public class HumanPlayerController extends BoomPlayerController implements Movem
         int detectionRangeX = 8, detectionRangeY = 4;
         int x = player.GetWorldX(), y = player.GetWorldY();
 
-        int offScreenX = detectionRangeX + AdjustAxialDetectionRange(detectionRangeX, x, (int)GlobalConstants.WORLD_WIDTH);
-        int offScreenY = detectionRangeY + AdjustAxialDetectionRange(detectionRangeY, y, (int)GlobalConstants.WORLD_HEIGHT);
+        int offScreenX = detectionRangeX + AdjustAxialDetectionRange(detectionRangeX, x, (int)boardState.BOARD_WIDTH);
+        int offScreenY = detectionRangeY + AdjustAxialDetectionRange(detectionRangeY, y, (int)boardState.BOARD_HEIGHT);
 
         firePathEvent.onFirePath = true;
         firePathEvent.hasNorth = !DetectBombAtCoordinate(x, y, detectionRangeX, 1, Direction.SOUTH) && DetectBombAtCoordinate(x, y + offScreenY, Direction.NORTH);
@@ -124,7 +124,7 @@ public class HumanPlayerController extends BoomPlayerController implements Movem
     }
 
     private boolean DetectBombAtCoordinate(int x, int y, int range, int counter, Direction direction) {
-        if (x < 0 || y < 0 || x >= GlobalConstants.WORLD_WIDTH || y >= GlobalConstants.WORLD_HEIGHT || (range > 0 && counter > range)) {
+        if (x < 0 || y < 0 || x >= boardState.BOARD_WIDTH || y >= boardState.BOARD_HEIGHT || (range > 0 && counter > range)) {
             return false;
         }
 
