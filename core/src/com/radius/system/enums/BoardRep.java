@@ -26,4 +26,9 @@ public enum BoardRep {
         return rep;
     }
 
+    @Override
+    public String toString() {
+        return String.valueOf(rep);
+    }
+
 }
