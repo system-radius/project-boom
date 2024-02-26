@@ -1,7 +1,5 @@
-package com.radius.system.screens.ui.hud;
+package com.radius.system.screens.game_ui.hud;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.radius.system.assets.GlobalAssets;

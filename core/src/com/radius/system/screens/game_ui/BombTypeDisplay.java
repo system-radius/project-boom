@@ -1,12 +1,10 @@
-package com.radius.system.screens.ui;
+package com.radius.system.screens.game_ui;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.radius.system.assets.GlobalAssets;
 import com.radius.system.enums.BombType;
-import com.radius.system.enums.BonusType;
-import com.radius.system.objects.bombs.Bomb;
 
 public class BombTypeDisplay extends Actor {
 

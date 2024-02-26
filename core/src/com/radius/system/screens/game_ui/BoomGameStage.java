@@ -1,8 +1,7 @@
-package com.radius.system.screens.ui;
+package com.radius.system.screens.game_ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -18,22 +17,16 @@ import com.radius.system.controllers.Joystick;
 import com.radius.system.enums.BonusType;
 import com.radius.system.enums.ButtonType;
 import com.radius.system.enums.ControlKeys;
-import com.radius.system.enums.TimeState;
-import com.radius.system.events.ButtonEventListener;
-import com.radius.system.events.RestartEventListener;
-import com.radius.system.events.TimerEventListener;
 import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.EndGameEventListener;
-import com.radius.system.events.listeners.FirePathListener;
 import com.radius.system.events.listeners.LoadingEventListener;
 import com.radius.system.events.listeners.MovementEventListener;
 import com.radius.system.events.listeners.StatChangeListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.events.parameters.EndGameEvent;
-import com.radius.system.events.parameters.FirePathEvent;
 import com.radius.system.events.parameters.MovementEvent;
-import com.radius.system.screens.ui.buttons.GameButton;
-import com.radius.system.screens.ui.hud.BoomHUD;
+import com.radius.system.screens.game_ui.buttons.GameButton;
+import com.radius.system.screens.game_ui.hud.BoomHUD;
 import com.radius.system.utils.FontUtils;
 
 import java.util.ArrayList;

@@ -1,11 +1,10 @@
-package com.radius.system.screens.ui.buttons;
+package com.radius.system.screens.game_ui.buttons;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.radius.system.enums.ButtonType;
-import com.radius.system.events.ButtonEventListener;
 import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
 

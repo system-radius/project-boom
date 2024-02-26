@@ -1,4 +1,4 @@
-package com.radius.system.screens.ui;
+package com.radius.system.screens.game_ui;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;

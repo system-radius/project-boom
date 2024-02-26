@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -26,8 +27,8 @@ import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.events.parameters.EndGameEvent;
 import com.radius.system.objects.players.Player;
 import com.radius.system.configs.PlayerConfig;
-import com.radius.system.screens.ui.BoomGameStage;
-import com.radius.system.screens.ui.GameCamera;
+import com.radius.system.screens.game_ui.BoomGameStage;
+import com.radius.system.screens.game_ui.GameCamera;
 import com.radius.system.modes.GameMode;
 import com.radius.system.utils.FontUtils;
 
@@ -58,7 +59,9 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
     private GameState gameState;
 
-    private BoomGameStage stage;
+    private BoomGameStage gameStage;
+
+    private Stage activeStage;
 
     private GameCamera mainCamera;
 
@@ -94,16 +97,18 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
         gameState = GameState.START;
         matches = 0;
+
+        activeStage = gameStage;
     }
 
     private void InitializeEvents() {
-        stage.AddButtonPressListener(this);
-        stage.GetTimer().AddOverTimeListener(gameMode);
+        gameStage.AddButtonPressListener(this);
+        gameStage.GetTimer().AddOverTimeListener(gameMode);
         //gameMode.AddEndGameEventListener(stage);
         //gameMode.AddEndGameEventListener(this);
 
         gameMode.AddWorldSizeChangeListener(this);
-        this.AddLoadingEventListener(stage);
+        this.AddLoadingEventListener(gameStage);
         HumanPlayerController controller = gameMode.GetMainController();
         if (controller == null) {
             float newZoom = ComputeZoomValue();
@@ -113,12 +118,12 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
             return;
         }
 
-        stage.AddMovementEventListener(controller);
-        stage.AddButtonPressListener(controller);
+        gameStage.AddMovementEventListener(controller);
+        gameStage.AddButtonPressListener(controller);
 
         Player player = controller.GetPlayer();
         player.AddCoordinateEventListener(mainCamera);
-        player.AddStatChangeListeners(stage.GetStatChangeListeners());
+        player.AddStatChangeListeners(gameStage.GetStatChangeListeners());
         controller.AddFirePathEventListener(player);
 
         mainCamera.SetWatchId(player.id);
@@ -126,13 +131,13 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
     private void InitializeStage() {
         //stage = new GameStage(0, uiViewport, WORLD_SCALE);;
-        stage = new BoomGameStage(uiViewport, WORLD_SCALE);
+        gameStage = new BoomGameStage(uiViewport, WORLD_SCALE);
 
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(gameStage);
         Gdx.input.setInputProcessor(multiplexer);
 
-        stage.OnLoadStart();
+        gameStage.OnLoadStart();
     }
 
     private void InitializeView() {
@@ -226,15 +231,15 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
     @Override
     public void show() {
-        stage.Resize();
+        gameStage.Resize();
     }
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
+        gameStage.getViewport().update(width, height, true);
         mainViewport.update(width, height);
         mainCamera.update();
-        stage.Resize();
+        gameStage.Resize();
     }
 
     @Override
@@ -250,14 +255,14 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
                 GlobalAssets.PreLoad();
                 gameState = GameState.RESTART;
                 preloadBuffer = 0;
-            case CONFIG:
+            //case CONFIG:
 
                 break;
             case RESTART:
                 gameState = GameState.LOADING;
                 FireOnLoadStartEvent();
                 gameMode.Restart(delta, configs);
-                stage.Restart();
+                gameStage.Restart();
                 startDate = new Date(System.currentTimeMillis());
                 break;
             case LOADING:
@@ -273,7 +278,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
                 break;
             case PLAYING:
                 gameMode.Update(delta * speedMultiplier);
-                stage.act(delta * speedMultiplier);
+                gameStage.act(delta * speedMultiplier);
                 break;
             case PAUSED:
             case COMPLETE:
@@ -296,7 +301,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
             DrawObjects(spriteBatch);
         }
         DrawUI(spriteBatch);
-        stage.draw();
+        activeStage.draw();
     }
 
     private void DrawObjects(SpriteBatch spriteBatch) {
@@ -363,7 +368,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
     public void dispose() {
         super.dispose();
         font.dispose();
-        stage.dispose();
+        gameStage.dispose();
         gameMode.dispose();
         FontUtils.Dispose();
     }

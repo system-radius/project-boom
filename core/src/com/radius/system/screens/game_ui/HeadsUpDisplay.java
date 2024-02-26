@@ -1,19 +1,15 @@
-package com.radius.system.screens.ui;
+package com.radius.system.screens.game_ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Disposable;
 import com.radius.system.enums.BombType;
 import com.radius.system.enums.BonusType;
-import com.radius.system.events.TimerEventListener;
-import com.radius.system.objects.blocks.Bonus;
-import com.radius.system.objects.bombs.Bomb;
 
 import java.util.HashMap;
 import java.util.Map;
