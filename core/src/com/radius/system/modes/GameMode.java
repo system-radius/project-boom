@@ -4,49 +4,53 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Disposable;
 import com.radius.system.assets.GlobalConstants;
+import com.radius.system.configs.FieldConfig;
 import com.radius.system.controllers.ArtificialIntelligenceController;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.events.OverTimeListener;
 import com.radius.system.events.listeners.EndGameEventListener;
+import com.radius.system.events.listeners.WorldSizeChangeListener;
 import com.radius.system.events.parameters.EndGameEvent;
 import com.radius.system.board.BoardState;
-import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
-import com.radius.system.objects.blocks.HardBlock;
 import com.radius.system.objects.blocks.SoftBlock;
 import com.radius.system.objects.players.Player;
-import com.radius.system.objects.players.PlayerConfig;
+import com.radius.system.configs.PlayerConfig;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class GameMode implements Disposable, OverTimeListener {
 
-    private final float WORLD_WIDTH = GlobalConstants.WORLD_WIDTH;
+    protected int WORLD_WIDTH = 31;
 
-    private final float WORLD_HEIGHT = GlobalConstants.WORLD_HEIGHT;
+    protected int WORLD_HEIGHT = 17;
 
-    private final float WORLD_SCALE = GlobalConstants.WORLD_SCALE;
+    protected final float WORLD_SCALE = GlobalConstants.WORLD_SCALE;
 
-    private final BoardState boardState;
+    protected final List<BoomPlayerController> controllers = new ArrayList<>();
 
-    private final List<BoomPlayerController> controllers = new ArrayList<>();
+    protected final List<WorldSizeChangeListener> worldSizeChangeListeners = new ArrayList<>();
 
-    private final List<EndGameEventListener> endGameEventListeners = new ArrayList<>();
+    protected final List<EndGameEventListener> endGameEventListeners = new ArrayList<>();
 
-    private final EndGameEvent endGameEvent;
+    protected final EndGameEvent endGameEvent;
 
-    private Thread restartThread;
+    protected BoardState boardState;
 
-    private int mainPlayer = -1;
+    protected FieldConfig field;
 
-    private boolean loading = false;
+    protected Thread restartThread;
+
+    protected int mainPlayer = -1;
+
+    protected boolean loading = false;
 
     public GameMode() {
-        boardState = new BoardState((int) WORLD_WIDTH, (int) WORLD_HEIGHT, (int) WORLD_SCALE);
+        boardState = new BoardState(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE);
+        field = new FieldConfig();
         endGameEvent = new EndGameEvent();
     }
 
@@ -87,9 +91,9 @@ public class GameMode implements Disposable, OverTimeListener {
         return controllers;
     }
 
-    public void Restart(float delta) {
+    public void Restart(float delta, List<PlayerConfig> configs) {
         loading = true;
-        restartThread = new Thread(() -> RestartField(delta));
+        restartThread = new Thread(() -> RestartField(delta, configs));
         restartThread.start();
     }
 
@@ -100,16 +104,17 @@ public class GameMode implements Disposable, OverTimeListener {
         }
     }
 
-    public void RestartField(float delta) {
-        RestartField(delta, false);
-    }
+    public void RestartField(float delta, List<PlayerConfig> configs) {
 
-    public void RestartField(float delta, boolean secondTime) {
-
-        boardState.ClearBoard();
+        field.LoadField(boardState, WORLD_SCALE);
+        WORLD_WIDTH = field.GetWidth();
+        WORLD_HEIGHT = field.GetHeight();
+        FireWorldSizeChange(WORLD_WIDTH, WORLD_HEIGHT);
+        AddPlayers(configs);
+        //boardState.ClearBoard();
         float spacing = 2f; // Allows for leaving spaces when generating hard blocks.
-        int fieldIndex = new Random(System.currentTimeMillis()).nextInt(7);
 
+        /*
         for(int x = 0; x < WORLD_WIDTH; x++) {
             for(int y = 0; y < WORLD_HEIGHT; y++) {
                 if (x == 0 || y == 0 || x + 1 == WORLD_WIDTH || y + 1 == WORLD_HEIGHT) {
@@ -124,6 +129,7 @@ public class GameMode implements Disposable, OverTimeListener {
 
         //RandomizeBonus();
         RandomizeField(fieldIndex);
+         */
 
         // Sleep for half a second to let the board complete its stuff.
         Sleep(0.5f);
@@ -214,7 +220,7 @@ public class GameMode implements Disposable, OverTimeListener {
                 controller.Update(delta);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-
+            FireCrashedEvent();
         }
 
         if (!ContinueGame()) {
@@ -264,9 +270,20 @@ public class GameMode implements Disposable, OverTimeListener {
         }
     }
 
+    public void AddWorldSizeChangeListener(WorldSizeChangeListener listener) {
+        if (worldSizeChangeListeners.contains(listener)) return;
+        worldSizeChangeListeners.add(listener);
+    }
+
     public void AddEndGameEventListener(EndGameEventListener listener) {
         if (endGameEventListeners.contains(listener)) return;
         endGameEventListeners.add(listener);
+    }
+
+    protected void FireWorldSizeChange(int width, int height) {
+        for (WorldSizeChangeListener listener : worldSizeChangeListeners) {
+            listener.OnWorldSizeChange(width, height);
+        }
     }
 
     private void FireCrashedEvent() {

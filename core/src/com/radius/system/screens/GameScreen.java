@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.radius.system.assets.GlobalAssets;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.controllers.ArtificialIntelligenceController;
 import com.radius.system.controllers.BoomPlayerController;
@@ -20,10 +21,11 @@ import com.radius.system.enums.GameState;
 import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.EndGameEventListener;
 import com.radius.system.events.listeners.LoadingEventListener;
+import com.radius.system.events.listeners.WorldSizeChangeListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.events.parameters.EndGameEvent;
 import com.radius.system.objects.players.Player;
-import com.radius.system.objects.players.PlayerConfig;
+import com.radius.system.configs.PlayerConfig;
 import com.radius.system.screens.ui.BoomGameStage;
 import com.radius.system.screens.ui.GameCamera;
 import com.radius.system.modes.GameMode;
@@ -33,11 +35,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class GameScreen extends AbstractScreen implements ButtonPressListener, EndGameEventListener {
+public class GameScreen extends AbstractScreen implements ButtonPressListener, EndGameEventListener, WorldSizeChangeListener {
 
-    private final float WORLD_WIDTH = GlobalConstants.WORLD_WIDTH;
+    private int WORLD_WIDTH = 0;
 
-    private final float WORLD_HEIGHT = GlobalConstants.WORLD_HEIGHT;
+    private int WORLD_HEIGHT = 0;
 
     private final float WORLD_SCALE = GlobalConstants.WORLD_SCALE;
 
@@ -51,6 +53,8 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
     private final List<LoadingEventListener> loadingEventListeners = new ArrayList<>();
+
+    private List<PlayerConfig> configs = new ArrayList<>();
 
     private GameState gameState;
 
@@ -95,8 +99,10 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
     private void InitializeEvents() {
         stage.AddButtonPressListener(this);
         stage.GetTimer().AddOverTimeListener(gameMode);
-        gameMode.AddEndGameEventListener(stage);
-        gameMode.AddEndGameEventListener(this);
+        //gameMode.AddEndGameEventListener(stage);
+        //gameMode.AddEndGameEventListener(this);
+
+        gameMode.AddWorldSizeChangeListener(this);
         this.AddLoadingEventListener(stage);
         HumanPlayerController controller = gameMode.GetMainController();
         if (controller == null) {
@@ -130,29 +136,43 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
     }
 
     private void InitializeView() {
-        mainCamera = new GameCamera(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE);
+        if (mainCamera == null) {
+            mainCamera = new GameCamera(WORLD_SCALE);
+        }
 
-        uiCamera = new OrthographicCamera();
+        if (uiCamera == null) {
+            uiCamera = new OrthographicCamera();
+        }
 
         float zoom = ZOOM;
         if (maxZoomOut) {
             zoom = ComputeZoomValue();
         }
+        mainCamera.SetZoom(zoom);
 
         float viewportWidth = (WORLD_SCALE * VIEWPORT_WIDTH) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
         float viewportHeight = (WORLD_SCALE * VIEWPORT_HEIGHT) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
-        mainCamera.SetZoom(zoom);
 
-        mainViewport = new FitViewport(viewportWidth, viewportHeight, mainCamera);
-        uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
+        if (mainViewport == null) {
+            mainViewport = new FitViewport(viewportWidth, viewportHeight, mainCamera);
+        } else {
+            mainViewport.setWorldWidth(viewportWidth);
+            mainViewport.setWorldHeight(viewportHeight);
+        }
 
-        float scaledWorldWidth = WORLD_WIDTH * WORLD_SCALE, scaledWorldHeight = WORLD_HEIGHT * WORLD_SCALE;
-        mainCamera.position.set(scaledWorldWidth / 2, scaledWorldHeight / 2, 0);
+        if (uiViewport == null) {
+            uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
 
-        uiCamera.position.x = mainCamera.position.x;
-        uiCamera.position.y = mainCamera.position.y;
+            float scaledWorldWidth = WORLD_WIDTH * WORLD_SCALE, scaledWorldHeight = WORLD_HEIGHT * WORLD_SCALE;
+            mainCamera.position.set(scaledWorldWidth / 2, scaledWorldHeight / 2, 0);
 
-        uiCamera.update();
+
+            uiCamera.position.x = mainCamera.position.x;
+            uiCamera.position.y = mainCamera.position.y;
+            uiCamera.update();
+        }
+
+        mainCamera.SetWorldSize(WORLD_WIDTH, WORLD_HEIGHT);
     }
 
     private void AdjustZoom(Viewport viewport, float zoom) {
@@ -177,9 +197,8 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
     private void InitializeGameState() {
 
-        List<PlayerConfig> configs = new ArrayList<>();
-
         configs.add(CreatePlayerConfig(false, true, BotLevel.S_CLASS));
+        /*
         configs.add(CreatePlayerConfig(false, false, BotLevel.A_CLASS));
         configs.add(CreatePlayerConfig(false, true, BotLevel.B_CLASS));
         configs.add(CreatePlayerConfig(false, false, BotLevel.D_CLASS));
@@ -188,7 +207,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
         wins = new int[configs.size()];
 
         gameMode = new GameMode();
-        gameMode.AddPlayers(configs);
+        //gameMode.AddPlayers(configs);
     }
 
     private PlayerConfig CreatePlayerConfig(boolean human, boolean randomizeSprite, BotLevel botLevel) {
@@ -228,13 +247,16 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
                     preloadBuffer += delta;
                     return;
                 }
+                GlobalAssets.PreLoad();
                 gameState = GameState.RESTART;
                 preloadBuffer = 0;
+            case CONFIG:
+
                 break;
             case RESTART:
                 gameState = GameState.LOADING;
                 FireOnLoadStartEvent();
-                gameMode.Restart(delta);
+                gameMode.Restart(delta, configs);
                 stage.Restart();
                 startDate = new Date(System.currentTimeMillis());
                 break;
@@ -438,5 +460,12 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
         if (matches >= 100) {
             gameState = GameState.COMPLETE;
         }
+    }
+
+    @Override
+    public void OnWorldSizeChange(int width, int height) {
+        WORLD_WIDTH = width;
+        WORLD_HEIGHT = height;
+        InitializeView();
     }
 }
