@@ -159,14 +159,14 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
     }
 
     private void SetButtonStates() {
-        aButton.setVisible(!paused && !gameConcluded);
-        bButton.setVisible(!paused && !gameConcluded);
+        aButton.setVisible((!paused && !gameConcluded) && !loading);
+        bButton.setVisible((!paused && !gameConcluded) && !loading);
 
-        pauseButton.setVisible(!paused && !gameConcluded);
-        playButton.setVisible(paused);
+        pauseButton.setVisible((!paused && !gameConcluded) && !loading);
+        playButton.setVisible(paused && !loading);
 
-        restartButton.setVisible(paused || gameConcluded);
-        cancelButton.setVisible(paused || gameConcluded);
+        restartButton.setVisible((paused || gameConcluded) && !loading);
+        cancelButton.setVisible((paused || gameConcluded) && !loading);
         Resize();
     }
 
@@ -411,13 +411,10 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
                 SetButtonStates();
                 break;
             case PLAY:
+            case RESTART:
+            case CANCEL:
                 paused = false;
                 SetButtonStates();
-                break;
-            case RESTART:
-            case A:
-            case B:
-            default:
         }
         FireButtonEvent(event);
     }
@@ -453,5 +450,6 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
     @Override
     public void OnLoadFinish() {
         loading = false;
+        SetButtonStates();
     }
 }

@@ -1,10 +1,6 @@
 package com.radius.system.screens.config_ui.mode_select;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.radius.system.assets.GlobalAssets;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.GameType;
 import com.radius.system.events.listeners.ModeSelectListener;
@@ -16,6 +12,7 @@ import java.util.List;
 public class ModeSelectionPanel extends GamePanel {
 
     private static final GameType[] GAME_MODES = new GameType[]{
+            GameType.TEST,
             GameType.CLASSIC,
             GameType.DEATH_MATCH,
             GameType.CAPTURE_THE_FLAG

@@ -29,6 +29,7 @@ import com.radius.system.events.listeners.StartGameListener;
 import com.radius.system.events.listeners.WorldSizeChangeListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.events.parameters.EndGameEvent;
+import com.radius.system.modes.TestMode;
 import com.radius.system.objects.players.Player;
 import com.radius.system.configs.PlayerConfig;
 import com.radius.system.screens.config_ui.ConfigStage;
@@ -208,7 +209,15 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         List<PlayerConfig> playerConfigs = gameConfig.GetPlayerConfigs();
         wins = new int[playerConfigs.size()];
 
-        gameMode = new GameMode(gameConfig.GetFieldConfig(), playerConfigs);
+        switch (gameConfig.GetGameMode()) {
+            case TEST:
+                gameMode = new TestMode(gameConfig.GetFieldConfig(), playerConfigs);
+                break;
+            case CLASSIC:
+            default:
+                gameMode = new GameMode(gameConfig.GetFieldConfig(), playerConfigs);
+        }
+
         //gameMode.AddPlayers(configs);
     }
 
@@ -247,12 +256,12 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
                 // Wait for loading to complete.
                 if (gameMode.IsDoneLoading()) {
                     gameState = GameState.LOAD_FINISH;
-                    gameStage.OnLoadFinish();
                 }
                 break;
             case LOAD_FINISH:
                 // Basically a marker to start playing.
                 InitializeEvents();
+                FireOnLoadFinishEvent();
                 gameState = GameState.PLAYING;
                 break;
             case PLAYING:
