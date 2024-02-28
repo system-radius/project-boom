@@ -23,6 +23,7 @@ import com.radius.system.enums.BotLevel;
 import com.radius.system.enums.GameState;
 import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.EndGameEventListener;
+import com.radius.system.events.listeners.ExitGameListener;
 import com.radius.system.events.listeners.LoadingEventListener;
 import com.radius.system.events.listeners.StartGameListener;
 import com.radius.system.events.listeners.WorldSizeChangeListener;
@@ -58,6 +59,8 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
     private final float EFFECTIVE_VIEWPORT_DIVIDER = 2f;
 
     private final List<LoadingEventListener> loadingEventListeners = new ArrayList<>();
+
+    private final List<ExitGameListener> exitGameListeners = new ArrayList<>();
 
     private GameConfig gameConfig;
 
@@ -365,6 +368,10 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
             case PLAY:
                 gameState = GameState.PLAYING;
                 break;
+            case CANCEL:
+                gameState = GameState.COMPLETE;
+                FireExitGameEvent();
+                break;
 
         }
     }
@@ -372,6 +379,11 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
     public void AddLoadingEventListener(LoadingEventListener listener) {
         if (loadingEventListeners.contains(listener)) return;
         loadingEventListeners.add(listener);
+    }
+
+    public void AddExitGameListener(ExitGameListener listener) {
+        if (exitGameListeners.contains(listener)) return;
+        exitGameListeners.add(listener);
     }
 
     private void FireOnLoadStartEvent() {
@@ -383,6 +395,12 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
     private void FireOnLoadFinishEvent() {
         for (LoadingEventListener listener : loadingEventListeners) {
             listener.OnLoadFinish();
+        }
+    }
+
+    private void FireExitGameEvent() {
+        for (ExitGameListener listener : exitGameListeners) {
+            listener.OnExitGame();
         }
     }
 

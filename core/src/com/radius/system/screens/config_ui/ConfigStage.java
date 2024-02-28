@@ -121,6 +121,11 @@ public class ConfigStage extends Stage implements ButtonPressListener {
         }
     }
 
+    public void ResetState() {
+        stateCounter = 0;
+        AdjustView();
+    }
+
     public void Resize() {
         float viewportWidth = getViewport().getWorldWidth();
         float viewportHeight = getViewport().getWorldHeight();

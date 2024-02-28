@@ -8,10 +8,11 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.configs.GameConfig;
+import com.radius.system.events.listeners.ExitGameListener;
 import com.radius.system.events.listeners.StartGameListener;
 import com.radius.system.screens.config_ui.ConfigStage;
 
-public class ConfigScreen extends AbstractScreen {
+public class ConfigScreen extends AbstractScreen implements ExitGameListener {
 
     private final ConfigStage configStage;
 
@@ -54,5 +55,11 @@ public class ConfigScreen extends AbstractScreen {
     @Override
     public void DrawDebug(ShapeRenderer renderer) {
 
+    }
+
+    @Override
+    public void OnExitGame() {
+        Gdx.input.setInputProcessor(configStage);
+        configStage.ResetState();
     }
 }

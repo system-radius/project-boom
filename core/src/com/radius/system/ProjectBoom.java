@@ -31,6 +31,9 @@ public class ProjectBoom extends Game implements StartGameListener, ExitGameList
 		configScreen.AddStartGameListener(this);
 		configScreen.AddStartGameListener(gameScreen);
 
+		gameScreen.AddExitGameListener(this);
+		gameScreen.AddExitGameListener(configScreen);
+
 		setScreen(configScreen);
 	}
 

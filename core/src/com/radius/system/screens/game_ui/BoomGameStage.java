@@ -97,10 +97,10 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
 
         this.addActor(hud);
         this.addActor(timer = new TimerDisplay(0, 0, scale / 1.5f, scale / 1.5f));
-        this.addActor(pauseButton = CreateGameButton(GlobalAssets.BUTTON_PAUSE_TEXTURE_PATH, ButtonType.PAUSE, 0, 0, scale / 1.5f, 1));
         this.addActor(aButton = CreateGameButton(GlobalAssets.BUTTON_B_TEXTURE_PATH, ButtonType.A, 0, viewport.getWorldHeight() / BUTTON_POSITION_Y_DIVIDER, gameButtonSize, 0.5f));
         this.addActor(bButton = CreateGameButton(GlobalAssets.BUTTON_B_TEXTURE_PATH, ButtonType.B, 0, viewport.getWorldHeight() / BUTTON_POSITION_Y_DIVIDER, gameButtonSize, 0.5f));
-        this.addActor(playButton = CreateGameButton(GlobalAssets.BUTTON_PLAY_TEXTURE_PATH, ButtonType.PLAY, 0, 0, pauseButtonSize, 1));
+        this.addActor(pauseButton = CreateGameButton(GlobalAssets.BUTTON_PAUSE_TEXTURE_PATH, ButtonType.PAUSE, 0, 0, scale / 1.5f, 1));
+        this.addActor(playButton = CreateGameButton(GlobalAssets.BUTTON_PLAY_TEXTURE_PATH, ButtonType.PLAY, 0, 0, scale / 1.5f, 1));
         this.addActor(restartButton = CreateGameButton(GlobalAssets.BUTTON_RESTART_TEXTURE_PATH, ButtonType.RESTART, 0, 0, pauseButtonSize, 1));
         this.addActor(cancelButton = CreateGameButton(GlobalAssets.BUTTON_CANCEL_TEXTURE_PATH, ButtonType.CANCEL, 0, 0, pauseButtonSize, 1));
 
@@ -143,12 +143,9 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
         timer.setPosition(worldWidth - timer.getWidth() * 6, worldHeight - hud.getHeight() / 2 - timer.getHeight() / 2);
 
         pauseButton.setPosition(worldWidth - scale, worldHeight - hud.getHeight() / 2 - pauseButton.getHeight() / 2);
+        playButton.setPosition(pauseButton.getX(), pauseButton.getY());
 
-        playButton.setPosition(worldWidth / 2 - pauseButtonSize - pauseButtonsOffset, worldHeight / 2 - pauseButtonSize / 2);
-        restartButton.setPosition(worldWidth / 2 + pauseButtonsOffset, worldHeight / 2 - pauseButtonSize / 2);
-        if (gameConcluded) {
-            restartButton.setPosition(playButton.getX(), playButton.getY());
-        }
+        restartButton.setPosition(worldWidth / 2 - pauseButtonSize - pauseButtonsOffset, worldHeight / 2 - pauseButtonSize / 2);
         cancelButton.setPosition(worldWidth / 2 + pauseButtonsOffset, worldHeight / 2 - pauseButtonSize / 2);
 
         aButton.setPosition(worldWidth - buttonPositionMultiplier / 2 * scale, aButton.getY());
@@ -164,11 +161,12 @@ public class BoomGameStage extends Stage implements ButtonPressListener, EndGame
     private void SetButtonStates() {
         aButton.setVisible(!paused && !gameConcluded);
         bButton.setVisible(!paused && !gameConcluded);
-        pauseButton.setVisible(!paused && !gameConcluded);
 
+        pauseButton.setVisible(!paused && !gameConcluded);
         playButton.setVisible(paused);
+
         restartButton.setVisible(paused || gameConcluded);
-        cancelButton.setVisible(gameConcluded);
+        cancelButton.setVisible(paused || gameConcluded);
         Resize();
     }
 
