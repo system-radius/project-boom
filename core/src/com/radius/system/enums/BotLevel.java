@@ -2,16 +2,26 @@ package com.radius.system.enums;
 
 public enum BotLevel {
 
-    OMEGA,
+    OMEGA("Omega"),
 
-    S_CLASS,
+    S_CLASS("S"),
 
-    A_CLASS,
+    A_CLASS("A"),
 
-    B_CLASS,
+    B_CLASS("B"),
 
-    C_CLASS,
+    C_CLASS("C"),
 
-    D_CLASS
+    D_CLASS("D");
+
+    private final String key;
+
+    BotLevel(String key) {
+        this.key = key;
+    }
+
+    public String GetKey() {
+        return key;
+    }
 
 }

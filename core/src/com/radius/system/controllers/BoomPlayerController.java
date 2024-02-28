@@ -18,7 +18,9 @@ public abstract class BoomPlayerController implements Disposable {
         this.boardState = boardState;
         this.player = player;
 
-        boardState.AddToBoard(player);
+        if (boardState != null && player != null) {
+            boardState.AddToBoard(player);
+        }
     }
 
     public void Restart() {
@@ -34,6 +36,10 @@ public abstract class BoomPlayerController implements Disposable {
 
     public Player GetPlayer() {
         return player;
+    }
+
+    public int GetRemainingLives() {
+        return player.GetRemainingLife();
     }
 
     public int GetTotalKills() {

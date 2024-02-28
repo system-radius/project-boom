@@ -2,10 +2,12 @@ package com.radius.system.modes;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.configs.FieldConfig;
 import com.radius.system.controllers.ArtificialIntelligenceController;
+import com.radius.system.controllers.EmptyController;
 import com.radius.system.controllers.HumanPlayerController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.enums.BoardRep;
@@ -38,7 +40,9 @@ public class GameMode implements Disposable, OverTimeListener {
 
     protected final EndGameEvent endGameEvent;
 
-    protected BoardState boardState;
+    protected BoardState boardState = null;
+
+    protected List<PlayerConfig> playerConfigs;
 
     protected FieldConfig field;
 
@@ -48,22 +52,29 @@ public class GameMode implements Disposable, OverTimeListener {
 
     protected boolean loading = false;
 
-    public GameMode() {
-        boardState = new BoardState(WORLD_WIDTH, WORLD_HEIGHT, WORLD_SCALE);
-        field = new FieldConfig();
+    public GameMode(FieldConfig fieldConfig, List<PlayerConfig> playerConfigs) {
         endGameEvent = new EndGameEvent();
+        this.field = fieldConfig;
+        this.playerConfigs = playerConfigs;
     }
 
     public void AddPlayers(List<PlayerConfig> configs) {
 
         for (int i = 0; i < configs.size(); i++) {
             PlayerConfig config = configs.get(i);
-            if (config.isHuman) {
-                controllers.add(new HumanPlayerController(i, boardState, config, WORLD_SCALE));
-                mainPlayer = i;
-            } else {
-                // Supposed to be adding AI controller.
-                controllers.add(new ArtificialIntelligenceController(i, boardState, config, WORLD_SCALE));
+            BoomPlayerController controller;
+            int id = controllers.size();
+            switch (config.controlType) {
+                case HUMAN:
+                    controller = new HumanPlayerController(id, config, boardState.GetSpawnPoint(config.id), boardState, WORLD_SCALE);
+                    mainPlayer = id;
+                    controllers.add(controller);
+                    break;
+                case AI:
+                    controller = new ArtificialIntelligenceController(id, config, boardState.GetSpawnPoint(config.id), boardState, WORLD_SCALE);
+                    controllers.add(controller);
+                    break;
+                default:
             }
         }
 
@@ -91,9 +102,9 @@ public class GameMode implements Disposable, OverTimeListener {
         return controllers;
     }
 
-    public void Restart(float delta, List<PlayerConfig> configs) {
+    public void Restart(float delta) {
         loading = true;
-        restartThread = new Thread(() -> RestartField(delta, configs));
+        restartThread = new Thread(() -> RestartField(delta));
         restartThread.start();
     }
 
@@ -104,15 +115,15 @@ public class GameMode implements Disposable, OverTimeListener {
         }
     }
 
-    public void RestartField(float delta, List<PlayerConfig> configs) {
+    public void RestartField(float delta) {
 
-        field.LoadField(boardState, WORLD_SCALE);
-        WORLD_WIDTH = field.GetWidth();
-        WORLD_HEIGHT = field.GetHeight();
-        FireWorldSizeChange(WORLD_WIDTH, WORLD_HEIGHT);
-        AddPlayers(configs);
-        //boardState.ClearBoard();
-        float spacing = 2f; // Allows for leaving spaces when generating hard blocks.
+        if (boardState == null) {
+            this.boardState = field.CreateBoardState();
+            AddPlayers(playerConfigs);
+        } else {
+            boardState.ClearBoard();
+            this.field.RestartBoard(boardState);
+        }
 
         /*
         for(int x = 0; x < WORLD_WIDTH; x++) {
@@ -232,7 +243,7 @@ public class GameMode implements Disposable, OverTimeListener {
         boolean hasOneAlive = false;
         for (BoomPlayerController controller : controllers) {
             Player player = controller.GetPlayer();
-            if (player.GetRemainingLife() > 0) {
+            if (player != null && player.GetRemainingLife() > 0) {
                 if (!hasOneAlive) {
                     hasOneAlive = true;
                     endGameEvent.playerName = player.name;

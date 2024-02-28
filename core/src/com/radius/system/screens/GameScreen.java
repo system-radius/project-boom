@@ -14,6 +14,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.radius.system.assets.GlobalAssets;
 import com.radius.system.assets.GlobalConstants;
+import com.radius.system.configs.FieldConfig;
+import com.radius.system.configs.GameConfig;
 import com.radius.system.controllers.ArtificialIntelligenceController;
 import com.radius.system.controllers.BoomPlayerController;
 import com.radius.system.controllers.HumanPlayerController;
@@ -22,11 +24,13 @@ import com.radius.system.enums.GameState;
 import com.radius.system.events.listeners.ButtonPressListener;
 import com.radius.system.events.listeners.EndGameEventListener;
 import com.radius.system.events.listeners.LoadingEventListener;
+import com.radius.system.events.listeners.StartGameListener;
 import com.radius.system.events.listeners.WorldSizeChangeListener;
 import com.radius.system.events.parameters.ButtonPressEvent;
 import com.radius.system.events.parameters.EndGameEvent;
 import com.radius.system.objects.players.Player;
 import com.radius.system.configs.PlayerConfig;
+import com.radius.system.screens.config_ui.ConfigStage;
 import com.radius.system.screens.game_ui.BoomGameStage;
 import com.radius.system.screens.game_ui.GameCamera;
 import com.radius.system.modes.GameMode;
@@ -36,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class GameScreen extends AbstractScreen implements ButtonPressListener, EndGameEventListener, WorldSizeChangeListener {
+public class GameScreen extends AbstractScreen implements StartGameListener, ButtonPressListener, EndGameEventListener, WorldSizeChangeListener {
 
     private int WORLD_WIDTH = 0;
 
@@ -55,13 +59,11 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
     private final List<LoadingEventListener> loadingEventListeners = new ArrayList<>();
 
-    private List<PlayerConfig> configs = new ArrayList<>();
+    private GameConfig gameConfig;
 
     private GameState gameState;
 
     private BoomGameStage gameStage;
-
-    private Stage activeStage;
 
     private GameCamera mainCamera;
 
@@ -92,20 +94,16 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
         InitializeView();
         InitializeStage();
-        InitializeGameState();
-        InitializeEvents();
 
-        gameState = GameState.START;
+        gameState = GameState.COMPLETE;
         matches = 0;
-
-        activeStage = gameStage;
     }
 
     private void InitializeEvents() {
         gameStage.AddButtonPressListener(this);
         gameStage.GetTimer().AddOverTimeListener(gameMode);
-        //gameMode.AddEndGameEventListener(stage);
-        //gameMode.AddEndGameEventListener(this);
+        gameMode.AddEndGameEventListener(gameStage);
+        gameMode.AddEndGameEventListener(this);
 
         gameMode.AddWorldSizeChangeListener(this);
         this.AddLoadingEventListener(gameStage);
@@ -132,11 +130,6 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
     private void InitializeStage() {
         //stage = new GameStage(0, uiViewport, WORLD_SCALE);;
         gameStage = new BoomGameStage(uiViewport, WORLD_SCALE);
-
-        InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(gameStage);
-        Gdx.input.setInputProcessor(multiplexer);
-
         gameStage.OnLoadStart();
     }
 
@@ -202,36 +195,25 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
 
     private void InitializeGameState() {
 
-        configs.add(CreatePlayerConfig(false, true, BotLevel.S_CLASS));
+        //configs.add(CreatePlayerConfig(false, true, BotLevel.S_CLASS));
         /*
         configs.add(CreatePlayerConfig(false, false, BotLevel.A_CLASS));
         configs.add(CreatePlayerConfig(false, true, BotLevel.B_CLASS));
         configs.add(CreatePlayerConfig(false, false, BotLevel.D_CLASS));
         /**/
 
-        wins = new int[configs.size()];
+        List<PlayerConfig> playerConfigs = gameConfig.GetPlayerConfigs();
+        wins = new int[playerConfigs.size()];
 
-        gameMode = new GameMode();
+        gameMode = new GameMode(gameConfig.GetFieldConfig(), playerConfigs);
         //gameMode.AddPlayers(configs);
-    }
-
-    private PlayerConfig CreatePlayerConfig(boolean human, boolean randomizeSprite, BotLevel botLevel) {
-        PlayerConfig config = new PlayerConfig();
-        config.isHuman = human;
-        if (!human) {
-            config.botLevel = botLevel;
-        }
-
-        if (randomizeSprite) {
-            config.RandomizePlayerSprite();
-        }
-
-        return config;
     }
 
     @Override
     public void show() {
-        gameStage.Resize();
+        if (gameStage != null) {
+            gameStage.Resize();
+        }
     }
 
     @Override
@@ -248,20 +230,13 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
         switch (gameState) {
             case START:
                 // Do things that need to be done only once, then set state to restart.
-                if (preloadBuffer < preloadLimit) {
-                    preloadBuffer += delta;
-                    return;
-                }
-                GlobalAssets.PreLoad();
+                InitializeGameState();
                 gameState = GameState.RESTART;
-                preloadBuffer = 0;
-            //case CONFIG:
-
                 break;
             case RESTART:
                 gameState = GameState.LOADING;
                 FireOnLoadStartEvent();
-                gameMode.Restart(delta, configs);
+                gameMode.Restart(delta);
                 gameStage.Restart();
                 startDate = new Date(System.currentTimeMillis());
                 break;
@@ -269,11 +244,12 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
                 // Wait for loading to complete.
                 if (gameMode.IsDoneLoading()) {
                     gameState = GameState.LOAD_FINISH;
-                    FireOnLoadFinishEvent();
+                    gameStage.OnLoadFinish();
                 }
                 break;
             case LOAD_FINISH:
                 // Basically a marker to start playing.
+                InitializeEvents();
                 gameState = GameState.PLAYING;
                 break;
             case PLAYING:
@@ -301,7 +277,7 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
             DrawObjects(spriteBatch);
         }
         DrawUI(spriteBatch);
-        activeStage.draw();
+        gameStage.draw();
     }
 
     private void DrawObjects(SpriteBatch spriteBatch) {
@@ -472,5 +448,21 @@ public class GameScreen extends AbstractScreen implements ButtonPressListener, E
         WORLD_WIDTH = width;
         WORLD_HEIGHT = height;
         InitializeView();
+    }
+
+    @Override
+    public void OnGameStart(GameConfig gameConfig) {
+        FieldConfig fieldConfig = gameConfig.GetFieldConfig();
+        this.gameConfig = gameConfig;
+
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(gameStage);
+        Gdx.input.setInputProcessor(multiplexer);
+
+        WORLD_WIDTH = fieldConfig.GetWidth();
+        WORLD_HEIGHT = fieldConfig.GetHeight();
+        InitializeView();
+
+        gameState = GameState.START;
     }
 }

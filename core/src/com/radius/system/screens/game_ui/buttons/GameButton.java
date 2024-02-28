@@ -1,5 +1,6 @@
 package com.radius.system.screens.game_ui.buttons;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -16,6 +17,20 @@ public class GameButton extends Image {
     private final List<ButtonPressListener> buttonPressListeners = new ArrayList<>();
 
     private final ButtonPressEvent event;
+
+    public GameButton(ButtonType buttonType, float x, float y, float width, float height) {
+        setX(x); setY(y); setWidth(width); setHeight(height);
+
+        event = new ButtonPressEvent();
+        event.buttonType = buttonType;
+
+        this.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                FireButtonEvent();
+            }
+        });
+    }
 
     public GameButton(TextureRegion texture, ButtonType buttonType, float x, float y, float width, float height, float alpha) {
         super(texture);

@@ -43,9 +43,26 @@ public class GlobalAssets {
 
     public static final String BACKGROUND_TEXTURE_PATH = "img/background.png";
 
+    public static final String WHITE_SQUARE = "img/background_white.png";
+
     public static final String WARNING_SIGN_PATH = "img/warning_sign.png";
 
     public static final String BURN_TEST_PATH = "field/burn_test.png";
+
+    /* * * * * * * CONFIG RELATED * * * * * */
+
+    public static final String DEATH_MATCH_MODE_PATH = "mode_banners/death_match.png";
+
+    public static final String CLASSIC_MODE_PATH = "mode_banners/classic.png";
+
+    public static final String CFT_MODE_PATH = "mode_banners/cft.png";
+
+    public static final String FORWARD_TEXTURE_PATH = "img/forward.png";
+
+    public static final String BACKWARD_TEXTURE_PATH = "img/backward.png";
+
+    /* * * * * * * * * * * * * * * * * * * */
+
 
     private static final Map<String, Texture> textureMap = new HashMap<>();
 

@@ -90,6 +90,7 @@ public class BoomHUD extends HeadsUpDisplay implements ButtonPressListener {
                 isPaused = true;
                 break;
             case PLAY:
+            case RESTART:
                 isPaused = false;
                 break;
         }

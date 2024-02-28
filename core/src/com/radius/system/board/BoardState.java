@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.Direction;
@@ -19,6 +20,7 @@ import com.radius.system.utils.FontUtils;
 
 import java.io.DataInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,20 +38,23 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
     private final float scale;
 
+    private final Map<Integer, Vector2> spawnPoints;
+
     private final List<Player> players;
 
     private final List<Bomb> bombs;
 
     private final BitmapFont font;
 
-    public BoardState(int boardWidth, int boardHeight, float scale) {
+    public BoardState(int boardWidth, int boardHeight, float scale, BitmapFont font) {
+        this.spawnPoints = new HashMap<>();
         this.players = new ArrayList<>();
         this.bombs = new ArrayList<>();
         this.scale = scale;
 
         Resize(boardWidth, boardHeight);
 
-        font = FontUtils.GetFont((int) GlobalConstants.WORLD_SCALE / 6, Color.WHITE, 1, Color.BLACK);
+        this.font = font;
     }
 
     public void Resize(int boardWidth, int boardHeight) {
@@ -72,6 +77,14 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
             }
         }
         bombs.clear();
+    }
+
+    public Vector2 GetSpawnPoint(int id) {
+        return spawnPoints.get(id % spawnPoints.size());
+    }
+
+    public void AddToBoard(int id, Vector2 spawnPoint) {
+        spawnPoints.put(id, spawnPoint);
     }
 
     public void AddToBoard(Block block) {
@@ -331,7 +344,7 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
             }
         }
 
-        if (GlobalConstants.DEBUG) {
+        if (GlobalConstants.DEBUG && font != null) {
             for (int i = 0; i < BOARD_WIDTH; i++) {
                 for (int j = 0; j < BOARD_HEIGHT; j++) {
                     font.draw(batch, "(" + i + ", " + j + ")", i * GlobalConstants.WORLD_SCALE, j * GlobalConstants.WORLD_SCALE + GlobalConstants.WORLD_SCALE);

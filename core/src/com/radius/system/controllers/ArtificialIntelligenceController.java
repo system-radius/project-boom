@@ -36,10 +36,11 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     private String activeNode = null;
 
-    public ArtificialIntelligenceController(int id, BoardState boardState, PlayerConfig config, float scale) {
-        super(boardState, new Player(id, config.GetPlayerSpawnPoint(id), config.GetSpritePath(), scale));
+    public ArtificialIntelligenceController(int id, PlayerConfig config, Vector2 spawnPoint, BoardState boardState, float scale) {
+        super(boardState, new Player(id, spawnPoint, config.texturePath, scale));
         targetPoint = new Point(null, -1, -1);
         pastTarget = new Point(null, -1, -1);
+
         switch (config.botLevel) {
             case S_CLASS:
                 tree = new SClassTree(id, boardState);
