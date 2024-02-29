@@ -36,7 +36,8 @@ public class PlayerConfigView extends GamePanel implements ButtonPressListener {
     private final ControlType[] controllers = new ControlType[]{ ControlType.AI, ControlType.HUMAN, ControlType.OFF};
 
     private final BotLevel[] botLevels = new BotLevel[]{
-            BotLevel.A_CLASS, BotLevel.B_CLASS, BotLevel.C_CLASS, BotLevel.D_CLASS
+            BotLevel.A_CLASS, BotLevel.B_CLASS, BotLevel.C_CLASS, BotLevel.D_CLASS,
+            BotLevel.S_CLASS
     };
 
     private final Color[] controllerColors = new Color[] {
@@ -44,7 +45,8 @@ public class PlayerConfigView extends GamePanel implements ButtonPressListener {
     };
 
     private final Color[] botColors = new Color[] {
-            new Color(0x101040ff), new Color(0x401040ff), new Color(0x404010ff), new Color(0x104010ff)
+            new Color(0x101040ff), new Color(0x401040ff), new Color(0x404010ff), new Color(0x104010ff),
+            Color.GOLD
     };
 
     private final List<PlayerConfigResetListener> playerConfigResetListeners = new ArrayList<>();
