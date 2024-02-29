@@ -84,7 +84,7 @@ public class FieldConfig {
         }
 
         if (GlobalConstants.DEBUG) {
-            System.out.println(sb);
+            //System.out.println(sb);
         }
     }
 

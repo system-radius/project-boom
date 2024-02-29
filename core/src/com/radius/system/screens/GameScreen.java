@@ -83,13 +83,13 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
 
     private Date startDate, endDate;
 
-    private boolean maxZoomOut = true;
+    private boolean maxZoomOut = true, hasController = false;
 
     private float preloadBuffer = 0f, speedMultiplier = 1f;
 
     private int[] wins;
 
-    private int matches, crashes;
+    private int matches, crashes, watchId = -1;
 
     private String matchResults, dateTime;
 
@@ -112,11 +112,12 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         gameMode.AddWorldSizeChangeListener(this);
         this.AddLoadingEventListener(gameStage);
         HumanPlayerController controller = gameMode.GetMainController();
-        if (controller == null) {
+        hasController = controller != null;
+        if (!hasController) {
             float newZoom = ComputeZoomValue();
             mainCamera.SetZoom(newZoom);
-            AdjustZoom(mainViewport, newZoom);
             speedMultiplier = 1f;
+            SetupCameraListener();
             return;
         }
 
@@ -131,6 +132,12 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         mainCamera.SetWatchId(player.id);
     }
 
+    private void SetupCameraListener() {
+        for (BoomPlayerController controller : gameMode.GetControllers()) {
+            controller.GetPlayer().AddCoordinateEventListener(mainCamera);
+        }
+    }
+
     private void InitializeStage() {
         //stage = new GameStage(0, uiViewport, WORLD_SCALE);;
         gameStage = new BoomGameStage(uiViewport, WORLD_SCALE);
@@ -140,6 +147,10 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
     private void InitializeView() {
         if (mainCamera == null) {
             mainCamera = new GameCamera(WORLD_SCALE);
+            mainViewport = mainCamera.GetViewport();
+        } else {
+            watchId = -1;
+            mainCamera.SetWatchId(watchId);
         }
 
         if (uiCamera == null) {
@@ -151,16 +162,6 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
             zoom = ComputeZoomValue();
         }
         mainCamera.SetZoom(zoom);
-
-        float viewportWidth = (WORLD_SCALE * VIEWPORT_WIDTH) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
-        float viewportHeight = (WORLD_SCALE * VIEWPORT_HEIGHT) / zoom / EFFECTIVE_VIEWPORT_DIVIDER;
-
-        if (mainViewport == null) {
-            mainViewport = new FitViewport(viewportWidth, viewportHeight, mainCamera);
-        } else {
-            mainViewport.setWorldWidth(viewportWidth);
-            mainViewport.setWorldHeight(viewportHeight);
-        }
 
         if (uiViewport == null) {
             uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
@@ -175,11 +176,6 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         }
 
         mainCamera.SetWorldSize(WORLD_WIDTH, WORLD_HEIGHT);
-    }
-
-    private void AdjustZoom(Viewport viewport, float zoom) {
-        viewport.setWorldWidth(WORLD_SCALE * VIEWPORT_WIDTH / zoom / EFFECTIVE_VIEWPORT_DIVIDER);
-        viewport.setWorldHeight(WORLD_SCALE * VIEWPORT_HEIGHT / zoom / EFFECTIVE_VIEWPORT_DIVIDER);
     }
 
     private float ComputeZoomValue() {
@@ -381,8 +377,23 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
                 gameState = GameState.COMPLETE;
                 FireExitGameEvent();
                 break;
-
+            case A:
+                AdjustWatchId(1);
+                break;
+            case B:
+                AdjustWatchId(-1);
+                break;
         }
+    }
+
+    public void AdjustWatchId(int adjustment) {
+        if (hasController) return;
+
+        int controllersAmount = gameMode.GetControllers().size();
+        watchId = (watchId + 1 + adjustment) % controllersAmount;
+        watchId = watchId < 0 ? controllersAmount : watchId;
+        watchId -= 1;
+        mainCamera.SetWatchId(watchId);
     }
 
     public void AddLoadingEventListener(LoadingEventListener listener) {
