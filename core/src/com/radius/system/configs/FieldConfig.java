@@ -20,6 +20,8 @@ public class FieldConfig {
 
     private static final Random RANDOMIZER = new Random(System.currentTimeMillis());
 
+    private static final Color GRAY = new Color(0x2e2e2eff);
+
     private final float scale;
 
     private final BitmapFont font;
@@ -69,9 +71,12 @@ public class FieldConfig {
                 } else if (Color.GREEN.equals(color)) {
                     boardRep[x][y] = BoardRep.SOFT_BLOCK;
                     sb.append(BoardRep.SOFT_BLOCK);
-                } else if (Color.BLACK.equals(color)) {
+                } else if (GRAY.equals(color)) {
                     boardRep[x][y] = BoardRep.EMPTY;
                     sb.append(BoardRep.EMPTY);
+                } else if (Color.BLACK.equals(color)) {
+                    boardRep[x][y] = BoardRep.VOID;
+                    sb.append(BoardRep.VOID);
                 } else if (Color.YELLOW.equals(color)) {
                     boardRep[x][y] = BoardRep.PLAYER;
                     sb.append(BoardRep.PLAYER);

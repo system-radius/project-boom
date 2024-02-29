@@ -67,6 +67,7 @@ public class GameCamera extends OrthographicCamera implements MovementEventListe
     public void SetWatchId(int watchId) {
 
         if (watchId < 0) {
+            if (activeZoom == zoom) return;
             AdjustViewport(zoom);
             Clamp(worldWidth / 2f, worldHeight / 2f);
             return;

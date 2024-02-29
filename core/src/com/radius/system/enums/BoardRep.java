@@ -22,7 +22,9 @@ public enum BoardRep {
 
     PLAYER_4('4'),
 
-    EMPTY(' ');
+    EMPTY(' '),
+
+    VOID('?');
 
     private char rep;
 

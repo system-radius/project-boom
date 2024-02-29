@@ -390,7 +390,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         if (hasController) return;
 
         int controllersAmount = gameMode.GetControllers().size();
-        watchId = (watchId + 1 + adjustment) % controllersAmount;
+        watchId = (watchId + 1 + adjustment) % (controllersAmount + 1);
         watchId = watchId < 0 ? controllersAmount : watchId;
         watchId -= 1;
         mainCamera.SetWatchId(watchId);
