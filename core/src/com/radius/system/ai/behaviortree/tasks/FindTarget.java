@@ -2,7 +2,6 @@ package com.radius.system.ai.behaviortree.tasks;
 
 import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.nodes.NoExecuteNode;
-import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
@@ -10,7 +9,7 @@ import com.radius.system.enums.NodeState;
 
 import java.util.List;
 
-public class FindSpace extends NoExecuteNode {
+public class FindTarget extends NoExecuteNode {
 
     protected Point srcPoint;
 

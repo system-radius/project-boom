@@ -634,6 +634,10 @@ public class Player extends Entity implements FirePathListener {
         FireStatChange(BonusType.BOMB_STOCK, bombStock - bombs.size());
     }
 
+    public float GetDistance(Player that) {
+        return Math.abs(that.position.x - this.position.x) + Math.abs(that.position.y - this.position.y);
+    }
+
     public boolean IsAlive() {
         return state != PlayerState.DEAD && state != PlayerState.DYING;
     }
