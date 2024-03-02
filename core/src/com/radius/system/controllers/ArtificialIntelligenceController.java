@@ -183,7 +183,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         }
 
         float scale = GlobalConstants.WORLD_SCALE;
-        float offset = player.id * (scale / 5);
+        float offset = (player.id + 1) * (scale / 5);
 
         renderer.setColor(TRACKER_COLORS[player.id]);
         for (Point point : currentPath) {
