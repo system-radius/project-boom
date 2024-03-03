@@ -82,7 +82,7 @@ public abstract class Tree implements BoomUpdatable {
 
     protected Node ConstructDefenseTree(int fireThreshold, boolean backup) {
         Node findSafeSpaceTarget = new Selector("[+] FindSpace");
-        findSafeSpaceTarget.AttachChild(new HasTargetPoint());
+        //findSafeSpaceTarget.AttachChild(new HasTargetPoint());
         findSafeSpaceTarget.AttachChild(new FindSafeSpace(fireThreshold));
 
         Node root = new Sequencer("[>] Defense" + fireThreshold);
@@ -111,7 +111,7 @@ public abstract class Tree implements BoomUpdatable {
 
     protected Node ConstructBombAreaTree() {
         Node findBombAreaTarget = new Selector("[+] FindArea");
-        findBombAreaTarget.AttachChild(new HasTargetPoint());
+        //findBombAreaTarget.AttachChild(new HasTargetPoint());
         findBombAreaTarget.AttachChild(new FindBombArea(fireThreshold, boardState, boardState.GetPlayers().get(id)));
 
         Node root = new Sequencer("[>] AttackA");
