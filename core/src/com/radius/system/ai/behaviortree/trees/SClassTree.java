@@ -3,6 +3,7 @@ package com.radius.system.ai.behaviortree.trees;
 import com.radius.system.ai.behaviortree.checks.IsPlantingBomb;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.RootSelector;
+import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.NodeState;
 import com.radius.system.board.BoardState;
@@ -14,11 +15,13 @@ import java.util.List;
 public class SClassTree extends Tree {
 
     public SClassTree(int id, BoardState boardState) {
-        super(id, (int)(GlobalConstants.WORLD_AREA * 0.75f), boardState);
+        super(id, (int)(GlobalConstants.WORLD_AREA * 0.5f), boardState);
     }
 
     @Override
     protected void Evaluate(int[][] boardCost) {
+        super.Evaluate(boardCost);
+        /*
         NodeState state = root.Evaluate(srcPoint, boardCost);
         List<Node> children = root.GetChildren();
         List<Node> consideredChildren = new ArrayList<>();
@@ -32,11 +35,13 @@ public class SClassTree extends Tree {
             Collections.sort(consideredChildren);
             consideredChildren.get(0).Execute();
         }
+
+         */
     }
 
     @Override
     protected Node SetupTree() {
-        Node root = new RootSelector("[S] ROOT");
+        Node root = new Selector("[S] ROOT");
 
         root.AttachChild(new IsPlantingBomb());
         root.AttachChild(ConstructDefenseTree(fireThreshold, false));
