@@ -127,7 +127,7 @@ public class AStar {
         return false;
     }
 
-    private List<Point> ReconstructPath(Point point) {
+    public static List<Point> ReconstructPath(Point point) {
         List<Point> path = new ArrayList<>();
         path.add(point);
         for (Point parent = point.GetParent(); parent != null; parent = parent.GetParent()) {
