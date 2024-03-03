@@ -13,6 +13,7 @@ import com.radius.system.enums.Direction;
 import com.radius.system.enums.NodeState;
 import com.radius.system.objects.players.Player;
 import com.radius.system.board.BoardState;
+import com.radius.system.screens.game_ui.TimerDisplay;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,27 +48,39 @@ public class FindBombArea extends Solidifier {
         super.Evaluate(srcPoint, boardCost);
         this.srcPoint = srcPoint;
 
-        if (player.GetAvailableBombs() <= 0) {
-            return Failure();
-        }
-
         this.boardCost = boardCost;
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
-            //System.out.println("[" + displayId + "] Failed to select target!");
+            //TimerDisplay.LogTimeStamped("[" + displayId + "] Failed to select target!");
             return Failure();
         }
 
-        List<Point> path = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, targetPoint.x, targetPoint.y);
-        if (path == null) {
-            return Failure();
+        Node root = GetRoot();
+        Point setTargetPoint = (Point) root.GetData(NodeKeys.TARGET_POINT);
+        List<Point> path = AStar.ReconstructPath(targetPoint);
+        int setPathSize = 0, pathSize = path.size();
+        if (setTargetPoint != null) {
+            AssessBombArea(setTargetPoint.x, setTargetPoint.y);
+            List<Point> setPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, setTargetPoint.x, setTargetPoint.y);
+            String setterId = root.GetData(NodeKeys.TARGET_SETTER).toString();
+            if (setPath != null) {
+                setPathSize = setPath.size();
+                if ((setPathSize - currentBurnCount) <= (pathSize - maxBurnCount) &&  setPathSize < pathSize && displayId.equals(setterId)) {
+                    //TimerDisplay.LogTimeStamped("[" + displayId + "] Failed to select target due to closer path!");
+                    return Success(setPathSize);
+                }
+            }
+
+            if (targetPoint.IsEqualPosition(setTargetPoint)) {
+                return Success(pathSize);
+            }
         }
 
-        GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
-        //System.out.println("[" + displayId + "]  Target point acquired: " + targetPoint + " ---> " + maxBurnCount);
-        return Success(path.size());
+        //TimerDisplay.LogTimeStamped("[" + displayId + "]  Target point acquired: " + targetPoint + ", burnCount: " + maxBurnCount + ", path size: " + path.size());
+        //TimerDisplay.LogTimeStamped("[" + displayId + "]  Data map:\n" + BuildMapString());
+        return Success(pathSize, targetPoint);
     }
 
     @Override
@@ -103,6 +116,8 @@ public class FindBombArea extends Solidifier {
         for (int i = 0; i < boardCost.length; i++) {
             System.arraycopy(boardCost[i], 0, modifiedBoardCost[i], 0, boardCost[i].length);
         }
+
+        Solidify(modifiedBoardCost, 2);
 
         if (BoardRep.BOMB.equals(boardState.GetBoardEntry(srcPoint.x, srcPoint.y))) {
             modifiedBoardCost[srcPoint.x][srcPoint.y] = -1;
