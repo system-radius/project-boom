@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
+import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalAssets;
 import com.radius.system.events.listeners.FirePathListener;
 import com.radius.system.events.parameters.FirePathEvent;
@@ -636,6 +637,10 @@ public class Player extends Entity implements FirePathListener {
 
     public float GetDistance(Player that) {
         return Math.abs(that.position.x - this.position.x) + Math.abs(that.position.y - this.position.y);
+    }
+
+    public float GetDistance(Point point) {
+        return Math.abs(this.position.x - point.x) + Math.abs(this.position.y - point.y);
     }
 
     public boolean IsAlive() {
