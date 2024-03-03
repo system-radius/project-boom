@@ -23,12 +23,18 @@ public abstract class Solidifier extends FindTarget {
         return NodeState.SUCCESS;
     }
 
-    protected final void Solidify(int[][] boardCost) {
+    protected final int[][] Solidify(int [][] boardCost) {
+        return this.Solidify(boardCost, fireThreshold);
+    }
+
+    protected final int[][] Solidify(int[][] boardCost, int fireThreshold) {
         for (int i = 0; i < boardCost.length; i++) {
             for (int j = 0; j < boardCost[i].length; j++) {
                 boardCost[i][j] = boardCost[i][j] > fireThreshold ? -1 : boardCost[i][j];
             }
         }
+
+        return boardCost;
     }
 
 }
