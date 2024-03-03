@@ -12,6 +12,8 @@ import java.util.List;
 
 public class TimerDisplay extends Actor implements TimerEventListener {
 
+    private static int tensMinutesValue, onesMinutesValue, tensSecondsValue, onesSecondsValue;
+
     private static final TextureRegion[][] SYMBOLS = GlobalAssets.LoadTextureRegion(GlobalAssets.SYMBOLS_TEXTURE_PATH, GlobalAssets.SYMBOLS_TEXTURE_REGION_SIZE, GlobalAssets.SYMBOLS_TEXTURE_REGION_SIZE);
 
     private final List<OverTimeListener> overtimeListeners = new ArrayList<>();
@@ -38,14 +40,14 @@ public class TimerDisplay extends Actor implements TimerEventListener {
         int minutes = (int)time / 60;
         int seconds = (int)time % 60;
 
-        int tensMinutesValue = minutes / 10;
-        int onesMinutesValue = minutes % 10;
+        tensMinutesValue = minutes / 10;
+        onesMinutesValue = minutes % 10;
 
         tensMinutes = SYMBOLS[0][tensMinutesValue];
         onesMinutes = SYMBOLS[0][onesMinutesValue];
 
-        int tensSecondsValue = seconds / 10;
-        int onesSecondsValue = seconds % 10;
+        tensSecondsValue = seconds / 10;
+        onesSecondsValue = seconds % 10;
 
         tensSeconds = SYMBOLS[0][tensSecondsValue];
         onesSeconds = SYMBOLS[0][onesSecondsValue];
@@ -107,5 +109,9 @@ public class TimerDisplay extends Actor implements TimerEventListener {
 
     public void ResumeTimer() {
         paused = false;
+    }
+
+    public static void LogTimeStamped(String message) {
+        System.out.println("[" + tensMinutesValue + onesMinutesValue + ":" + tensSecondsValue + onesSecondsValue + "] " + message);
     }
 }

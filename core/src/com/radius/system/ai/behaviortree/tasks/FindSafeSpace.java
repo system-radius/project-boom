@@ -9,6 +9,7 @@ import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.NodeState;
+import com.radius.system.screens.game_ui.TimerDisplay;
 
 import java.util.List;
 
@@ -35,18 +36,13 @@ public class FindSafeSpace extends Solidifier {
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
-            //System.out.println("[" + displayId + "] Failed to select target!");
+            //TimerDisplay.LogTimeStamped("[" + displayId + "] Failed to select target!");
             return Failure();
         }
 
-        List<Point> path = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, targetPoint.x, targetPoint.y);
-        if (path == null) {
-            return Failure();
-        }
-
-        GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
-        //System.out.println("[" + displayId + "] Target point acquired: " + targetPoint);
-        return Success(path.size());
+        List<Point> path = AStar.ReconstructPath(targetPoint);
+        //TimerDisplay.LogTimeStamped("[" + displayId + "] Target point acquired: " + targetPoint);
+        return Success(path.size(), targetPoint);
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.NodeState;
+import com.radius.system.screens.game_ui.TimerDisplay;
 
 import java.util.List;
 
@@ -32,17 +33,19 @@ public class MoveToTarget extends Selector {
         currentPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, dstPoint.x, dstPoint.y);
         if (currentPath != null) {
             if (currentPath.size() == 1 && currentPath.get(0).IsEqualPosition(srcPoint)) {
-                Success(currentPath.size());
                 if (children.size() > 0) {
                     super.Evaluate(srcPoint, boardCost);
                 }
-                ClearFullData(NodeKeys.TARGET_POINT);
+                ClearData(NodeKeys.TARGET_POINT);
+                //TimerDisplay.LogTimeStamped("[" + displayId + "] Cleared target point!");
+                Success(currentPath.size());
             }
 
+            //TimerDisplay.LogTimeStamped("[" + displayId + "] Returning running!");
             return Running(Short.MAX_VALUE);
         }
-        //System.out.println("[" + depth + ": MoveToTarget] Returning running!");
 
+        //TimerDisplay.LogTimeStamped("[" + displayId + "] Returning failure!");
         return Failure();
     }
 
@@ -57,7 +60,7 @@ public class MoveToTarget extends Selector {
                 if (children.size() > 0) {
                     super.Execute();
                 }
-                ClearFullData(NodeKeys.TARGET_POINT);
+                //ClearFullData(NodeKeys.TARGET_POINT);
             }
         }
     }
