@@ -8,6 +8,8 @@ public class NodeKeys {
 
     public static final String TARGET_POINT = "dstPoint";
 
+    public static final String TARGET_SETTER = "targetSetter";
+
     public static final String ON_FIRE_PATH = "onFirePath";
 
     public static final String PLANT_BOMB = "plantBomb";
