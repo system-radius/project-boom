@@ -15,7 +15,7 @@ import java.util.List;
 public class SClassTree extends Tree {
 
     public SClassTree(int id, BoardState boardState) {
-        super(id, (int)(GlobalConstants.WORLD_AREA * 0.5f), boardState);
+        super(id, (int)(GlobalConstants.WORLD_AREA * 0.65f), boardState);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.radius.system.ai.behaviortree.tasks;
 
 import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.PlayerTarget;
+import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Solidifier;
 import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.ai.pathfinding.Point;
@@ -9,6 +10,7 @@ import com.radius.system.enums.BoardRep;
 import com.radius.system.board.BoardState;
 import com.radius.system.enums.NodeState;
 import com.radius.system.objects.players.Player;
+import com.radius.system.screens.game_ui.TimerDisplay;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +46,10 @@ public class FindPlayer extends Solidifier {
             InitializePlayerTargets(boardState.GetPlayers());
         }
 
+        if (owner.GetAvailableBombs() == 0) {
+            return Failure();
+        }
+
         int[][] modifiedBoardCost = CreateModifiedBoardCost(boardCost);
         super.Evaluate(srcPoint, boardCost);
         this.srcPoint = srcPoint;
@@ -52,6 +58,7 @@ public class FindPlayer extends Solidifier {
         List<Point> path = null;
         Point targetPoint = srcPoint;
         Collections.sort(playerTargets);
+        PlayerTarget currentTarget = null;
         for (PlayerTarget playerTarget : playerTargets) {
             if (!playerTarget.IsTargetAlive()) {
                 continue;
@@ -69,24 +76,36 @@ public class FindPlayer extends Solidifier {
                 List<Point> internalPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, tempTargetPoint.x, tempTargetPoint.y);
                 if (internalPath != null) {
                     targetPoint = tempTargetPoint;
+                    currentTarget = playerTarget;
+                    break;
                 }
             }
         }
 
-        if (path == null) {
+        if (path == null || currentTarget == null) {
             GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
-            //System.out.println("[" + displayId + "] Failed to select target due to null path/target!!");
+            //TimerDisplay.LogTimeStamped("[" + displayId + "] Failed to select target due to null path/target!!");
             return Failure();
         }
 
         if (BoardRep.BOMB.equals(boardState.GetBoardEntry(targetPoint.x, targetPoint.y))) {
-            //System.out.println("[" + displayId + "] Failed to select target due to bomb placement!");
+            //TimerDisplay.LogTimeStamped("[" + displayId + "] Failed to select target due to bomb placement!");
             return Failure();
         }
 
-        GetParent(1).SetData(NodeKeys.TARGET_POINT, targetPoint);
-        //System.out.println("[" + displayId + "] Target point acquired: " + targetPoint);
-        return Success(path.size());
+        Node root = GetRoot();
+        Point setTargetPoint = (Point) root.GetData(NodeKeys.TARGET_POINT);
+        if (setTargetPoint != null && owner.GetDistance(setTargetPoint) < owner.GetDistance(targetPoint)) {
+            String setterId = root.GetData(NodeKeys.TARGET_SETTER).toString();
+            List<Point> setPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, setTargetPoint.x, setTargetPoint.y);
+            if (setPath != null && setPath.size() < path.size() && displayId.equals(setterId)) {
+                //TimerDisplay.LogTimeStamped("[" + displayId + "] Failed to select target due to another target being closer!");
+                return Success(setPath.size());
+            }
+        }
+
+        //TimerDisplay.LogTimeStamped("[" + displayId + "] Target point acquired: " + targetPoint + ", target ID: " + currentTarget.targetId);
+        return Success(path.size(), targetPoint);
     }
 
     private int[][] CreateModifiedBoardCost(int[][] boardCost) {
@@ -163,5 +182,17 @@ public class FindPlayer extends Solidifier {
         for (PlayerTarget playerTarget : playerTargets) {
             playerTarget.ComputeDistance();
         }
+    }
+
+    private void LogPlayerTargets() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(displayId);
+        sb.append(": ");
+        for (PlayerTarget playerTarget : playerTargets) {
+            playerTarget.ComputeDistance();
+            sb.append(playerTarget);
+            sb.append(" ");
+        }
+        TimerDisplay.LogTimeStamped(sb.toString());
     }
 }

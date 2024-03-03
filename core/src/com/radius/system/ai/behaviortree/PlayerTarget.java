@@ -39,6 +39,11 @@ public class PlayerTarget implements Comparable<PlayerTarget> {
     }
 
     @Override
+    public String toString() {
+        return "[" + ownerId + " -> " + targetId + "/" + (target.IsAlive() ? "Alive" : "Dead") + "] " + distance;
+    }
+
+    @Override
     public int compareTo(PlayerTarget that) {
         return Float.compare(this.distance, that.distance);
     }
