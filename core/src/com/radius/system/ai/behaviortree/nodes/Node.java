@@ -179,6 +179,11 @@ public abstract class Node implements Comparable<Node> {
         return state = NodeState.FAILURE;
     }
 
+    public NodeState Success(int weight, Point targetPoint) {
+        SetTargetPoint(targetPoint);
+        return Success(weight);
+    }
+
     public NodeState Success(int weight) {
         this.weight = weight;
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + SUCCESS);
@@ -189,6 +194,13 @@ public abstract class Node implements Comparable<Node> {
         this.weight = weight;
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + RUNNING);
         return state = NodeState.RUNNING;
+    }
+
+    public void SetTargetPoint(Point targetPoint) {
+        Node root = GetRoot();
+
+        root.SetData(NodeKeys.TARGET_POINT, targetPoint);
+        root.SetData(NodeKeys.TARGET_SETTER, displayId);
     }
 
     @Override
