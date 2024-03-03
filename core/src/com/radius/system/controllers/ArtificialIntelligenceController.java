@@ -83,6 +83,8 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     public void Restart() {
         tree.Restart();
         currentPath = null;
+        movementVector.x = 0;
+        movementVector.y = 0;
     }
 
     private void UpdateTree(float delta) {
