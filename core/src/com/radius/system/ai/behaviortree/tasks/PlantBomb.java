@@ -21,6 +21,6 @@ public class PlantBomb extends Node {
     @Override
     public void Execute() {
         GetRoot().SetData(NodeKeys.PLANT_BOMB, true);
-        ClearFullData(NodeKeys.TARGET_POINT);
+        //ClearFullData(NodeKeys.TARGET_POINT);
     }
 }

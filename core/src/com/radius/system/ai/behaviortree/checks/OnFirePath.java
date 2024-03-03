@@ -30,7 +30,7 @@ public class OnFirePath extends NoExecuteNode {
         }
 
         GetRoot().ClearData(NodeKeys.ON_FIRE_PATH);
-        ClearData(NodeKeys.TARGET_POINT);
+        //ClearData(NodeKeys.TARGET_POINT);
         return Failure();
     }
 }
