@@ -27,12 +27,12 @@ public class FindSafeSpace extends Solidifier {
 
     @Override
     public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
-        //super.Evaluate(srcPoint, boardCost);
+        super.Evaluate(srcPoint, boardCost);
         this.srcPoint = srcPoint;
-        this.boardCost = boardCost;
+        this.boardCost = solidifiedBoard == null ? boardCost : solidifiedBoard;
 
         ((TheoreticalSafeSpaceCounter) theoryCrafter).ResetSpaceCount();
-        List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
+        List<Point> spaces = AStar.FindOpenSpaces(this.boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
@@ -66,7 +66,7 @@ public class FindSafeSpace extends Solidifier {
             System.arraycopy(boardCost[i], 0, modifiedBoardCost[i], 0, height);
         }
 
-        Solidify(modifiedBoardCost);
+        modifiedBoardCost = Solidify(modifiedBoardCost);
         return modifiedBoardCost;
     }
 }

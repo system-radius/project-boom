@@ -38,6 +38,12 @@ public class FindPlayer extends Solidifier {
     }
 
     @Override
+    public void Restart() {
+        super.Restart();
+        playerTargets = null;
+    }
+
+    @Override
     public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
 
         if (playerTargets != null) {
@@ -67,16 +73,17 @@ public class FindPlayer extends Solidifier {
             path = FindRangedPath(AStar.FindShortestPath(modifiedBoardCost, srcPoint.x, srcPoint.y, playerTarget.GetWorldX(), playerTarget.GetWorldY()));
             if (path != null) {
                 //  && !(boardCost[player.GetWorldX()][player.GetWorldY()] > fireThreshold)
-                //System.out.println("Found shorter path detecting player " + player.id + ", size: " + path.size());
+                //TimerDisplay.LogTimeStamped("[" + displayId + "] Got ranged path!");
                 // Verify that the last point on the path can be reached.
                 Point tempTargetPoint = srcPoint;
                 if (path.size() > 0) {
                     tempTargetPoint = path.get(path.size() - 1);
                 }
-                List<Point> internalPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, tempTargetPoint.x, tempTargetPoint.y);
+                List<Point> internalPath = AStar.FindShortestPath(solidifiedBoard, srcPoint.x, srcPoint.y, tempTargetPoint.x, tempTargetPoint.y);
                 if (internalPath != null) {
                     targetPoint = tempTargetPoint;
                     currentTarget = playerTarget;
+                    //path = internalPath;
                     break;
                 }
             }
@@ -120,6 +127,8 @@ public class FindPlayer extends Solidifier {
             }
         }
 
+        //AStar.PrintBoardCost(boardCost);
+        //AStar.PrintBoardCost(modifiedBoardCost);
         return modifiedBoardCost;
     }
 

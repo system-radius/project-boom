@@ -48,7 +48,7 @@ public class FindBombArea extends Solidifier {
         super.Evaluate(srcPoint, boardCost);
         this.srcPoint = srcPoint;
 
-        this.boardCost = boardCost;
+        this.boardCost = solidifiedBoard;
         List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 

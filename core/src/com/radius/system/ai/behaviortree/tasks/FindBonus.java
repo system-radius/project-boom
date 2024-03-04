@@ -35,7 +35,7 @@ public class FindBonus extends Solidifier {
         super.Evaluate(srcPoint, boardCost);
         this.srcPoint = srcPoint;
 
-        List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
+        List<Point> spaces = AStar.FindOpenSpaces(solidifiedBoard, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
