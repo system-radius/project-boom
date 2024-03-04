@@ -78,6 +78,7 @@ public class GlobalAssets {
         }
 
         LoadTexture(BOMB_TEXTURE_PATH);
+        LoadTexture(FIRE_TEXTURE_PATH);
         LoadTexture(BLOCKS_TEXTURE_PATH);
         LoadTexture(WARNING_SIGN_PATH);
     }
