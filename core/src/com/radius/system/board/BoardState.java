@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.radius.system.ai.pathfinding.AStar;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.Direction;
@@ -228,7 +229,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
             return;
         }
 
-        if (boardCost[x][y] > 0 ) {
+        boardCost[x][y] = boardCost[x][y] < 0 ? boardCost[x][y] : Math.max(boardCost[x][y], cost);
+        if (cost < 0) {
             boardCost[x][y] = cost;
         }
         switch (direction) {
