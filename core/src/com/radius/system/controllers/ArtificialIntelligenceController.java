@@ -9,6 +9,7 @@ import com.radius.system.ai.behaviortree.trees.AClassTree;
 import com.radius.system.ai.behaviortree.trees.BClassTree;
 import com.radius.system.ai.behaviortree.trees.CClassTree;
 import com.radius.system.ai.behaviortree.trees.DClassTree;
+import com.radius.system.ai.behaviortree.trees.EClassTree;
 import com.radius.system.ai.behaviortree.trees.OmegaTree;
 import com.radius.system.ai.behaviortree.trees.SClassTree;
 import com.radius.system.ai.behaviortree.trees.Tree;
@@ -56,6 +57,9 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
                 break;
             case D_CLASS:
                 tree = new DClassTree(id, boardState);
+                break;
+            case E_CLASS:
+                tree = new EClassTree(id, boardState);
                 break;
             case OMEGA:
             default:

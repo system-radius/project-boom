@@ -12,7 +12,9 @@ public enum BotLevel {
 
     C_CLASS("C"),
 
-    D_CLASS("D");
+    D_CLASS("D"),
+
+    E_CLASS("E");
 
     private final String key;
 
