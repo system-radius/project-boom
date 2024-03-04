@@ -141,4 +141,25 @@ public class AStar {
         return path;
     }
 
+    public static void PrintBoardCost(int[][] boardCost) {
+        StringBuilder sb = new StringBuilder();
+        for (int j = boardCost.length - 1; j >= 0; j--) {
+            for (int i = 0; i < boardCost[j].length; i++) {
+                sb.append('[');
+                int cost = boardCost[i][j];
+                if (cost < 0) {
+                    sb.append('x');
+                } else if (cost > 1) {
+                    sb.append('!');
+                } else {
+                    sb.append(' ');
+                }
+                sb.append("] ");
+            }
+            sb.append('\n');
+        }
+
+        System.out.println(sb);
+    }
+
 }
