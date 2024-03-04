@@ -114,7 +114,9 @@ public class Bomb extends Block {
         super(BoardRep.BOMB, -1, x, y, width, height);
 
         this.owner = player;
-        this.range = player.GetFirePower();
+        if (player != null) {
+            this.range = player.GetFirePower();
+        }
         this.scale = scale;
 
         this.bombType = bombType;
@@ -410,9 +412,10 @@ public class Bomb extends Block {
 
     @Override
     public boolean HasActiveCollision(Player player) {
-        if (IsMoving() || IsExploding() || IsExploded()) {
+        if (IsMoving() || IsExploding() || IsExploded() || owner == null) {
             return false;
         }
+
         return playerCollisions.get(player);
     }
 
@@ -460,7 +463,9 @@ public class Bomb extends Block {
         explosionTime += delta;
         if (explosionTime >= EXPLOSION_TIMER) {
             state = BombState.EXPLODED;
-            owner.RemoveBomb(this);
+            if (owner != null) {
+                owner.RemoveBomb(this);
+            }
         }
     }
 

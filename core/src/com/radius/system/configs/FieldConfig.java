@@ -12,6 +12,7 @@ import com.radius.system.enums.BoardRep;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.HardBlock;
 import com.radius.system.objects.blocks.SoftBlock;
+import com.radius.system.objects.bombs.DummyBomb;
 import com.radius.system.utils.FontUtils;
 
 import java.util.Random;
@@ -37,6 +38,7 @@ public class FieldConfig {
     public FieldConfig() {
         scale = GlobalConstants.WORLD_SCALE;
         font = FontUtils.GetFont((int) GlobalConstants.WORLD_SCALE / 6, Color.WHITE, 1, Color.BLACK);
+        GlobalAssets.PreLoad();
     }
 
     public void LoadField(String texturePath) {
@@ -77,6 +79,9 @@ public class FieldConfig {
                 } else if (Color.BLACK.equals(color)) {
                     boardRep[x][y] = BoardRep.VOID;
                     sb.append(BoardRep.VOID);
+                } else if (Color.PURPLE.equals(color)) {
+                    boardRep[x][y] = BoardRep.BOMB;
+                    sb.append(BoardRep.BOMB);
                 } else if (Color.YELLOW.equals(color)) {
                     boardRep[x][y] = BoardRep.PLAYER;
                     sb.append(BoardRep.PLAYER);
@@ -133,6 +138,9 @@ public class FieldConfig {
                     case SOFT_BLOCK:
                         randomize = false;
                         boardState.AddToBoard(new SoftBlock(fieldIndex, x, y, scale, scale));
+                        break;
+                    case BOMB:
+                        boardState.AddBombToBoard(new DummyBomb(x, y, scale, scale, scale));
                         break;
                     case PLAYER:
                         boardState.AddToBoard(spawnPoints, new Vector2(x, y));
