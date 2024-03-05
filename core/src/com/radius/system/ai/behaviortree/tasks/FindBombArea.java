@@ -117,7 +117,7 @@ public class FindBombArea extends Solidifier {
             System.arraycopy(boardCost[i], 0, modifiedBoardCost[i], 0, boardCost[i].length);
         }
 
-        Solidify(modifiedBoardCost, 2);
+        Solidify(modifiedBoardCost, 2, false);
 
         if (BoardRep.BOMB.equals(boardState.GetBoardEntry(srcPoint.x, srcPoint.y))) {
             modifiedBoardCost[srcPoint.x][srcPoint.y] = -1;

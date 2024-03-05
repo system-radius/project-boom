@@ -29,7 +29,7 @@ public abstract class Solidifier extends FindTarget {
     }
 
     protected final int[][] Solidify(int [][] boardCost) {
-        return this.Solidify(boardCost, fireThreshold);
+        return this.Solidify(boardCost, fireThreshold, false);
     }
 
     protected final void RefreshInternalBoardCost(int[][] boardCost) {
@@ -42,11 +42,15 @@ public abstract class Solidifier extends FindTarget {
         }
     }
 
-    protected final int[][] Solidify(int[][] boardCost, int fireThreshold) {
+    protected final int[][] Solidify(int[][] boardCost, int fireThreshold, boolean simplify) {
         RefreshInternalBoardCost(boardCost);
         for (int i = 0; i < boardCost.length; i++) {
             for (int j = 0; j < boardCost[i].length; j++) {
-                solidifiedBoard[i][j] = boardCost[i][j] > fireThreshold ? -1 : boardCost[i][j];
+                int cost = boardCost[i][j];
+                solidifiedBoard[i][j] = cost >= fireThreshold ? -1 : cost;
+                if (simplify) {
+                    solidifiedBoard[i][j] = cost > 0 && cost < fireThreshold ? 1 : boardCost[i][j];
+                }
             }
         }
 

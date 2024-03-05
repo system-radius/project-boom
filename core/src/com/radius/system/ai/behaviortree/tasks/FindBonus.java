@@ -33,6 +33,7 @@ public class FindBonus extends Solidifier {
     @Override
     public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
         super.Evaluate(srcPoint, boardCost);
+        Solidify(boardCost, fireThreshold, true);
         this.srcPoint = srcPoint;
 
         List<Point> spaces = AStar.FindOpenSpaces(solidifiedBoard, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
