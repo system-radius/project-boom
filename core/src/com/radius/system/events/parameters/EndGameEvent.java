@@ -14,4 +14,6 @@ public class EndGameEvent {
 
     public boolean crashed;
 
+    public String crashMessage;
+
 }
