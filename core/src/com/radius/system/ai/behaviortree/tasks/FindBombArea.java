@@ -27,6 +27,8 @@ public class FindBombArea extends Solidifier {
 
     private final Player player;
 
+    private final int fireThreshold;
+
     private int[][] boardCost;
 
     private int maxBurnCount = 0, currentBurnCount, range;
@@ -34,7 +36,7 @@ public class FindBombArea extends Solidifier {
     private boolean hasPierceBomb;
 
     public FindBombArea(int fireThreshold, BoardState boardState, Player player) {
-        super(fireThreshold);
+        this.fireThreshold = fireThreshold;
         this.boardState = boardState;
         this.player = player;
 
@@ -45,11 +47,10 @@ public class FindBombArea extends Solidifier {
 
     @Override
     public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
-        super.Evaluate(srcPoint, boardCost);
         this.srcPoint = srcPoint;
 
-        this.boardCost = solidifiedBoard;
-        List<Point> spaces = AStar.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
+        this.boardCost = ConditionalSolidifyBoardCopy(boardCost, fireThreshold);
+        List<Point> spaces = AStar.FindOpenSpaces(this.boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
@@ -64,6 +65,7 @@ public class FindBombArea extends Solidifier {
         if (setTargetPoint != null) {
             AssessBombArea(setTargetPoint.x, setTargetPoint.y);
             List<Point> setPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, setTargetPoint.x, setTargetPoint.y);
+            Object setterObject = root.GetData(NodeKeys.TARGET_SETTER);
             String setterId = root.GetData(NodeKeys.TARGET_SETTER).toString();
             if (setPath != null) {
                 setPathSize = setPath.size();
@@ -73,8 +75,8 @@ public class FindBombArea extends Solidifier {
                 }
             }
 
-            if (targetPoint.IsEqualPosition(setTargetPoint)) {
-                return Success(pathSize);
+            if (srcPoint.IsEqualPosition(setTargetPoint) && player.GetAvailableBombs() <= 0 && boardCost[srcPoint.x][srcPoint.y] > 1) {
+                return Failure();
             }
         }
 
@@ -116,8 +118,6 @@ public class FindBombArea extends Solidifier {
         for (int i = 0; i < boardCost.length; i++) {
             System.arraycopy(boardCost[i], 0, modifiedBoardCost[i], 0, boardCost[i].length);
         }
-
-        Solidify(modifiedBoardCost, 2, false);
 
         if (BoardRep.BOMB.equals(boardState.GetBoardEntry(srcPoint.x, srcPoint.y))) {
             modifiedBoardCost[srcPoint.x][srcPoint.y] = -1;

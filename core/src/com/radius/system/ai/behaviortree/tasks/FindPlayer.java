@@ -20,7 +20,7 @@ public class FindPlayer extends Solidifier {
 
     private final BoardState boardState;
 
-    private final int playerId;
+    private final int playerId, fireThreshold;
 
     private Player owner;
 
@@ -29,7 +29,7 @@ public class FindPlayer extends Solidifier {
     private int range;
 
     public FindPlayer(int id, int fireThreshold, BoardState boardState) {
-        super(fireThreshold);
+        this.fireThreshold = fireThreshold;
         this.playerId = id;
 
         this.boardState = boardState;
@@ -57,7 +57,7 @@ public class FindPlayer extends Solidifier {
         }
 
         int[][] modifiedBoardCost = CreateModifiedBoardCost(boardCost);
-        super.Evaluate(srcPoint, boardCost);
+        int[][] solidifiedBoard = SolidifyBoardCopy(boardCost, fireThreshold);
         this.srcPoint = srcPoint;
 
         range = owner.GetFirePower();

@@ -17,14 +17,14 @@ public class FindBonus extends Solidifier {
 
     private final BoardState boardState;
 
-    private final int defaultSuccessWeight;
+    private final int defaultSuccessWeight, fireThreshold;
 
     public FindBonus(int fireThreshold, BoardState boardState) {
         this(-1, fireThreshold, boardState);
     }
 
     public FindBonus(int defaultSuccessWeight, int fireThreshold, BoardState boardState) {
-        super(fireThreshold);
+        this.fireThreshold = fireThreshold;
         this.boardState = boardState;
         this.defaultSuccessWeight = defaultSuccessWeight;
         id = "[!] FindBonus";
@@ -32,8 +32,7 @@ public class FindBonus extends Solidifier {
 
     @Override
     public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
-        super.Evaluate(srcPoint, boardCost);
-        Solidify(boardCost, fireThreshold, true);
+        int[][] solidifiedBoard = SolidifyBoardCopy(boardCost, fireThreshold);
         this.srcPoint = srcPoint;
 
         List<Point> spaces = AStar.FindOpenSpaces(solidifiedBoard, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
