@@ -239,6 +239,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
             case START:
                 // Do things that need to be done only once, then set state to restart.
                 InitializeGameState();
+                startDate = new Date(System.currentTimeMillis());
                 gameState = GameState.RESTART;
                 break;
             case RESTART:
@@ -246,7 +247,6 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
                 FireOnLoadStartEvent();
                 gameMode.Restart(delta);
                 gameStage.Restart();
-                startDate = new Date(System.currentTimeMillis());
                 break;
             case LOADING:
                 // Wait for loading to complete.
@@ -366,6 +366,8 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
                 gameState = GameState.RESTART;
                 preloadBuffer = matches = crashes = 0;
                 gameMode.ResetKDStats();
+                matchResults = "";
+                startDate = new Date(System.currentTimeMillis());
                 break;
             case PAUSE:
                 gameState = GameState.PAUSED;
@@ -427,23 +429,40 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
     @Override
     public void OnEndGameTrigger(EndGameEvent event) {
         gameState = GameState.CONCLUDED;
-        if (event.id >= 0) {
-            wins[event.id]++;
-        }
 
         if (!event.crashed) {
             matches++;
+            if (event.id >= 0) {
+                wins[event.id]++;
+            }
+            PrintMatchState(event);
         } else {
             crashes++;
+            PrintCrashState(event);
         }
 
+        System.out.println("= = = = = = = =");
+
+        if (matches >= 100) {
+            gameState = GameState.COMPLETE;
+        }
+    }
+
+    private void PrintCrashState(EndGameEvent event) {
+
+        System.out.print(" = = = = = = = C R A S H E D = = = = = = = \n");
+        PrintMatchState(event);
+        System.out.println(event.crashMessage);
+    }
+
+    private void PrintMatchState(EndGameEvent event) {
         endDate = new Date(System.currentTimeMillis());
         StringBuilder sb = new StringBuilder();
         sb.append("Match #");
         sb.append(matches);
-        sb.append(" / Crashes: ");
+        sb.append("(Crashes: ");
         sb.append(crashes);
-        sb.append("\nWins: [");
+        sb.append(")\nWins: [");
         for (int i = 0; i < wins.length; i++) {
             sb.append("Player");
             sb.append(i + 1);
@@ -472,12 +491,6 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
             sb.append(endDate.toString());
             dateTime = sb.toString();
             System.out.println(dateTime);
-        }
-
-        System.out.println("= = = = = = = =");
-
-        if (matches >= 100) {
-            gameState = GameState.COMPLETE;
         }
     }
 
