@@ -68,4 +68,9 @@ public abstract class BoomPlayerController implements Disposable {
 
     public abstract void DrawDebug(ShapeRenderer renderer);
 
+    @Override
+    public String toString() {
+        return "Position -> [" + player.position.x + ", " + player.position.y + "]";
+    }
+
 }

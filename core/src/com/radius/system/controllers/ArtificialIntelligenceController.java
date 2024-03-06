@@ -87,8 +87,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     public void Restart() {
         tree.Restart();
         currentPath = null;
-        movementVector.x = 0;
-        movementVector.y = 0;
+        movementVector.x = movementVector.y = 0;
     }
 
     private void UpdateTree(float delta) {
@@ -200,5 +199,27 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     @Override
     public void dispose() {
         player.dispose();
+    }
+
+    @Override
+    public String toString() {
+        Point point = (Point) tree.GetData(NodeKeys.TARGET_POINT);
+        StringBuilder sb = new StringBuilder();
+        sb.append(GetActiveNode());
+        sb.append(" / final target point: ");
+        sb.append(point);
+        if (currentPath != null) {
+            sb.append(" / current target point: ");
+            sb.append(currentPath.get(0));
+        }
+        sb.append("     ");
+        sb.append(super.toString());
+        sb.append(", movementVector -> [");
+        sb.append(movementVector.x);
+        sb.append(", ");
+        sb.append(movementVector.y);
+        sb.append("]");
+
+        return sb.toString();
     }
 }
