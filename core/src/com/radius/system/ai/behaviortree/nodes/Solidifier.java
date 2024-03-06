@@ -2,59 +2,57 @@ package com.radius.system.ai.behaviortree.nodes;
 
 import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.tasks.FindTarget;
-import com.radius.system.ai.pathfinding.Point;
-import com.radius.system.enums.NodeState;
-import com.radius.system.screens.game_ui.TimerDisplay;
 
 public abstract class Solidifier extends FindTarget {
 
-    protected final int fireThreshold;
-
-    protected int[][] solidifiedBoard;
-
-    public Solidifier(int fireThreshold) {
-        this.fireThreshold = fireThreshold;
-    }
-
-
-    @Override
-    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+    protected final int[][] ConditionalSolidifyBoardCopy(int[][] boardCost, int fireThreshold) {
         Boolean onFirePath = (Boolean) GetRoot().GetData(NodeKeys.ON_FIRE_PATH);
-        RefreshInternalBoardCost(boardCost);
+        int[][] boardCopy = CopyBoardCost(boardCost);
         if (onFirePath == null || !onFirePath) {
-            Solidify(boardCost);
+            Solidify(boardCopy, fireThreshold);
         }
 
-        return NodeState.SUCCESS;
+        return boardCopy;
     }
 
-    protected final int[][] Solidify(int [][] boardCost) {
-        return this.Solidify(boardCost, fireThreshold, false);
-    }
-
-    protected final void RefreshInternalBoardCost(int[][] boardCost) {
-        if (solidifiedBoard == null || solidifiedBoard.length != boardCost.length || solidifiedBoard[0].length != boardCost[0].length) {
-            solidifiedBoard = new int[boardCost.length][boardCost[0].length];
-        }
+    protected final int[][] CopyBoardCost(int[][] boardCost) {
+        int[][] boardCostCopy = new int[boardCost.length][boardCost[0].length];
 
         for (int i = 0; i < boardCost.length; i++) {
-            System.arraycopy(boardCost[i], 0,  solidifiedBoard[i], 0, boardCost[i].length);
+            System.arraycopy(boardCost[i], 0,  boardCostCopy[i], 0, boardCost[i].length);
         }
+
+        return boardCostCopy;
     }
 
-    protected final int[][] Solidify(int[][] boardCost, int fireThreshold, boolean simplify) {
-        RefreshInternalBoardCost(boardCost);
+    private int[][] Simplify(int[][] boardCost, int fireThreshold) {
         for (int i = 0; i < boardCost.length; i++) {
             for (int j = 0; j < boardCost[i].length; j++) {
                 int cost = boardCost[i][j];
-                solidifiedBoard[i][j] = cost >= fireThreshold ? -1 : cost;
-                if (simplify) {
-                    solidifiedBoard[i][j] = cost > 0 && cost < fireThreshold ? 1 : boardCost[i][j];
-                }
+                boardCost[i][j] = cost > 0 && cost < fireThreshold ? 1 : cost;
             }
         }
 
-        return solidifiedBoard;
+        return boardCost;
+    }
+
+    protected final int[][] SimplifyBoardCopy(int[][] boardCost, int fireThreshold) {
+        return Simplify(CopyBoardCost(boardCost), fireThreshold);
+    }
+
+    private int[][] Solidify(int[][] boardCost, int fireThreshold) {
+        for (int i = 0; i < boardCost.length; i++) {
+            for (int j = 0; j < boardCost[i].length; j++) {
+                int cost = boardCost[i][j];
+                boardCost[i][j] = cost >= fireThreshold ? -1 : cost;
+            }
+        }
+
+        return boardCost;
+    }
+
+    protected final int[][] SolidifyBoardCopy(int[][] boardCost, int fireThreshold) {
+        return Solidify(CopyBoardCost(boardCost), fireThreshold);
     }
 
 }
