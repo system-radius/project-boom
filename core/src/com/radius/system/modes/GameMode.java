@@ -231,7 +231,7 @@ public class GameMode implements Disposable, OverTimeListener {
                 controller.Update(delta);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            FireCrashedEvent();
+            FireCrashedEvent(e);
         }
 
         if (!ContinueGame()) {
@@ -297,8 +297,23 @@ public class GameMode implements Disposable, OverTimeListener {
         }
     }
 
-    private void FireCrashedEvent() {
+    private void FireCrashedEvent(Exception e) {
+
+        StringBuilder crashBuilder = new StringBuilder();
+        crashBuilder.append("Match crashed!\n");
+        for (StackTraceElement stackTrace : e.getStackTrace()) {
+            crashBuilder.append(stackTrace);
+            crashBuilder.append("\n");
+        }
+
+        crashBuilder.append(" = = = = Player states = = = =\n");
+        for (BoomPlayerController controller : GetControllers()) {
+            crashBuilder.append(controller.toString());
+            crashBuilder.append("\n");
+        }
+        crashBuilder.append(" = = = Player states end = = =\n");
         endGameEvent.crashed = true;
+        endGameEvent.crashMessage = crashBuilder.toString();
         FireEndGameEvent();
     }
 
