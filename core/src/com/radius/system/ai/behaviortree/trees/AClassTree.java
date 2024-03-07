@@ -3,6 +3,7 @@ package com.radius.system.ai.behaviortree.trees;
 import com.radius.system.ai.behaviortree.checks.IsPlantingBomb;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.RootSelector;
+import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.board.BoardState;
 
 public class AClassTree extends Tree {
@@ -12,7 +13,7 @@ public class AClassTree extends Tree {
 
     @Override
     protected Node SetupTree() {
-        Node root = new RootSelector("[A] ROOT");
+        Node root = new Selector("[A] ROOT");
 
         root.AttachChild(new IsPlantingBomb());
         root.AttachChild(ConstructDefenseTree(fireThreshold, false));

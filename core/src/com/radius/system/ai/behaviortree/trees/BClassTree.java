@@ -19,6 +19,7 @@ public class BClassTree extends Tree {
         root.AttachChild(ConstructDefenseTree(fireThreshold, false));
         root.AttachChild(ConstructAttackPlayerTree());
         root.AttachChild(ConstructBombAreaTree());
+        root.AttachChild(ConstructDefenseTree(2, true));
 
         return root;
     }
