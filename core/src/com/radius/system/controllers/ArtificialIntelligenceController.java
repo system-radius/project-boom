@@ -126,6 +126,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         Object object = tree.GetData(NodeKeys.MOVEMENT_PATH);
         if (object == null) {
             currentPath = null;
+            movementVector.x = movementVector.y = 0;
             return;
         }
         currentPath = (List<Point>) tree.GetData(NodeKeys.MOVEMENT_PATH);
