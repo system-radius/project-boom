@@ -1,5 +1,6 @@
 package com.radius.system.objects.players;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -40,6 +41,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Player extends Entity implements FirePathListener {
+
+    private static final Sound PLAYER_BURN_SFX = GlobalAssets.LoadSound(GlobalAssets.PLAYER_BURN_SFX_PATH);
 
     private static final float FRAME_DURATION_MOVING = 1f / 10f;
 
@@ -669,6 +672,7 @@ public class Player extends Entity implements FirePathListener {
 
         state = PlayerState.DYING;
         animationElapsedTime = deathTime = respawnTime = 0f;
+        PLAYER_BURN_SFX.play();
         return true;
     }
 

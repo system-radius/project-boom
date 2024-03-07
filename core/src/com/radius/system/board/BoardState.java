@@ -1,12 +1,12 @@
 package com.radius.system.board;
 
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.radius.system.ai.pathfinding.AStar;
+import com.radius.system.assets.GlobalAssets;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.Direction;
@@ -17,15 +17,15 @@ import com.radius.system.objects.AnimatedGameObject;
 import com.radius.system.objects.blocks.Block;
 import com.radius.system.objects.blocks.Bonus;
 import com.radius.system.objects.players.Player;
-import com.radius.system.utils.FontUtils;
 
-import java.io.DataInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class BoardState implements BoomUpdatable, BoomDrawable {
+
+    private static final Sound BOMB_SET_SFX = GlobalAssets.LoadSound(GlobalAssets.BOMB_SET_SFX_PATH);
 
     public int BOARD_WIDTH;
 
@@ -105,6 +105,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         bombs.add(bomb);
 
         bomb.AddPlayerCollision(players);
+
+        BOMB_SET_SFX.play();
     }
 
     public void AddToBoard(Player player) {

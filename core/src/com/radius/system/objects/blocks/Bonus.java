@@ -1,7 +1,9 @@
 package com.radius.system.objects.blocks;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.radius.system.assets.GlobalAssets;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
 import com.radius.system.enums.BonusType;
@@ -12,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bonus extends Block {
+
+    private static final Sound BONUS_GET_SFX = GlobalAssets.LoadSound(GlobalAssets.BONUS_GET_SFX_PATH);
 
     private static final int BONUS_BLOCKS = 7;
 
@@ -59,6 +63,7 @@ public class Bonus extends Block {
                 player.IncreaseBombStock();
         }
 
+        BONUS_GET_SFX.play();
         this.Burn();
     }
 

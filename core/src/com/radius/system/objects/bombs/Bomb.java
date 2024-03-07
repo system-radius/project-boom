@@ -1,5 +1,6 @@
 package com.radius.system.objects.bombs;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -29,6 +30,8 @@ public class Bomb extends Block {
     protected static final float FRAME_DURATION_BREATHING = 1f / 5f;
 
     protected static final float FRAME_DURATION_FIRE = 1f / 7.5f;
+
+    protected static final Sound EXPLOSION_SFX = GlobalAssets.LoadSound(GlobalAssets.EXPLOSION_SFX_PATH);
 
     private static final float WAIT_TIMER = 3f;
 
@@ -337,11 +340,13 @@ public class Bomb extends Block {
         return owner;
     }
 
-    public void Explode() {
+    public final void Explode() {
 
         if (IsExploding()) {
             return;
         }
+
+        EXPLOSION_SFX.play();
 
         state = BombState.EXPLODING;
         animationElapsedTime = 0;

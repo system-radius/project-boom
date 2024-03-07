@@ -1,6 +1,7 @@
 package com.radius.system.assets;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
@@ -49,6 +50,16 @@ public class GlobalAssets {
 
     public static final String BURN_TEST_PATH = "field/burn_test.png";
 
+    /* * * * * * * * * SFX  PATHS * * * * * */
+    public static final String EXPLOSION_SFX_PATH = "sfx/ex.wav";
+
+    public static final String BOMB_SET_SFX_PATH = "sfx/set.wav";
+
+    public static final String BONUS_GET_SFX_PATH = "sfx/get.wav";
+
+    public static final String PLAYER_BURN_SFX_PATH = "sfx/dead.wav";
+    /* * * * * * * * * * *  * * * * * * * * */
+
     /* * * * * * * CONFIG RELATED * * * * * */
 
     public static final String DEATH_MATCH_MODE_PATH = "mode_banners/death_match.png";
@@ -65,6 +76,8 @@ public class GlobalAssets {
 
 
     private static final Map<String, Texture> textureMap = new HashMap<>();
+
+    private static final Map<String, Sound> soundMap = new HashMap<>();
 
     private static final Map<String, TextureRegion[][]> textureRegionMap = new HashMap<>();
 
@@ -132,9 +145,23 @@ public class GlobalAssets {
         return frames[col];
     }
 
+    public static Sound LoadSound(String path) {
+        if (soundMap.containsKey(path)) {
+            return soundMap.get(path);
+        }
+
+        Sound sound = Gdx.audio.newSound(Gdx.files.internal(path));
+        soundMap.put(path, sound);
+        return sound;
+    }
+
     public static void Dispose() {
         for (String key : textureMap.keySet()) {
             textureMap.get(key).dispose();
+        }
+
+        for (String key : soundMap.keySet()) {
+            soundMap.get(key).dispose();
         }
     }
 
