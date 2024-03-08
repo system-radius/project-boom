@@ -90,7 +90,7 @@ public class FindPlayer extends Solidifier {
         }
 
         if (path == null || currentTarget == null) {
-            GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
+            //GetRoot().ClearData(NodeKeys.MOVEMENT_PATH);
             //TimerDisplay.LogTimeStamped("[" + displayId + "] Failed to select target due to null path/target!!");
             return Failure();
         }

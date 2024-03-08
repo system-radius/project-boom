@@ -27,11 +27,13 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     private final Vector2 movementVector = new Vector2(0, 0);
 
-    private final Point targetPoint, pastTarget;
+    private final Point pastTarget;
 
     private final Tree tree;
 
     private List<Point> currentPath;
+
+    private Point targetPoint;
 
     private boolean deathReset;
 
@@ -110,8 +112,15 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
         return value;
     }
 
-    @SuppressWarnings("unchecked")
-    private void UpdateMovement() {
+    private void MoveToTargetPoint() {
+
+        if (targetPoint == null) {
+            return;
+        }
+
+        float sensitivity = 1f;
+        movementVector.x = Math.round(UpdateMovementAxis(targetPoint.x, player.position.x) * sensitivity) / sensitivity;
+        movementVector.y = Math.round(UpdateMovementAxis(targetPoint.y, player.position.y) * sensitivity) / sensitivity;
 
         if (targetPoint.IsEqualPosition(player.position.x, player.position.y)) {
             movementVector.x = movementVector.y = 0;
@@ -121,7 +130,13 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
                 tree.ClearData(NodeKeys.PLANT_BOMB);
                 //System.out.println("Bomb has been planted!");
             }
+            targetPoint = null;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void UpdateMovement() {
+        MoveToTargetPoint();
 
         Object object = tree.GetData(NodeKeys.MOVEMENT_PATH);
         if (object == null) {
@@ -129,21 +144,16 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
             movementVector.x = movementVector.y = 0;
             return;
         }
+
         currentPath = (List<Point>) tree.GetData(NodeKeys.MOVEMENT_PATH);
+        targetPoint = currentPath.get(0);
 
-        Point point = currentPath.get(0);
-        targetPoint.x = point.x;
-        targetPoint.y = point.y;
-
-        float sensitivity = 1f;
-        movementVector.x = Math.round(UpdateMovementAxis(point.x, player.position.x) * sensitivity) / sensitivity;
-        movementVector.y = Math.round(UpdateMovementAxis(point.y, player.position.y) * sensitivity) / sensitivity;
-        if ((point.x != pastTarget.x || point.y != pastTarget.y)) {
+        if ((targetPoint.x != pastTarget.x || targetPoint.y != pastTarget.y)) {
             if (GlobalConstants.DEBUG) {
                 //System.out.println("(" + movementVector.x + ", " + movementVector.y + "): " + player.GetWorldX() + ", " + player.GetWorldY() + " ---> (" + point.x + ", " + point.y + ")");
             }
-            pastTarget.x = point.x;
-            pastTarget.y = point.y;
+            pastTarget.x = targetPoint.x;
+            pastTarget.y = targetPoint.y;
         }
     }
 
