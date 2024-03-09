@@ -4,18 +4,23 @@ import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.NodeState;
+import com.radius.system.screens.game_ui.TimerDisplay;
 
 import java.util.List;
 
 public class TheoreticalSafeSpaceCounter extends TheoreticalSafeSpace {
+
+
+    private final PathFinder pathFinder = new PathFinder();
 
     private int spaceCount = 0;
 
     @Override
     public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
 
-        List<Point> spaces = pathFinder.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
+        List<Point> spaces = this.pathFinder.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA, 2);
         int currentSafeSpaceCount = spaces.size();
+        //TimerDisplay.LogTimeStamped("Found " + currentSafeSpaceCount + " safe spaces for " + srcPoint);
         boolean hasMoreSpace = currentSafeSpaceCount > spaceCount;
         spaceCount = hasMoreSpace ? currentSafeSpaceCount : spaceCount;
 
