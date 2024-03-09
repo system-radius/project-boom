@@ -10,13 +10,15 @@ import java.util.List;
 
 public class TheoreticalSafeSpace extends FindTarget {
 
+    private final PathFinder pathFinder = new PathFinder();
+
     private int[][] boardCost;
 
     @Override
     public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
         this.srcPoint = srcPoint;
         this.boardCost = boardCost;
-        List<Point> spaces = pathFinder.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
+        List<Point> spaces = this.pathFinder.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         return targetPoint == null ? Failure() : Success(spaces.size());
