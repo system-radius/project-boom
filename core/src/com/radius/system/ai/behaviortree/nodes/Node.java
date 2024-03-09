@@ -1,6 +1,7 @@
 package com.radius.system.ai.behaviortree.nodes;
 
 import com.radius.system.ai.behaviortree.NodeKeys;
+import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.NodeState;
 
@@ -81,7 +82,7 @@ public abstract class Node implements Comparable<Node> {
         return displayId;
     }
 
-    public abstract NodeState Evaluate(Point srcPoint, int[][] boardCost);
+    public abstract NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost);
 
     public abstract void Execute();
 
@@ -176,6 +177,7 @@ public abstract class Node implements Comparable<Node> {
 
     public NodeState Failure() {
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + FAILURE);
+        //System.out.println(displayId + FAILURE);
         return state = NodeState.FAILURE;
     }
 
@@ -187,12 +189,14 @@ public abstract class Node implements Comparable<Node> {
     public NodeState Success(int weight) {
         this.weight = weight;
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + SUCCESS);
+        //System.out.println(displayId + SUCCESS);
         return state = NodeState.SUCCESS;
     }
 
     public NodeState Running(int weight) {
         this.weight = weight;
         GetRoot().SetData(NodeKeys.ACTIVE_NODE, displayId + RUNNING);
+        //System.out.println(displayId + RUNNING);
         return state = NodeState.RUNNING;
     }
 

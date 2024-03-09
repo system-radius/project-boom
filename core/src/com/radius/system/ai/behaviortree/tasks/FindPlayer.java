@@ -4,7 +4,7 @@ import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.PlayerTarget;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Solidifier;
-import com.radius.system.ai.pathfinding.AStar;
+import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.board.BoardState;
@@ -44,7 +44,7 @@ public class FindPlayer extends Solidifier {
     }
 
     @Override
-    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+    public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
 
         if (playerTargets != null) {
             ComputeDistances();
@@ -70,7 +70,7 @@ public class FindPlayer extends Solidifier {
                 continue;
             }
 
-            path = FindRangedPath(AStar.FindShortestPath(modifiedBoardCost, srcPoint.x, srcPoint.y, playerTarget.GetWorldX(), playerTarget.GetWorldY()));
+            path = FindRangedPath(pathFinder.FindShortestPath(modifiedBoardCost, srcPoint.x, srcPoint.y, playerTarget.GetWorldX(), playerTarget.GetWorldY()));
             if (path != null) {
                 //  && !(boardCost[player.GetWorldX()][player.GetWorldY()] > fireThreshold)
                 //TimerDisplay.LogTimeStamped("[" + displayId + "] Got ranged path!");
@@ -79,7 +79,7 @@ public class FindPlayer extends Solidifier {
                 if (path.size() > 0) {
                     tempTargetPoint = path.get(path.size() - 1);
                 }
-                List<Point> internalPath = AStar.FindShortestPath(solidifiedBoard, srcPoint.x, srcPoint.y, tempTargetPoint.x, tempTargetPoint.y);
+                List<Point> internalPath = pathFinder.FindShortestPath(solidifiedBoard, srcPoint.x, srcPoint.y, tempTargetPoint.x, tempTargetPoint.y);
                 if (internalPath != null) {
                     targetPoint = tempTargetPoint;
                     currentTarget = playerTarget;
@@ -104,7 +104,7 @@ public class FindPlayer extends Solidifier {
         Point setTargetPoint = (Point) root.GetData(NodeKeys.TARGET_POINT);
         if (setTargetPoint != null && owner.GetDistance(setTargetPoint) < owner.GetDistance(targetPoint)) {
             String setterId = root.GetData(NodeKeys.TARGET_SETTER).toString();
-            List<Point> setPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, setTargetPoint.x, setTargetPoint.y);
+            List<Point> setPath = pathFinder.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, setTargetPoint.x, setTargetPoint.y);
             if (setPath != null && setPath.size() < path.size() && displayId.equals(setterId)) {
                 //TimerDisplay.LogTimeStamped("[" + displayId + "] Failed to select target due to another target being closer!");
                 return Success(setPath.size());

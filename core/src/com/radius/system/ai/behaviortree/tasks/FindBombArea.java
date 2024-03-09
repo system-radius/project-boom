@@ -4,16 +4,15 @@ import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.checks.TheoreticalSafeSpace;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Solidifier;
-import com.radius.system.ai.pathfinding.AStar;
+import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
+import com.radius.system.board.BoardState;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.NodeState;
 import com.radius.system.objects.players.Player;
-import com.radius.system.board.BoardState;
-import com.radius.system.screens.game_ui.TimerDisplay;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +27,8 @@ public class FindBombArea extends Solidifier {
     private final Player player;
 
     private final int fireThreshold;
+
+    private PathFinder pathFinder;
 
     private int[][] boardCost;
 
@@ -46,11 +47,12 @@ public class FindBombArea extends Solidifier {
     }
 
     @Override
-    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+    public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
         this.srcPoint = srcPoint;
+        this.pathFinder = pathFinder;
 
         this.boardCost = ConditionalSolidifyBoardCopy(boardCost, fireThreshold);
-        List<Point> spaces = AStar.FindOpenSpaces(this.boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
+        List<Point> spaces = pathFinder.FindOpenSpaces(this.boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
@@ -60,11 +62,11 @@ public class FindBombArea extends Solidifier {
 
         Node root = GetRoot();
         Point setTargetPoint = (Point) root.GetData(NodeKeys.TARGET_POINT);
-        List<Point> path = AStar.ReconstructPath(targetPoint);
+        List<Point> path = PathFinder.ReconstructPath(targetPoint);
         int setPathSize = 0, pathSize = path.size();
         if (setTargetPoint != null) {
             AssessBombArea(setTargetPoint.x, setTargetPoint.y);
-            List<Point> setPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, setTargetPoint.x, setTargetPoint.y);
+            List<Point> setPath = pathFinder.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, setTargetPoint.x, setTargetPoint.y);
             Object setterObject = root.GetData(NodeKeys.TARGET_SETTER);
             String setterId = root.GetData(NodeKeys.TARGET_SETTER).toString();
             if (setPath != null) {
@@ -102,7 +104,7 @@ public class FindBombArea extends Solidifier {
         boolean acceptPoint = false;
 
         if (hasMoreBurnCount) {
-            NodeState state = theoryCrafter.Evaluate(point, ModifyBoardCost(rangeMapping, point));
+            NodeState state = theoryCrafter.Evaluate(point, pathFinder, ModifyBoardCost(rangeMapping, point));
             acceptPoint = NodeState.SUCCESS.equals(state);
             if (acceptPoint) {
                 maxBurnCount = currentBurnCount;

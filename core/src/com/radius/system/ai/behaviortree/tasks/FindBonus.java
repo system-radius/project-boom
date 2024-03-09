@@ -1,15 +1,12 @@
 package com.radius.system.ai.behaviortree.tasks;
 
-import com.radius.system.ai.behaviortree.NodeKeys;
-import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Solidifier;
-import com.radius.system.ai.pathfinding.AStar;
+import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.enums.NodeState;
 import com.radius.system.board.BoardState;
-import com.radius.system.screens.game_ui.TimerDisplay;
 
 import java.util.List;
 
@@ -31,11 +28,11 @@ public class FindBonus extends Solidifier {
     }
 
     @Override
-    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+    public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
         int[][] solidifiedBoard = SolidifyBoardCopy(boardCost, fireThreshold);
         this.srcPoint = srcPoint;
 
-        List<Point> spaces = AStar.FindOpenSpaces(solidifiedBoard, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
+        List<Point> spaces = pathFinder.FindOpenSpaces(solidifiedBoard, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
@@ -43,7 +40,7 @@ public class FindBonus extends Solidifier {
             return Failure();
         }
 
-        List<Point> path = AStar.ReconstructPath(targetPoint);
+        List<Point> path = PathFinder.ReconstructPath(targetPoint);
         //TimerDisplay.LogTimeStamped("[" + displayId + "] Target point acquired: " + targetPoint);
         return Success(defaultSuccessWeight < 0 ? path.size() : defaultSuccessWeight, targetPoint);
     }

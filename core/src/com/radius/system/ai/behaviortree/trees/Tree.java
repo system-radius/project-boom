@@ -1,6 +1,5 @@
 package com.radius.system.ai.behaviortree.trees;
 
-import com.radius.system.ai.behaviortree.checks.HasTargetPoint;
 import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
@@ -11,6 +10,7 @@ import com.radius.system.ai.behaviortree.tasks.FindPlayer;
 import com.radius.system.ai.behaviortree.tasks.FindSafeSpace;
 import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
 import com.radius.system.ai.behaviortree.tasks.PlantBomb;
+import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.NodeState;
 import com.radius.system.board.BoardState;
@@ -30,6 +30,8 @@ public abstract class Tree implements BoomUpdatable {
 
     protected final Point srcPoint;
 
+    protected final PathFinder pathFinder;
+
     public Tree(int id, int fireThreshold, BoardState boardState) {
 
         this.id =  id;
@@ -38,6 +40,7 @@ public abstract class Tree implements BoomUpdatable {
         boardCost = new int[boardState.BOARD_WIDTH][boardState.BOARD_HEIGHT];
 
         srcPoint = new Point(null, -1, -1);
+        this.pathFinder = new PathFinder();
 
         root = SetupTree();
     }
@@ -68,7 +71,7 @@ public abstract class Tree implements BoomUpdatable {
     }
 
     protected void Evaluate(int[][] boardCost) {
-        NodeState state = root.Evaluate(srcPoint, boardCost);
+        NodeState state = root.Evaluate(srcPoint, pathFinder, boardCost);
         List<Node> children = root.GetChildren();
         for (Node child : children) {
             if (state.equals(child.GetState())) {

@@ -3,10 +3,9 @@ package com.radius.system.ai.behaviortree.tasks;
 import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
-import com.radius.system.ai.pathfinding.AStar;
+import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.NodeState;
-import com.radius.system.screens.game_ui.TimerDisplay;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class MoveToTarget extends Selector {
     }
 
     @Override
-    public NodeState Evaluate(Point srcPoint, int[][] boardCost) {
+    public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
 
         this.srcPoint = srcPoint;
         Point dstPoint = (Point) GetData(NodeKeys.TARGET_POINT);
@@ -30,11 +29,11 @@ public class MoveToTarget extends Selector {
             return Failure();
         }
 
-        currentPath = AStar.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, dstPoint.x, dstPoint.y);
+        currentPath = pathFinder.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, dstPoint.x, dstPoint.y);
         if (currentPath != null) {
             if (currentPath.size() == 1 && currentPath.get(0).IsEqualPosition(srcPoint)) {
                 if (children.size() > 0) {
-                    super.Evaluate(srcPoint, boardCost);
+                    super.Evaluate(srcPoint, pathFinder, boardCost);
                 }
                 ClearData(NodeKeys.TARGET_POINT);
                 //TimerDisplay.LogTimeStamped("[" + displayId + "] Cleared target point!");

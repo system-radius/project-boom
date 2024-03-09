@@ -1,12 +1,12 @@
 package com.radius.system.ai.pathfinding;
 
+import com.radius.system.assets.GlobalConstants;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AStar {
-
-    private static AStar instance;
+public class PathFinder {
 
     private final List<Point> openList = new ArrayList<>();
 
@@ -14,25 +14,13 @@ public class AStar {
 
     private int[][] maze;
 
-    private AStar() {}
+    public PathFinder() {}
 
-    public static List<Point> FindShortestPath(int[][] boardCost, int srcX, int srcY, int dstX, int dstY) {
-        if (instance == null) {
-            instance = new AStar();
-        }
-
-        return instance.FindShortestPathInternal(boardCost, srcX, srcY, dstX, dstY);
+    public List<Point> FindShortestPath(int[][] boardCost, int srcX, int srcY, int dstX, int dstY) {
+        return FindShortestPath(boardCost, srcX, srcY, dstX, dstY, GlobalConstants.WORLD_AREA + 1);
     }
 
-    public static List<Point> FindOpenSpaces(int[][] boardCost, int srcX, int srcY, int depthLimit) {
-        if (instance == null) {
-            instance = new AStar();
-        }
-
-        return instance.FindOpenSpacesInternal(boardCost, srcX, srcY, depthLimit);
-    }
-
-    private List<Point> FindShortestPathInternal(int[][] boardCost, int srcX, int srcY, int dstX, int dstY) {
+    public List<Point> FindShortestPath(int[][] boardCost, int srcX, int srcY, int dstX, int dstY, float costThreshold) {
         openList.clear();
         closedList.clear();
 
@@ -49,13 +37,17 @@ public class AStar {
             }
 
             closedList.add(now);
-            AddChildrenToOpenList(now, dstX, dstY);
+            AddChildrenToOpenList(now, dstX, dstY, costThreshold);
         }
 
         return null;
     }
 
-    private List<Point> FindOpenSpacesInternal(int[][] boardCost, int srcX, int srcY, int depthLimit) {
+    public List<Point> FindOpenSpaces(int[][] boardCost, int srcX, int srcY, int depthLimit) {
+        return FindOpenSpaces(boardCost, srcX, srcY, depthLimit, GlobalConstants.WORLD_AREA + 1);
+    }
+
+    public List<Point> FindOpenSpaces(int[][] boardCost, int srcX, int srcY, int depthLimit, float costThreshold) {
         openList.clear();
         closedList.clear();
 
@@ -71,13 +63,13 @@ public class AStar {
             }
 
             closedList.add(now);
-            AddChildrenToOpenList(now, srcX, srcY);
+            AddChildrenToOpenList(now, srcX, srcY, costThreshold);
         }
 
         return closedList;
     }
 
-    private void AddChildrenToOpenList(Point parent, int hX, int hY) {
+    private void AddChildrenToOpenList(Point parent, int hX, int hY, float costThreshold) {
         int parentX = parent.x, parentY = parent.y;
         float parentG = parent.parentCost;
 
@@ -94,7 +86,7 @@ public class AStar {
                     continue;
                 }
 
-                if (x == y || (Math.abs(x) == Math.abs(y))) {
+                if (x == y || (Math.abs(x) == Math.abs(y)) || maze[childX][childY] >= costThreshold) {
                     continue;
                 }
 
