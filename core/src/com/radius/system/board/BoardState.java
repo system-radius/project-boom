@@ -130,7 +130,7 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
         int x = block.GetWorldX();
         int y = block.GetWorldY();
 
-        if (block.HasBonus()) {
+        if (block.HasBonus() && GlobalConstants.ENABLE_BONUS) {
             board[x][y] = new Bonus(x, y, scale, scale);
             boardRep[x][y] = BoardRep.BONUS;
         } else {

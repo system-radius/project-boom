@@ -20,6 +20,8 @@ public class GlobalConstants {
 
     public static final String TIED_MESSAGE = "Every one has lost!  ";
 
+    public static final boolean ENABLE_BONUS = true;
+
     public static boolean DEBUG = true;
 
     public static boolean GODMODE = false;
