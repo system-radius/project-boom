@@ -36,8 +36,10 @@ public class PathFinder {
                 return ReconstructPath(now);
             }
 
-            closedList.add(now);
-            AddChildrenToOpenList(now, dstX, dstY, costThreshold);
+            if (now.selfCost < costThreshold) {
+                closedList.add(now);
+            }
+            AddChildrenToOpenList(now, dstX, dstY);
         }
 
         return null;
@@ -62,14 +64,16 @@ public class PathFinder {
                 break;
             }
 
-            closedList.add(now);
-            AddChildrenToOpenList(now, srcX, srcY, costThreshold);
+            if (now.selfCost < costThreshold) {
+                closedList.add(now);
+            }
+            AddChildrenToOpenList(now, srcX, srcY);
         }
 
         return closedList;
     }
 
-    private void AddChildrenToOpenList(Point parent, int hX, int hY, float costThreshold) {
+    private void AddChildrenToOpenList(Point parent, int hX, int hY) {
         int parentX = parent.x, parentY = parent.y;
         float parentG = parent.parentCost;
 
@@ -86,7 +90,7 @@ public class PathFinder {
                     continue;
                 }
 
-                if (x == y || (Math.abs(x) == Math.abs(y)) || maze[childX][childY] >= costThreshold) {
+                if (x == y || (Math.abs(x) == Math.abs(y))) {
                     continue;
                 }
 

@@ -67,6 +67,7 @@ public class FindPlayer extends FindBombArea {
 
         range = owner.GetFirePower();
         List<Point> path = null;
+        List<Point> rangedPoints = null;
         Point targetPoint = srcPoint;
         Collections.sort(playerTargets);
         PlayerTarget currentTarget = null;
@@ -75,20 +76,17 @@ public class FindPlayer extends FindBombArea {
                 continue;
             }
 
-            path = FindRangedPath(pathFinder.FindShortestPath(modifiedBoardCost, srcPoint.x, srcPoint.y, playerTarget.GetWorldX(), playerTarget.GetWorldY()));
-            if (path != null) {
+            rangedPoints = FindRangedPath(pathFinder.FindShortestPath(modifiedBoardCost, srcPoint.x, srcPoint.y, playerTarget.GetWorldX(), playerTarget.GetWorldY()));
+            Point temp = SelectTarget(rangedPoints);
+            if (temp != null) {
                 //  && !(boardCost[player.GetWorldX()][player.GetWorldY()] > fireThreshold)
                 //TimerDisplay.LogTimeStamped("[" + displayId + "] Got ranged path!");
                 // Verify that the last point on the path can be reached.
-                Point tempTargetPoint = srcPoint;
-                if (path.size() > 0) {
-                    tempTargetPoint = path.get(path.size() - 1);
-                }
-                List<Point> internalPath = pathFinder.FindShortestPath(solidifiedBoard, srcPoint.x, srcPoint.y, tempTargetPoint.x, tempTargetPoint.y);
-                if (internalPath != null && AcceptPoint(tempTargetPoint)) {
-                    targetPoint = tempTargetPoint;
+                List<Point> internalPath = pathFinder.FindShortestPath(solidifiedBoard, srcPoint.x, srcPoint.y, temp.x, temp.y);
+                if (internalPath != null && AcceptPoint(temp)) {
+                    targetPoint = temp;
                     currentTarget = playerTarget;
-                    //path = internalPath;
+                    path = internalPath;
                     break;
                 }
             }
@@ -121,9 +119,27 @@ public class FindPlayer extends FindBombArea {
     }
 
     @Override
+    protected Point SelectTarget(List<Point> points) {
+
+        if (points == null) {
+            return null;
+        }
+
+        Point targetPoint = null;
+        for (Point point : points) {
+            if (AcceptPoint(point)) {
+                targetPoint = point;
+            }
+        }
+
+        return targetPoint;
+    }
+
+    @Override
     protected boolean AcceptPoint(Point point) {
         Map<Direction, Integer> rangeMapping = AssessBombArea(point.x, point.y);
-        return NodeState.SUCCESS.equals(theoryCrafter.Evaluate(point, pathFinder, ModifyBoardCost(rangeMapping, point)));
+        NodeState state = theoryCrafter.Evaluate(point, pathFinder, ModifyBoardCost(rangeMapping, point));
+        return NodeState.SUCCESS.equals(state);
     }
 
     private int[][] CreateModifiedBoardCost(int[][] boardCost) {
@@ -149,10 +165,14 @@ public class FindPlayer extends FindBombArea {
             return null;
         }
 
+        List<Point> points = new ArrayList<>();
+
         // Fix the path so that a portion is removed based on the player's range.
         Point lastPoint = path.remove(path.size() - 1);
+        points.add(lastPoint);
         boolean xDiff, yDiff, xDiffTrack = false, yDiffTrack = false;
         for (int i = 1; i < range; i++) {
+
             if (path.size() == 0) {
                 xDiff = srcPoint.x != lastPoint.x;
                 yDiff = srcPoint.y != lastPoint.y;
@@ -183,9 +203,10 @@ public class FindPlayer extends FindBombArea {
                 }
             }
             lastPoint = path.remove(path.size() - 1);
+            points.add(lastPoint);
         }
 
-        return path;
+        return points;
     }
 
     private void InitializePlayerTargets(List<Player> players) {
