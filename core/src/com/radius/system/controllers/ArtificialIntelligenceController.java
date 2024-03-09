@@ -89,6 +89,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     public void Restart() {
         tree.Restart();
         currentPath = null;
+        targetPoint = null;
         movementVector.x = movementVector.y = 0;
     }
 
@@ -131,6 +132,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
                 //System.out.println("Bomb has been planted!");
             }
             targetPoint = null;
+            currentPath = null;
         }
     }
 
