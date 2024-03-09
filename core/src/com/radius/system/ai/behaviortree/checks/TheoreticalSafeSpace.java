@@ -18,7 +18,7 @@ public class TheoreticalSafeSpace extends FindTarget {
     public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
         this.srcPoint = srcPoint;
         this.boardCost = boardCost;
-        List<Point> spaces = this.pathFinder.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
+        List<Point> spaces = this.pathFinder.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA, 2);
         Point targetPoint = SelectTarget(spaces);
 
         return targetPoint == null ? Failure() : Success(spaces.size());

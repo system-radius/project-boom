@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class FindBombArea extends Solidifier {
 
-    private final Node theoryCrafter;
+    protected final Node theoryCrafter;
 
     private final BoardState boardState;
 
@@ -28,13 +28,13 @@ public class FindBombArea extends Solidifier {
 
     private final int fireThreshold;
 
-    private PathFinder pathFinder;
-
-    private int[][] boardCost;
-
     private int maxBurnCount = 0, currentBurnCount, range;
 
     private boolean hasPierceBomb;
+
+    protected PathFinder pathFinder;
+
+    protected int[][] boardCost;
 
     public FindBombArea(int fireThreshold, BoardState boardState, Player player) {
         this.fireThreshold = fireThreshold;
@@ -114,7 +114,7 @@ public class FindBombArea extends Solidifier {
         return acceptPoint;
     }
 
-    private int[][] ModifyBoardCost(Map<Direction, Integer> rangeMapping, Point point) {
+    protected int[][] ModifyBoardCost(Map<Direction, Integer> rangeMapping, Point point) {
         int width = boardCost.length, height = boardCost[0].length;
         int[][] modifiedBoardCost = new int[width][height];
         for (int i = 0; i < boardCost.length; i++) {
@@ -170,7 +170,7 @@ public class FindBombArea extends Solidifier {
         return counter <= range && goodAxis;
     }
 
-    private Map<Direction, Integer> AssessBombArea(int x, int y) {
+    protected Map<Direction, Integer> AssessBombArea(int x, int y) {
         range = player.GetFirePower();
         hasPierceBomb = BombType.PIERCE.equals(player.GetBombType());
         currentBurnCount = 0;

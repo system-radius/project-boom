@@ -8,6 +8,7 @@ import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.enums.BoardRep;
 import com.radius.system.board.BoardState;
+import com.radius.system.enums.Direction;
 import com.radius.system.enums.NodeState;
 import com.radius.system.objects.players.Player;
 import com.radius.system.screens.game_ui.TimerDisplay;
@@ -15,8 +16,9 @@ import com.radius.system.screens.game_ui.TimerDisplay;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-public class FindPlayer extends Solidifier {
+public class FindPlayer extends FindBombArea {
 
     private final BoardState boardState;
 
@@ -29,6 +31,7 @@ public class FindPlayer extends Solidifier {
     private int range;
 
     public FindPlayer(int id, int fireThreshold, BoardState boardState) {
+        super(fireThreshold, boardState, boardState.GetPlayers().get(id));
         this.fireThreshold = fireThreshold;
         this.playerId = id;
 
@@ -56,9 +59,11 @@ public class FindPlayer extends Solidifier {
             return Failure();
         }
 
+        this.boardCost = ConditionalSolidifyBoardCopy(boardCost, fireThreshold);
         int[][] modifiedBoardCost = CreateModifiedBoardCost(boardCost);
         int[][] solidifiedBoard = SolidifyBoardCopy(boardCost, fireThreshold);
         this.srcPoint = srcPoint;
+        this.pathFinder = pathFinder;
 
         range = owner.GetFirePower();
         List<Point> path = null;
@@ -80,7 +85,7 @@ public class FindPlayer extends Solidifier {
                     tempTargetPoint = path.get(path.size() - 1);
                 }
                 List<Point> internalPath = pathFinder.FindShortestPath(solidifiedBoard, srcPoint.x, srcPoint.y, tempTargetPoint.x, tempTargetPoint.y);
-                if (internalPath != null) {
+                if (internalPath != null && AcceptPoint(tempTargetPoint)) {
                     targetPoint = tempTargetPoint;
                     currentTarget = playerTarget;
                     //path = internalPath;
@@ -113,6 +118,12 @@ public class FindPlayer extends Solidifier {
 
         //TimerDisplay.LogTimeStamped("[" + displayId + "] Target point acquired: " + targetPoint + ", target ID: " + currentTarget.targetId);
         return Success(path.size(), targetPoint);
+    }
+
+    @Override
+    protected boolean AcceptPoint(Point point) {
+        Map<Direction, Integer> rangeMapping = AssessBombArea(point.x, point.y);
+        return NodeState.SUCCESS.equals(theoryCrafter.Evaluate(point, pathFinder, ModifyBoardCost(rangeMapping, point)));
     }
 
     private int[][] CreateModifiedBoardCost(int[][] boardCost) {
