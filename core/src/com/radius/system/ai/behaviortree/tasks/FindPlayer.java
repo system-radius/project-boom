@@ -105,10 +105,10 @@ public class FindPlayer extends FindBombArea {
 
         Node root = GetRoot();
         Point setTargetPoint = (Point) root.GetData(NodeKeys.TARGET_POINT);
-        if (setTargetPoint != null && owner.GetDistance(setTargetPoint) < owner.GetDistance(targetPoint)) {
+        if (setTargetPoint != null && owner.GetDistance(setTargetPoint) <= owner.GetDistance(targetPoint)) {
             String setterId = root.GetData(NodeKeys.TARGET_SETTER).toString();
             List<Point> setPath = pathFinder.FindShortestPath(boardCost, srcPoint.x, srcPoint.y, setTargetPoint.x, setTargetPoint.y);
-            if (setPath != null && setPath.size() < path.size() && displayId.equals(setterId)) {
+            if (setPath != null && setPath.size() <= path.size() && displayId.equals(setterId)) {
                 //TimerDisplay.LogTimeStamped("[" + displayId + "] Failed to select target due to another target being closer!");
                 return Success(setPath.size());
             }
@@ -126,9 +126,11 @@ public class FindPlayer extends FindBombArea {
         }
 
         Point targetPoint = null;
-        for (Point point : points) {
+        for (int i = points.size() - 1; i >= 0; i--) {
+            Point point = points.get(i);
             if (AcceptPoint(point)) {
                 targetPoint = point;
+                break;
             }
         }
 
