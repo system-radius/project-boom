@@ -33,6 +33,7 @@ public class GameCamera extends OrthographicCamera implements MovementEventListe
         float viewportHeight = (GlobalConstants.WORLD_SCALE * GlobalConstants.VIEWPORT_HEIGHT) / activeZoom / EFFECTIVE_VIEWPORT_DIVIDER;
 
         viewport = new FitViewport(viewportWidth, viewportHeight, this);
+        viewport.apply();
 
         this.scale = scale;
     }
@@ -44,13 +45,18 @@ public class GameCamera extends OrthographicCamera implements MovementEventListe
     public void SetWorldSize(int worldWidth, int worldHeight) {
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
-        Clamp(worldWidth / 2f, worldHeight / 2f);
+        AdjustViewport(activeZoom);
+
+        position.x = worldWidth / 2f * scale;
+        position.y = worldHeight / 2f * scale;
     }
 
     public void SetZoom(float zoom) {
         this.zoom = zoom;
         AdjustViewport(zoom);
-        Clamp(worldWidth / 2f, worldHeight / 2f);
+        //Clamp(worldWidth / 2f, worldWidth / 2f);
+        position.x = worldWidth / 2f * scale;
+        position.y = worldHeight / 2f * scale;
     }
 
     private void AdjustViewport(float zoom) {
@@ -60,16 +66,17 @@ public class GameCamera extends OrthographicCamera implements MovementEventListe
 
         viewport.setWorldWidth(viewportWidth);
         viewport.setWorldHeight(viewportHeight);
-
+        viewport.apply();
         this.update();
     }
 
     public void SetWatchId(int watchId) {
 
         if (watchId < 0) {
-            if (activeZoom == zoom) return;
+            //if (activeZoom == zoom) return;
             AdjustViewport(zoom);
-            Clamp(worldWidth / 2f, worldHeight / 2f);
+            position.x = worldWidth / 2f * scale;
+            position.y = worldHeight / 2f * scale;
             return;
         }
 
@@ -96,8 +103,8 @@ public class GameCamera extends OrthographicCamera implements MovementEventListe
         x *= scale;
         y *= scale;
 
-        float effectiveViewportWidth = this.viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER;
-        float effectiveViewportHeight = this.viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER;
+        float effectiveViewportWidth = viewportWidth / EFFECTIVE_VIEWPORT_DIVIDER;
+        float effectiveViewportHeight = viewportHeight / EFFECTIVE_VIEWPORT_DIVIDER;
 
         this.position.x = MathUtils.clamp(x, effectiveViewportWidth, (worldWidth * scale) - effectiveViewportWidth);
         this.position.y = MathUtils.clamp(y, effectiveViewportHeight, (worldHeight * scale) - effectiveViewportHeight);
