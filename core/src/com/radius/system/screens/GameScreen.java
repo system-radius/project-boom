@@ -148,15 +148,10 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         if (mainCamera == null) {
             mainCamera = new GameCamera(WORLD_SCALE);
             mainViewport = mainCamera.GetViewport();
-        } else {
-            watchId = -1;
-            mainCamera.SetWatchId(watchId);
         }
-
-        if (uiCamera == null) {
-            uiCamera = new OrthographicCamera();
-        }
-
+        watchId = -1;
+        mainCamera.SetWorldSize(WORLD_WIDTH, WORLD_HEIGHT);
+        mainCamera.SetWatchId(watchId);
         float zoom = ZOOM;
         if (maxZoomOut) {
             zoom = ComputeZoomValue();
@@ -164,6 +159,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         mainCamera.SetZoom(zoom);
 
         if (uiViewport == null) {
+            uiCamera = new OrthographicCamera();
             uiViewport = new ExtendViewport(VIEWPORT_WIDTH * WORLD_SCALE, VIEWPORT_HEIGHT * WORLD_SCALE, uiCamera);
 
             float scaledWorldWidth = WORLD_WIDTH * WORLD_SCALE, scaledWorldHeight = WORLD_HEIGHT * WORLD_SCALE;
@@ -175,7 +171,6 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
             uiCamera.update();
         }
 
-        mainCamera.SetWorldSize(WORLD_WIDTH, WORLD_HEIGHT);
     }
 
     private float ComputeZoomValue() {
@@ -238,11 +233,11 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         switch (gameState) {
             case START:
                 // Do things that need to be done only once, then set state to restart.
-                InitializeGameState();
                 startDate = new Date(System.currentTimeMillis());
                 gameState = GameState.RESTART;
                 break;
             case RESTART:
+                InitializeGameState();
                 gameState = GameState.LOADING;
                 FireOnLoadStartEvent();
                 gameMode.Restart(delta);
@@ -312,7 +307,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
             if (GameState.COMPLETE.equals(gameState) || GameState.CONCLUDED.equals(gameState)) {
                 font.draw(spriteBatch, matchResults, WORLD_SCALE/2f, WORLD_SCALE);
                 font.draw(spriteBatch, dateTime, WORLD_SCALE/2f, WORLD_SCALE * 2);
-            } else {
+            } else if (gameMode != null) {
                 List<BoomPlayerController> controllers = gameMode.GetControllers();
                 for (int i = 0; i < controllers.size(); i++) {
                     BoomPlayerController controller = controllers.get(i);
@@ -329,7 +324,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
                 }
             }
             //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
-            //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2);
+            //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2f);
         }
         spriteBatch.end();
     }
