@@ -222,7 +222,8 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
         for (Bomb bomb : bombs) {
             int x = bomb.GetWorldX(), y = bomb.GetWorldY();
-            boardCost[x][y] = bomb.HasActiveCollision(players.get(id)) ? -1 : this.boardCost[x][y];
+            //boardCost[x][y] = bomb.HasActiveCollision(players.get(id)) ? -1 : this.boardCost[x][y];
+            boardCost[x][y] = -1;
         }
     }
 
