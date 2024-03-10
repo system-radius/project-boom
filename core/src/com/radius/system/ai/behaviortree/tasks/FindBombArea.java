@@ -13,6 +13,7 @@ import com.radius.system.enums.BombType;
 import com.radius.system.enums.Direction;
 import com.radius.system.enums.NodeState;
 import com.radius.system.objects.players.Player;
+import com.radius.system.screens.game_ui.TimerDisplay;
 
 import java.util.HashMap;
 import java.util.List;
@@ -98,13 +99,15 @@ public class FindBombArea extends Solidifier {
 
         Map<Direction, Integer> rangeMapping = AssessBombArea(point.x, point.y);
 
-        boolean hasMoreBurnCount = currentBurnCount > maxBurnCount && BoardRep.EMPTY.equals(boardState.GetBoardEntry(point.x, point.y));
+        BoardRep rep = boardState.GetBoardEntry(point.x, point.y);
+        boolean hasMoreBurnCount = currentBurnCount > maxBurnCount && (BoardRep.EMPTY.equals(rep) || BoardRep.BONUS.equals(rep));
         //System.out.println(point + " Accepted by super: " + acceptedBySuper + ", has more burn count (" + currentBurnCount + " > " + maxBurnCount + "): " + hasMoreBurnCount);
 
         boolean acceptPoint = false;
 
         if (hasMoreBurnCount) {
-            NodeState state = theoryCrafter.Evaluate(point, pathFinder, ModifyBoardCost(rangeMapping, point));
+            int[][] modifiedBoardCost = ModifyBoardCost(rangeMapping, point);
+            NodeState state = theoryCrafter.Evaluate(point, pathFinder, modifiedBoardCost);
             acceptPoint = NodeState.SUCCESS.equals(state);
             if (acceptPoint) {
                 maxBurnCount = currentBurnCount;
