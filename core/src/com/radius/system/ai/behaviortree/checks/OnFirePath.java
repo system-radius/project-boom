@@ -25,7 +25,7 @@ public class OnFirePath extends NoExecuteNode {
     @Override
     public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
 
-        if (boardCost[srcPoint.x][srcPoint.y] > threshold) {
+        if (boardCost[srcPoint.x][srcPoint.y] > threshold || boardCost[srcPoint.x][srcPoint.y] < 0) {
             GetRoot().SetData(NodeKeys.ON_FIRE_PATH, true);
             return Success(backup ? Short.MAX_VALUE : 0);
         }
