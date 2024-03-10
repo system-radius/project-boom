@@ -18,7 +18,7 @@ public class Sequencer extends Node {
     public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
         boolean anyRunning = false;
         for (Node node : children) {
-            switch (node.Evaluate(srcPoint, pathFinder, boardCost)) {
+            switch (node.Start(srcPoint, pathFinder, boardCost)) {
                 case FAILURE:
                     state = NodeState.FAILURE;
                     return state;

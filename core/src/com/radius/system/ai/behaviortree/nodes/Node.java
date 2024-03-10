@@ -24,6 +24,8 @@ public abstract class Node implements Comparable<Node> {
 
     protected List<Node> children = new ArrayList<>();
 
+    protected boolean processing;
+
     protected int weight ;
 
     public Node() {
@@ -80,6 +82,17 @@ public abstract class Node implements Comparable<Node> {
 
     public String GetDisplayId() {
         return displayId;
+    }
+
+    public NodeState Start(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
+        if (processing) {
+            return Running(Short.MAX_VALUE);
+        }
+
+        processing = true;
+        NodeState state = Evaluate(srcPoint, pathFinder, boardCost);
+        processing = false;
+        return state;
     }
 
     public abstract NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost);

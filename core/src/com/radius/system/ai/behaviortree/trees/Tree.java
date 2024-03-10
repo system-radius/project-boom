@@ -71,7 +71,7 @@ public abstract class Tree implements BoomUpdatable {
     }
 
     protected void Evaluate(int[][] boardCost) {
-        NodeState state = root.Evaluate(srcPoint, pathFinder, boardCost);
+        NodeState state = root.Start(srcPoint, pathFinder, boardCost);
         List<Node> children = root.GetChildren();
         for (Node child : children) {
             if (state.equals(child.GetState())) {

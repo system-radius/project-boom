@@ -17,7 +17,7 @@ public class Selector extends Node {
     @Override
     public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {
         for (Node node : children) {
-            switch (node.Evaluate(srcPoint, pathFinder, boardCost)) {
+            switch (node.Start(srcPoint, pathFinder, boardCost)) {
                 case FAILURE:
                     continue;
                 case SUCCESS:
