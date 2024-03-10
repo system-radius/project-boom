@@ -124,7 +124,7 @@ public class FieldConfig {
     public void RestartBoard(BoardState boardState) {
         fieldIndex = RANDOMIZER.nextInt(7);
 
-        boolean randomize = true;
+        boolean randomize = GlobalConstants.RANDOMIZE_FIELD;
         int spawnPoints = 0;
         for (int x = 0; x < width; x++) {
             for (int y = height - 1; y >= 0; y--) {

@@ -22,6 +22,8 @@ public class GlobalConstants {
 
     public static final boolean ENABLE_BONUS = true;
 
+    public static final boolean RANDOMIZE_FIELD = true;
+
     public static boolean DEBUG = true;
 
     public static boolean GODMODE = false;
