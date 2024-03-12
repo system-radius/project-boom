@@ -9,6 +9,7 @@ public class DummyBomb extends Bomb {
         range = 99;
     }
 
+    @Override
     public int GetCost() {
         return MAX_COST;
     }

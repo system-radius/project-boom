@@ -33,7 +33,7 @@ public class Bomb extends Block {
 
     protected static final Sound EXPLOSION_SFX = GlobalAssets.LoadSound(GlobalAssets.EXPLOSION_SFX_PATH);
 
-    private static final float WAIT_TIMER = 3f;
+    protected static final float WAIT_TIMER = 3f;
 
     private static final float EXPLOSION_TIMER = 1f;
 
@@ -99,7 +99,7 @@ public class Bomb extends Block {
 
     protected BombType bombType;
 
-    private float preExplosionTime = 0f;
+    protected float preExplosionTime = 0f;
 
     private float explosionTime = 0f;
 
@@ -346,7 +346,11 @@ public class Bomb extends Block {
             return;
         }
 
-        EXPLOSION_SFX.play();
+        try {
+            EXPLOSION_SFX.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         state = BombState.EXPLODING;
         animationElapsedTime = 0;
