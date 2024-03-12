@@ -62,6 +62,10 @@ public class TimerDisplay extends Actor implements TimerEventListener {
         overtimeListeners.add(listener);
     }
 
+    public void ClearOverTimeListeners() {
+        overtimeListeners.clear();
+    }
+
     public void FireOverTimeEvent() {
         for (OverTimeListener listener : overtimeListeners) {
             listener.OverTime();
