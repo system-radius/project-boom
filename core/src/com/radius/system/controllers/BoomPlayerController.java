@@ -21,6 +21,7 @@ public abstract class BoomPlayerController implements Disposable {
         if (boardState != null && player != null) {
             boardState.AddToBoard(player);
         }
+        ResetKDStats();
     }
 
     public void Restart() {
