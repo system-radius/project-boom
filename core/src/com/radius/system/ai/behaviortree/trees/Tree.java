@@ -4,6 +4,8 @@ import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.ai.behaviortree.nodes.Sequencer;
+import com.radius.system.ai.behaviortree.tasks.BasicFindBombArea;
+import com.radius.system.ai.behaviortree.tasks.BasicFindPlayer;
 import com.radius.system.ai.behaviortree.tasks.FindBombArea;
 import com.radius.system.ai.behaviortree.tasks.FindBonus;
 import com.radius.system.ai.behaviortree.tasks.FindPlayer;
@@ -106,7 +108,7 @@ public abstract class Tree implements BoomUpdatable {
 
     protected Node ConstructAttackPlayerTree() {
         Node root = new Sequencer("[>] AttackP");
-        root.AttachChild(new FindPlayer(id, fireThreshold, boardState));
+        root.AttachChild(new BasicFindPlayer(id, fireThreshold, boardState));
         root.AttachChild(new MoveToTarget(new PlantBomb()));
 
         return root;
@@ -115,7 +117,7 @@ public abstract class Tree implements BoomUpdatable {
     protected Node ConstructBombAreaTree() {
         Node findBombAreaTarget = new Selector("[+] FindArea");
         //findBombAreaTarget.AttachChild(new HasTargetPoint());
-        findBombAreaTarget.AttachChild(new FindBombArea(fireThreshold, boardState, boardState.GetPlayers().get(id)));
+        findBombAreaTarget.AttachChild(new BasicFindBombArea(fireThreshold, boardState, boardState.GetPlayers().get(id)));
 
         Node root = new Sequencer("[>] AttackA");
         root.AttachChild(findBombAreaTarget);
