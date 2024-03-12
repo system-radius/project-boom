@@ -230,7 +230,7 @@ public class GameMode implements Disposable, OverTimeListener {
             for (BoomPlayerController controller : controllers) {
                 controller.Update(delta);
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (Exception e) {
             FireCrashedEvent(e);
         }
 
