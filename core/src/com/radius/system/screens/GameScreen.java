@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -87,9 +88,9 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
 
     private float preloadBuffer = 0f, speedMultiplier = 1f;
 
-    private int[] wins;
+    private int[] wins, kills, deaths, selfBurns;
 
-    private int matches, crashes, watchId = -1;
+    private int matches, crashes, watchId = -1, tiedMatches;
 
     private String matchResults, dateTime;
 
@@ -105,6 +106,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
 
     private void InitializeEvents() {
         gameStage.AddButtonPressListener(this);
+        gameStage.GetTimer().ClearOverTimeListeners();
         gameStage.GetTimer().AddOverTimeListener(gameMode);
         gameMode.AddEndGameEventListener(gameStage);
         gameMode.AddEndGameEventListener(this);
@@ -116,7 +118,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         if (!hasController) {
             float newZoom = ComputeZoomValue();
             mainCamera.SetZoom(newZoom);
-            speedMultiplier = 1f;
+            speedMultiplier = 2f;
             SetupCameraListener();
             return;
         }
@@ -198,7 +200,6 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         /**/
 
         List<PlayerConfig> playerConfigs = gameConfig.GetPlayerConfigs();
-        wins = new int[playerConfigs.size()];
 
         switch (gameConfig.GetGameMode()) {
             case TEST:
@@ -210,6 +211,13 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         }
 
         //gameMode.AddPlayers(configs);
+    }
+
+    private void InitializeKillDeathStats(int size) {
+        wins = new int[size];
+        kills = new int[size];
+        deaths = new int[size];
+        selfBurns = new int[size];
     }
 
     @Override
@@ -233,8 +241,12 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         switch (gameState) {
             case START:
                 // Do things that need to be done only once, then set state to restart.
-                startDate = new Date(System.currentTimeMillis());
-                gameState = GameState.RESTART;
+                if (gameConfig != null) {
+                    startDate = new Date(System.currentTimeMillis());
+                    List<PlayerConfig> playerConfigs = gameConfig.GetPlayerConfigs();
+                    InitializeKillDeathStats(playerConfigs.size());
+                    gameState = GameState.RESTART;
+                }
                 break;
             case RESTART:
                 InitializeGameState();
@@ -326,6 +338,25 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
             //font.draw(spriteBatch, "(" + uiViewport.getWorldWidth() / 4 + ", " + uiViewport.getWorldHeight() + ")" , x, y + WORLD_SCALE);
             //font.draw(spriteBatch, "(" + mainCamera.position.x + ", " + mainCamera.position.y + ")" , x, y + WORLD_SCALE * 2f);
         }
+
+        if (gameConfig != null && gameMode != null) {
+            float targetWidth = uiViewport.getWorldWidth(), xPos = 0, yPos = uiViewport.getWorldHeight() - WORLD_SCALE * 1.5f;
+            List<BoomPlayerController> controllers = gameMode.GetControllers();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < controllers.size(); i++) {
+                sb.clear();
+                BoomPlayerController controller = controllers.get(i);
+                Player player = controller.GetPlayer();
+                sb.append(player.GetKills());
+                sb.append(" / ");
+                sb.append(player.GetDeaths());
+                sb.append(" / ");
+                sb.append(player.GetSelfBurn());
+                font.draw(spriteBatch, (i + 1) + ": " + sb, xPos, yPos - ((WORLD_SCALE / 3.5f) * i), targetWidth - WORLD_SCALE / 2, Align.right, false);
+            }
+        }
+
+
         spriteBatch.end();
     }
 
@@ -429,6 +460,8 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
             matches++;
             if (event.id >= 0) {
                 wins[event.id]++;
+            } else {
+                tiedMatches++;
             }
             PrintMatchState(event);
         } else {
@@ -455,7 +488,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         StringBuilder sb = new StringBuilder();
         sb.append("Match #");
         sb.append(matches);
-        sb.append("(Crashes: ");
+        sb.append(" (Crashes: ");
         sb.append(crashes);
         sb.append(")\nWins: [");
         for (int i = 0; i < wins.length; i++) {
@@ -464,16 +497,20 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
             sb.append(": ");
             sb.append(wins[i]);
             sb.append(" -> ");
-            sb.append(event.killCount[i]);
+            kills[i] += event.killCount[i];
+            sb.append(kills[i]);
             sb.append("/");
-            sb.append(event.deathCount[i]);
+            deaths[i] += event.deathCount[i];
+            sb.append(deaths[i]);
             sb.append("/");
-            sb.append(event.selfBurn[i]);
+            selfBurns[i] += event.selfBurn[i];
+            sb.append(selfBurns[i]);
             if (i + 1 < wins.length) {
                 sb.append(",    ");
             }
         }
-        sb.append("]\t");
+        sb.append("]\t\nTied Matches: ");
+        sb.append(tiedMatches);
         matchResults = sb.toString();
         sb.clear();
 
