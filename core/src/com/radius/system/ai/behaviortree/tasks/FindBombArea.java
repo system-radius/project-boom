@@ -120,13 +120,7 @@ public class FindBombArea extends Solidifier {
     protected int[][] ModifyBoardCost(Map<Direction, Integer> rangeMapping, Point point) {
         int width = boardCost.length, height = boardCost[0].length;
         int[][] modifiedBoardCost = new int[width][height];
-        for (int i = 0; i < boardCost.length; i++) {
-            System.arraycopy(boardCost[i], 0, modifiedBoardCost[i], 0, boardCost[i].length);
-        }
-
-        if (BoardRep.BOMB.equals(boardState.GetBoardEntry(srcPoint.x, srcPoint.y))) {
-            modifiedBoardCost[srcPoint.x][srcPoint.y] = -1;
-        }
+        boardState.CompileBoardCost(modifiedBoardCost, fireThreshold, -1);
 
         int x = point.x, y = point.y;
 
