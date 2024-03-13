@@ -6,10 +6,8 @@ import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.ai.behaviortree.nodes.Sequencer;
 import com.radius.system.ai.behaviortree.tasks.BasicFindBombArea;
 import com.radius.system.ai.behaviortree.tasks.BasicFindPlayer;
-import com.radius.system.ai.behaviortree.tasks.FindBombArea;
 import com.radius.system.ai.behaviortree.tasks.FindBonus;
-import com.radius.system.ai.behaviortree.tasks.FindPlayer;
-import com.radius.system.ai.behaviortree.tasks.FindSafeSpace;
+import com.radius.system.ai.behaviortree.tasks.BasicFindSafeSpace;
 import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
 import com.radius.system.ai.behaviortree.tasks.PlantBomb;
 import com.radius.system.ai.pathfinding.PathFinder;
@@ -88,7 +86,7 @@ public abstract class Tree implements BoomUpdatable {
     protected Node ConstructDefenseTree(int fireThreshold, boolean backup) {
         Node findSafeSpaceTarget = new Selector("[+] FindSpace");
         //findSafeSpaceTarget.AttachChild(new HasTargetPoint());
-        findSafeSpaceTarget.AttachChild(new FindSafeSpace(fireThreshold));
+        findSafeSpaceTarget.AttachChild(new BasicFindSafeSpace(fireThreshold));
 
         Node root = new Sequencer("[>] Defense" + fireThreshold);
         root.AttachChild(new OnFirePath(fireThreshold, backup));
