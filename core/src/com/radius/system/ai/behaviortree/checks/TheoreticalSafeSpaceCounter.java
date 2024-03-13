@@ -21,7 +21,7 @@ public class TheoreticalSafeSpaceCounter extends TheoreticalSafeSpace {
         List<Point> spaces = this.pathFinder.FindOpenSpaces(boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA, 2);
         int currentSafeSpaceCount = spaces.size();
         //TimerDisplay.LogTimeStamped("Found " + currentSafeSpaceCount + " safe spaces for " + srcPoint);
-        boolean hasMoreSpace = currentSafeSpaceCount > spaceCount;
+        boolean hasMoreSpace = currentSafeSpaceCount >= spaceCount;
         spaceCount = hasMoreSpace ? currentSafeSpaceCount : spaceCount;
 
         return hasMoreSpace ? Success(spaceCount) : Failure();
