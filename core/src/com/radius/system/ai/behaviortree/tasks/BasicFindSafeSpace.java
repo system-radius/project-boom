@@ -8,23 +8,22 @@ import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.NodeState;
 
-import java.nio.file.Path;
 import java.util.List;
 
-public class FindSafeSpace extends Solidifier {
+public class BasicFindSafeSpace extends Solidifier {
 
-    private final Node theoryCrafter;
+    protected final Node theoryCrafter;
 
-    private final int fireThreshold;
+    protected final int fireThreshold;
 
-    private int[][] boardCost;
+    protected int[][] boardCost;
 
-    private PathFinder pathFinder;
+    protected PathFinder pathFinder;
 
-    public FindSafeSpace(int fireThreshold) {
+    public BasicFindSafeSpace(int fireThreshold) {
         this.fireThreshold = fireThreshold;
         theoryCrafter = new TheoreticalSafeSpaceCounter();
-        id = "[!] FindSafeSpace";
+        id = "[!] BasicFindSafeSpace";
     }
 
     @Override
@@ -34,7 +33,7 @@ public class FindSafeSpace extends Solidifier {
         this.boardCost = ConditionalSolidifyBoardCopy(boardCost, fireThreshold);
 
         ((TheoreticalSafeSpaceCounter) theoryCrafter).ResetSpaceCount();
-        List<Point> spaces = pathFinder.FindOpenSpaces(this.boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA);
+        List<Point> spaces = pathFinder.FindOpenSpaces(this.boardCost, srcPoint.x, srcPoint.y, GlobalConstants.WORLD_AREA, fireThreshold);
         Point targetPoint = SelectTarget(spaces);
 
         if (targetPoint == null) {
