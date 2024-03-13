@@ -115,10 +115,10 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         this.AddLoadingEventListener(gameStage);
         HumanPlayerController controller = gameMode.GetMainController();
         hasController = controller != null;
+        speedMultiplier = hasController ? 1f : 2f;
         if (!hasController) {
             float newZoom = ComputeZoomValue();
             mainCamera.SetZoom(newZoom);
-            speedMultiplier = 2f;
             SetupCameraListener();
             return;
         }
