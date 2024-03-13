@@ -1,48 +1,27 @@
 package com.radius.system.ai.behaviortree.trees;
 
 import com.radius.system.ai.behaviortree.checks.IsPlantingBomb;
+import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
-import com.radius.system.ai.behaviortree.nodes.RootSelector;
 import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.ai.behaviortree.nodes.Sequencer;
-import com.radius.system.ai.behaviortree.tasks.BasicFindPlayer;
 import com.radius.system.ai.behaviortree.tasks.FindBombArea;
 import com.radius.system.ai.behaviortree.tasks.FindPlayer;
+import com.radius.system.ai.behaviortree.tasks.FindSafeSpace;
 import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
 import com.radius.system.ai.behaviortree.tasks.PlantBomb;
 import com.radius.system.assets.GlobalConstants;
-import com.radius.system.enums.NodeState;
 import com.radius.system.board.BoardState;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class SClassTree extends Tree {
 
     public SClassTree(int id, BoardState boardState) {
-        super(id, (int)(GlobalConstants.WORLD_AREA * 0.65f), boardState);
+        super(id, (int)(GlobalConstants.WORLD_AREA * 0.5f), boardState);
     }
 
     @Override
     protected void Evaluate(int[][] boardCost) {
         super.Evaluate(boardCost);
-        /*
-        NodeState state = root.Evaluate(srcPoint, boardCost);
-        List<Node> children = root.GetChildren();
-        List<Node> consideredChildren = new ArrayList<>();
-        for (Node child : children) {
-            if (state.equals(child.GetState())) {
-                consideredChildren.add(child);
-            }
-        }
-
-        if (consideredChildren.size() > 0) {
-            Collections.sort(consideredChildren);
-            consideredChildren.get(0).Execute();
-        }
-
-         */
     }
 
     @Override
@@ -55,6 +34,20 @@ public class SClassTree extends Tree {
         root.AttachChild(ConstructAttackPlayerTree());
         root.AttachChild(ConstructBombAreaTree());
         root.AttachChild(ConstructDefenseTree(2, true));
+
+        return root;
+    }
+
+    @Override
+    protected Node ConstructDefenseTree(int fireThreshold, boolean backup) {
+        Node findSafeSpaceTarget = new Selector("[+] FindSpace");
+        //findSafeSpaceTarget.AttachChild(new HasTargetPoint());
+        findSafeSpaceTarget.AttachChild(new FindSafeSpace(fireThreshold, boardState, boardState.GetPlayers().get(id)));
+
+        Node root = new Sequencer("[>] Defense" + fireThreshold);
+        root.AttachChild(new OnFirePath(fireThreshold, backup));
+        root.AttachChild(findSafeSpaceTarget);
+        root.AttachChild(new MoveToTarget());
 
         return root;
     }
