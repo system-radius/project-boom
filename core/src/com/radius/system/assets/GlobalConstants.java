@@ -16,6 +16,8 @@ public class GlobalConstants {
 
     public static final float WORLD_SCALE = 64f;
 
+    public static final float BOMB_WAIT_TIMER = 3f;
+
     public static int WORLD_AREA = (int)(WORLD_WIDTH * WORLD_HEIGHT);
 
     public static final String TIED_MESSAGE = "Every one has lost!  ";
