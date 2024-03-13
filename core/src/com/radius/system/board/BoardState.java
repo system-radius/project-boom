@@ -25,8 +25,6 @@ import java.util.Map;
 
 public class BoardState implements BoomUpdatable, BoomDrawable {
 
-    private static final Sound BOMB_SET_SFX = GlobalAssets.LoadSound(GlobalAssets.BOMB_SET_SFX_PATH);
-
     public int BOARD_WIDTH;
 
     public int BOARD_HEIGHT;
@@ -106,7 +104,7 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
         bomb.AddPlayerCollision(players);
 
-        BOMB_SET_SFX.play();
+        GlobalAssets.PlaySound(GlobalAssets.BOMB_SET_SFX_PATH);
     }
 
     public void AddToBoard(Player player) {
@@ -222,8 +220,11 @@ public class BoardState implements BoomUpdatable, BoomDrawable {
 
         for (Bomb bomb : bombs) {
             int x = bomb.GetWorldX(), y = bomb.GetWorldY();
-            //boardCost[x][y] = bomb.HasActiveCollision(players.get(id)) ? -1 : this.boardCost[x][y];
-            boardCost[x][y] = -1;
+            if (id >= 0) {
+                boardCost[x][y] = bomb.HasActiveCollision(players.get(id)) ? -1 : this.boardCost[x][y];
+            } else {
+                boardCost[x][y] = -1;
+            }
         }
     }
 
