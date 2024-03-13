@@ -31,9 +31,7 @@ public class Bomb extends Block {
 
     protected static final float FRAME_DURATION_FIRE = 1f / 7.5f;
 
-    protected static final Sound EXPLOSION_SFX = GlobalAssets.LoadSound(GlobalAssets.EXPLOSION_SFX_PATH);
-
-    protected static final float WAIT_TIMER = 3f;
+    protected static final float WAIT_TIMER = GlobalConstants.BOMB_WAIT_TIMER;
 
     private static final float EXPLOSION_TIMER = 1f;
 
@@ -193,7 +191,7 @@ public class Bomb extends Block {
     public int GetCost() {
         // Get percentage of the explosion limit against the current time.
         float percent = 1 - ((WAIT_TIMER - preExplosionTime) / WAIT_TIMER);
-        return IsExploding() ? -1 : (int)(MAX_COST * percent);
+        return IsExploding() || IsSetToExplode() ? -1 : (int)(MAX_COST * percent);
     }
 
     public Map<Direction, Integer> GetRangeValues() {
@@ -346,11 +344,7 @@ public class Bomb extends Block {
             return;
         }
 
-        try {
-            EXPLOSION_SFX.play();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        GlobalAssets.PlaySound(GlobalAssets.EXPLOSION_SFX_PATH);
 
         state = BombState.EXPLODING;
         animationElapsedTime = 0;
@@ -373,6 +367,10 @@ public class Bomb extends Block {
 
     public boolean IsExploding() {
         return state == BombState.EXPLODING;
+    }
+
+    public boolean IsSetToExplode() {
+        return state == BombState.SET_TO_EXPLODE;
     }
 
     public boolean IsExploded() {
@@ -431,7 +429,7 @@ public class Bomb extends Block {
     @Override
     public boolean Burn() {
 
-        if (state == BombState.SET_TO_EXPLODE || state == BombState.EXPLODING) {
+        if (IsExploding() || IsSetToExplode() || IsExploded()) {
             return false;
         }
 
