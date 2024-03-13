@@ -15,8 +15,6 @@ import java.util.List;
 
 public class Bonus extends Block {
 
-    private static final Sound BONUS_GET_SFX = GlobalAssets.LoadSound(GlobalAssets.BONUS_GET_SFX_PATH);
-
     private static final int BONUS_BLOCKS = 7;
 
     private static final BonusType[] BONUSES = new BonusType[] {
@@ -63,7 +61,7 @@ public class Bonus extends Block {
                 player.IncreaseBombStock();
         }
 
-        BONUS_GET_SFX.play();
+        GlobalAssets.PlaySound(GlobalAssets.BONUS_GET_SFX_PATH);
         this.Burn();
     }
 

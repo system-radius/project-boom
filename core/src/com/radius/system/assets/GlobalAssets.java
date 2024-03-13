@@ -81,6 +81,8 @@ public class GlobalAssets {
 
     private static final Map<String, TextureRegion[][]> textureRegionMap = new HashMap<>();
 
+    private static final Map<String, Long> soundTimerMap = new HashMap<>();
+
     private GlobalAssets() {
 
     }
@@ -153,6 +155,20 @@ public class GlobalAssets {
         Sound sound = Gdx.audio.newSound(Gdx.files.internal(path));
         soundMap.put(path, sound);
         return sound;
+    }
+
+    public static void PlaySound(String path) {
+        long millis = System.currentTimeMillis();
+        long lastMillis = -1L;
+        if (soundTimerMap.containsKey(path)) {
+            lastMillis = soundTimerMap.get(path);
+        }
+        if (millis - lastMillis < 100) {
+            return;
+        }
+
+        soundTimerMap.put(path, millis);
+        LoadSound(path).play();
     }
 
     public static void Dispose() {

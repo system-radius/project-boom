@@ -42,8 +42,6 @@ import java.util.List;
 
 public class Player extends Entity implements FirePathListener {
 
-    private static final Sound PLAYER_BURN_SFX = GlobalAssets.LoadSound(GlobalAssets.PLAYER_BURN_SFX_PATH);
-
     private static final float FRAME_DURATION_MOVING = 1f / 10f;
 
     private static final float FRAME_DURATION_DYING = 1f / 4f;
@@ -672,7 +670,7 @@ public class Player extends Entity implements FirePathListener {
 
         state = PlayerState.DYING;
         animationElapsedTime = deathTime = respawnTime = 0f;
-        PLAYER_BURN_SFX.play();
+        GlobalAssets.PlaySound(GlobalAssets.PLAYER_BURN_SFX_PATH);
         return true;
     }
 
