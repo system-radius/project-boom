@@ -379,7 +379,6 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
         super.dispose();
         font.dispose();
         gameStage.dispose();
-        gameMode.dispose();
         FontUtils.Dispose();
     }
 
@@ -455,6 +454,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
     @Override
     public void OnEndGameTrigger(EndGameEvent event) {
         gameState = GameState.CONCLUDED;
+        gameMode.dispose();
 
         if (!event.crashed) {
             matches++;

@@ -654,6 +654,7 @@ public class Player extends Entity implements FirePathListener {
 
     @Override
     public void dispose() {
+        movementEventListeners.clear();
     }
 
     @Override
