@@ -4,10 +4,11 @@ import com.radius.system.ai.behaviortree.checks.IsPlantingBomb;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.board.BoardState;
+import com.radius.system.objects.players.Player;
 
 public class CClassTree extends Tree {
-    public CClassTree(int id, BoardState boardState) {
-        super(id, 2, boardState);
+    public CClassTree(int id, BoardState boardState, Player player) {
+        super(id, 2, boardState, player);
     }
 
     @Override

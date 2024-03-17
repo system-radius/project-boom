@@ -12,11 +12,12 @@ import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
 import com.radius.system.ai.behaviortree.tasks.PlantBomb;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.board.BoardState;
+import com.radius.system.objects.players.Player;
 
 public class SClassTree extends Tree {
 
-    public SClassTree(int id, BoardState boardState) {
-        super(id, (int)(GlobalConstants.WORLD_AREA * 0.5f), boardState);
+    public SClassTree(int id, BoardState boardState, Player player) {
+        super(id, (int)(GlobalConstants.WORLD_AREA * 0.5f), boardState, player);
     }
 
     @Override
