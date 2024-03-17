@@ -102,6 +102,18 @@ public class GameMode implements Disposable, OverTimeListener {
         return controllers;
     }
 
+    public void Play() {
+        for (BoomPlayerController controller : controllers) {
+            controller.Play();
+        }
+    }
+
+    public void Pause() {
+        for (BoomPlayerController controller : controllers) {
+            controller.Pause();
+        }
+    }
+
     public void Restart(float delta) {
         loading = true;
         restartThread = new Thread(() -> RestartField(delta));

@@ -395,9 +395,11 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
                 startDate = new Date(System.currentTimeMillis());
                 break;
             case PAUSE:
+                gameMode.Pause();
                 gameState = GameState.PAUSED;
                 break;
             case PLAY:
+                gameMode.Play();
                 gameState = GameState.PLAYING;
                 break;
             case CANCEL:

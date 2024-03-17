@@ -86,6 +86,16 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     }
 
     @Override
+    public void Play() {
+        System.out.println("Playing!");
+    }
+
+    @Override
+    public void Pause() {
+        System.out.println("Paused!");
+    }
+
+    @Override
     public void Restart() {
         tree.Restart();
         currentPath = null;
