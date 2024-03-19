@@ -1,6 +1,5 @@
 package com.radius.system.ai.behaviortree.trees;
 
-import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
@@ -17,7 +16,7 @@ import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.NodeState;
 import com.radius.system.board.BoardState;
 import com.radius.system.objects.players.Player;
-import com.radius.system.screens.game_ui.TimerDisplay;
+import com.radius.system.utils.ThreadUtils;
 
 import java.util.List;
 
@@ -60,8 +59,7 @@ public abstract class Tree implements Runnable {
         }
 
         playing = running = true;
-        thread = new Thread(this);
-        thread.start();
+        ThreadUtils.EXECUTOR.execute(this);
     }
 
     public void Stop() {
@@ -69,12 +67,7 @@ public abstract class Tree implements Runnable {
             return;
         }
 
-        try {
-            running = false;
-            thread.join(1000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        running = false;
     }
 
     public void Play() {
