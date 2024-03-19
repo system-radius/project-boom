@@ -46,26 +46,26 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
         switch (config.botLevel) {
             case S_CLASS:
-                tree = new SClassTree(id, boardState);
+                tree = new SClassTree(id, boardState, player);
                 break;
             case A_CLASS:
-                tree = new AClassTree(id, boardState);
+                tree = new AClassTree(id, boardState, player);
                 break;
             case B_CLASS:
-                tree = new BClassTree(id, boardState);
+                tree = new BClassTree(id, boardState, player);
                 break;
             case C_CLASS:
-                tree = new CClassTree(id, boardState);
+                tree = new CClassTree(id, boardState, player);
                 break;
             case D_CLASS:
-                tree = new DClassTree(id, boardState);
+                tree = new DClassTree(id, boardState, player);
                 break;
             case E_CLASS:
-                tree = new EClassTree(id, boardState);
+                tree = new EClassTree(id, boardState, player);
                 break;
             case OMEGA:
             default:
-                tree = new OmegaTree(id, boardState);
+                tree = new OmegaTree(id, boardState, player);
         }
     }
 
@@ -87,12 +87,12 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     @Override
     public void Play() {
-        System.out.println("Playing!");
+        tree.Play();
     }
 
     @Override
     public void Pause() {
-        System.out.println("Paused!");
+        tree.Pause();
     }
 
     @Override
@@ -104,7 +104,6 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     }
 
     private void UpdateTree(float delta) {
-        tree.SetSourcePoint(player.GetWorldX(), player.GetWorldY());
         tree.Update(delta);
         UpdateMovement();
     }
@@ -221,6 +220,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     @Override
     public void dispose() {
+        tree.Stop();
         player.dispose();
     }
 
