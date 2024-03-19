@@ -46,4 +46,10 @@ public class ProjectBoom extends Game implements StartGameListener, ExitGameList
 	public void OnExitGame() {
 		setScreen(configScreen);
 	}
+
+	@Override
+	public void dispose() {
+		configScreen.dispose();
+		gameScreen.dispose();
+	}
 }

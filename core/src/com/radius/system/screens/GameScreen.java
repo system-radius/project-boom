@@ -378,6 +378,7 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
     public void dispose() {
         super.dispose();
         font.dispose();
+        gameMode.dispose();
         gameStage.dispose();
         FontUtils.Dispose();
     }
