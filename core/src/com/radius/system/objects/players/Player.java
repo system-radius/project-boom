@@ -203,7 +203,15 @@ public class Player extends Entity implements FirePathListener {
         kills = deaths = selfBurn = 0;
         bombType = BombType.NORMAL;
 
-        Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
+        position.x = GetWorldPosition(respawnPoint.x, size.x);
+        position.y = GetWorldPosition(respawnPoint.y, size.y);
+
+        FixBounds();
+
+        //Respawn(GetWorldPosition(respawnPoint.x, size.x), GetWorldPosition(respawnPoint.y, size.y));
+        state = PlayerState.SPAWNING;
+        respawnTime = 0;
+
         if (godmode) {
             this.spritePath = "img/player_5.png";
         }
@@ -645,7 +653,8 @@ public class Player extends Entity implements FirePathListener {
     }
 
     public boolean IsAlive() {
-        return state != PlayerState.DEAD && state != PlayerState.DYING;
+        //return state != PlayerState.DEAD && state != PlayerState.DYING && state != PlayerState.SPAWNING;
+        return state == PlayerState.IDLE || state == PlayerState.MOVING;
     }
 
     public boolean IsDead() {
@@ -659,7 +668,7 @@ public class Player extends Entity implements FirePathListener {
 
     @Override
     public boolean Burn() {
-        if (PlayerState.DYING.equals(state) || PlayerState.DEAD.equals(state) || invulnerable || life < 0) {
+        if (!IsAlive() || invulnerable || life < 0) {
             return false;
         }
 
@@ -689,6 +698,7 @@ public class Player extends Entity implements FirePathListener {
             case DYING:
                 UpdateDying(delta);
                 break;
+            case SPAWNING:
             case DEAD:
                 UpdateRespawn(delta);
         }
@@ -758,6 +768,10 @@ public class Player extends Entity implements FirePathListener {
 
     @Override
     public void Draw(Batch batch) {
+
+        if (PlayerState.SPAWNING.equals(state)) {
+            return;
+        }
 
         if (state == PlayerState.MOVING || state == PlayerState.DYING) {
             activeAnimation = GetActiveAnimation();
