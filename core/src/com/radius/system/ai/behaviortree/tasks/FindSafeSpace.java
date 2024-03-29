@@ -19,7 +19,7 @@ public class FindSafeSpace extends BasicFindSafeSpace {
     private final BoardState boardState;
 
     public FindSafeSpace(int fireThreshold, BoardState boardState, Player player) {
-        super(fireThreshold);
+        super(fireThreshold, boardState);
         this.boardState = boardState;
         this.player = player;
     }
@@ -43,7 +43,8 @@ public class FindSafeSpace extends BasicFindSafeSpace {
             }
         }
 
-        List<Point> path = PathFinder.ReconstructPath(targetPoint);
+        //List<Point> path = PathFinder.ReconstructPath(targetPoint);
+        List<Point> path = pathFinder.FindShortestPath(this.boardCost, srcPoint.x, srcPoint.y, targetPoint.x, targetPoint.y);
         //TimerDisplay.LogTimeStamped("[" + displayId + "] Target point acquired: " + targetPoint);
         return Success(path.size(), targetPoint);
     }
@@ -83,7 +84,7 @@ public class FindSafeSpace extends BasicFindSafeSpace {
             Point space = spaces.get(i);
             if (ForceAcceptPoint(space)) {
                 targetPoint = space;
-                lowestCost = (int) space.GetCost();
+                lowestCost = (int) space.selfCost;
             }
         }
 
@@ -91,7 +92,7 @@ public class FindSafeSpace extends BasicFindSafeSpace {
     }
 
     private boolean ForceAcceptPoint(Point point) {
-        return !point.IsEqualPosition(srcPoint) && point.GetCost() < lowestCost;
+        return !point.IsEqualPosition(srcPoint) && point.selfCost < lowestCost;
     }
 
     /*

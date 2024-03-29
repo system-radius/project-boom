@@ -240,7 +240,8 @@ public class Player extends Entity implements FirePathListener {
 
         float fixedDivider = 1.1f;
         float balancer = 2f;
-        float divider = SPEED_LIMIT - speedLevel;
+        //float divider = SPEED_LIMIT - speedLevel;
+        float divider = 0;
 
         divider = divider == 0 ? balancer + 0.1f : balancer + divider;
 

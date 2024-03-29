@@ -41,8 +41,8 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     public ArtificialIntelligenceController(int id, PlayerConfig config, Vector2 spawnPoint, BoardState boardState, float scale) {
         super(boardState, new Player(id, spawnPoint, config.texturePath, scale));
-        targetPoint = new Point(null, -1, -1);
-        pastTarget = new Point(null, -1, -1);
+        targetPoint = new Point();
+        pastTarget = new Point();
 
         switch (config.botLevel) {
             case S_CLASS:
@@ -184,6 +184,12 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
             Restart();
         } else if (player.IsAlive() && !deathReset) {
             deathReset = true;
+        }
+
+        if (tree.GetData(NodeKeys.CRASHED) != null) {
+            //tree.ClearData(NodeKeys.CRASHED);
+            player.Burn();
+            return;
         }
 
         // Continuously update the player regardless of death status.

@@ -1,5 +1,6 @@
 package com.radius.system.ai.behaviortree.trees;
 
+import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
@@ -38,8 +39,6 @@ public abstract class Tree implements Runnable {
 
     private boolean running = false, playing = false;
 
-    protected Thread thread;
-
     public Tree(int id, int fireThreshold, BoardState boardState, Player player) {
         this.owner = player;
         this.id =  id;
@@ -47,8 +46,8 @@ public abstract class Tree implements Runnable {
         this.boardState = boardState;
         boardCost = new int[boardState.BOARD_WIDTH][boardState.BOARD_HEIGHT];
 
-        srcPoint = new Point(null, -1, -1);
-        this.pathFinder = new PathFinder();
+        srcPoint = new Point();
+        this.pathFinder = new PathFinder(boardState);
 
         root = SetupTree();
     }
@@ -94,13 +93,6 @@ public abstract class Tree implements Runnable {
         if (owner.IsAlive() && !running) {
             Start();
         }
-        /*
-        if (root != null) {
-            boardState.CompileBoardCost(boardCost, fireThreshold, id);
-            Evaluate(boardCost);
-        }
-
-         */
     }
 
     public void run() {
@@ -120,13 +112,28 @@ public abstract class Tree implements Runnable {
                 delta += (now - lastTime) / ticksPerSecond;
             }
             lastTime = now;
+            if (root.GetData(NodeKeys.CRASHED) != null) {
+                continue;
+            }
             while (delta >= 1) {
                 delta--;
 
                 srcPoint.x = owner.GetWorldX();
                 srcPoint.y = owner.GetWorldY();
-                boardState.CompileBoardCost(boardCost, fireThreshold, id);
-                Evaluate(boardCost);
+
+                try {
+                    boardState.CompileBoardCost(boardCost, fireThreshold, id);
+                    Evaluate(boardCost);
+                } catch (ArrayIndexOutOfBoundsException arrayException) {
+                    root.SetData(NodeKeys.CRASHED, true);
+                    System.out.println("[" + (id + 1) + "] Crashed due to out of bounds! Current position: " + srcPoint);
+                    break;
+                } catch (Exception e) {
+                    root.SetData(NodeKeys.CRASHED, true);
+                    System.out.println("[" + (id + 1) + "] Crashed due everything else!");
+                    e.printStackTrace();
+                    break;
+                }
 
                 /*
                 GetData(NodeKeys.ACTIVE_NODE);
@@ -167,7 +174,7 @@ public abstract class Tree implements Runnable {
     protected Node ConstructDefenseTree(int fireThreshold, boolean backup) {
         Node findSafeSpaceTarget = new Selector("[+] FindSpace");
         //findSafeSpaceTarget.AttachChild(new HasTargetPoint());
-        findSafeSpaceTarget.AttachChild(new BasicFindSafeSpace(fireThreshold));
+        findSafeSpaceTarget.AttachChild(new BasicFindSafeSpace(fireThreshold, boardState));
 
         Node root = new Sequencer("[>] Defense" + fireThreshold);
         root.AttachChild(new OnFirePath(fireThreshold, backup));

@@ -18,6 +18,8 @@ public class NodeKeys {
 
     public static final String ACTIVE_NODE = "activeNode";
 
+    public static final String CRASHED = "crashed";
+
     private NodeKeys(){
 
     }
