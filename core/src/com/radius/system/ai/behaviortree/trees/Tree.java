@@ -1,5 +1,6 @@
 package com.radius.system.ai.behaviortree.trees;
 
+import com.radius.system.ai.behaviortree.NodeKeys;
 import com.radius.system.ai.behaviortree.checks.OnFirePath;
 import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.Selector;
@@ -12,13 +13,15 @@ import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
 import com.radius.system.ai.behaviortree.tasks.PlantBomb;
 import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
+import com.radius.system.assets.GlobalConstants;
 import com.radius.system.enums.NodeState;
 import com.radius.system.board.BoardState;
-import com.radius.system.objects.BoomUpdatable;
+import com.radius.system.objects.players.Player;
+import com.radius.system.utils.ThreadUtils;
 
 import java.util.List;
 
-public abstract class Tree implements BoomUpdatable {
+public abstract class Tree implements Runnable {
 
     protected final int id, fireThreshold;
 
@@ -32,17 +35,46 @@ public abstract class Tree implements BoomUpdatable {
 
     protected final PathFinder pathFinder;
 
-    public Tree(int id, int fireThreshold, BoardState boardState) {
+    protected final Player owner;
 
+    private boolean running = false, playing = false;
+
+    public Tree(int id, int fireThreshold, BoardState boardState, Player player) {
+        this.owner = player;
         this.id =  id;
         this.fireThreshold = fireThreshold;
         this.boardState = boardState;
         boardCost = new int[boardState.BOARD_WIDTH][boardState.BOARD_HEIGHT];
 
-        srcPoint = new Point(null, -1, -1);
-        this.pathFinder = new PathFinder();
+        srcPoint = new Point();
+        this.pathFinder = new PathFinder(boardState);
 
         root = SetupTree();
+    }
+
+    public void Start() {
+        if (running) {
+            return;
+        }
+
+        playing = running = true;
+        ThreadUtils.EXECUTOR.execute(this);
+    }
+
+    public void Stop() {
+        if (!running) {
+            return;
+        }
+
+        running = false;
+    }
+
+    public void Play() {
+        playing = true;
+    }
+
+    public void Pause() {
+        playing = false;
     }
 
     public void Restart() {
@@ -57,17 +89,73 @@ public abstract class Tree implements BoomUpdatable {
         return root.GetData(key);
     }
 
-    public void SetSourcePoint(int x, int y) {
-        srcPoint.x = x;
-        srcPoint.y = y;
+    public final void Update(float delta) {
+        if (owner.IsAlive() && !running) {
+            Start();
+        }
     }
 
-    @Override
-    public final void Update(float delta) {
-        if (root != null) {
-            boardState.CompileBoardCost(boardCost, fireThreshold, id);
-            Evaluate(boardCost);
+    public void run() {
+        long lastTime = System.nanoTime();
+        double ticksAmount = GlobalConstants.TICKS_PER_SECOND;
+        double ticksPerSecond = 1_000_000_000 / ticksAmount;
+        double delta = 0;
+        playing = true;
+        long timer = System.currentTimeMillis(), timeDelta = 0;
+        int ticks = 0;
+        while (running) {
+            if (!owner.IsAlive()) {
+                break;
+            }
+            long now = System.nanoTime();
+            if (playing) {
+                delta += (now - lastTime) / ticksPerSecond;
+            }
+            lastTime = now;
+            if (root.GetData(NodeKeys.CRASHED) != null) {
+                continue;
+            }
+            while (delta >= 1) {
+                delta--;
+
+                srcPoint.x = owner.GetWorldX();
+                srcPoint.y = owner.GetWorldY();
+
+                try {
+                    boardState.CompileBoardCost(boardCost, fireThreshold, id);
+                    Evaluate(boardCost);
+                } catch (ArrayIndexOutOfBoundsException arrayException) {
+                    root.SetData(NodeKeys.CRASHED, true);
+                    System.out.println("[" + (id + 1) + "] Crashed due to out of bounds! Current position: " + srcPoint);
+                    break;
+                } catch (Exception e) {
+                    root.SetData(NodeKeys.CRASHED, true);
+                    System.out.println("[" + (id + 1) + "] Crashed due everything else!");
+                    e.printStackTrace();
+                    break;
+                }
+
+                /*
+                GetData(NodeKeys.ACTIVE_NODE);
+                (Boolean) GetData(NodeKeys.PLANT_BOMB);
+                (List<Point>) GetData(NodeKeys.MOVEMENT_PATH);
+                (Point) GetData(NodeKeys.TARGET_POINT);
+
+                 */
+                ticks++;
+            }
+
+            long currentTime = System.currentTimeMillis();
+            if (playing) timeDelta += currentTime - timer;
+            timer = currentTime;
+            if (timeDelta > 1000) {
+                timeDelta = 0;
+                //TimerDisplay.LogTimeStamped("[" + (id + 1) + "]" + ": " + ticks + " ticks!");
+                ticks = 0;
+            }
         }
+
+        Stop();
     }
 
     protected void Evaluate(int[][] boardCost) {
@@ -86,7 +174,7 @@ public abstract class Tree implements BoomUpdatable {
     protected Node ConstructDefenseTree(int fireThreshold, boolean backup) {
         Node findSafeSpaceTarget = new Selector("[+] FindSpace");
         //findSafeSpaceTarget.AttachChild(new HasTargetPoint());
-        findSafeSpaceTarget.AttachChild(new BasicFindSafeSpace(fireThreshold));
+        findSafeSpaceTarget.AttachChild(new BasicFindSafeSpace(fireThreshold, boardState));
 
         Node root = new Sequencer("[>] Defense" + fireThreshold);
         root.AttachChild(new OnFirePath(fireThreshold, backup));

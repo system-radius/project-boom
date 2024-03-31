@@ -41,31 +41,31 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     public ArtificialIntelligenceController(int id, PlayerConfig config, Vector2 spawnPoint, BoardState boardState, float scale) {
         super(boardState, new Player(id, spawnPoint, config.texturePath, scale));
-        targetPoint = new Point(null, -1, -1);
-        pastTarget = new Point(null, -1, -1);
+        targetPoint = new Point();
+        pastTarget = new Point();
 
         switch (config.botLevel) {
             case S_CLASS:
-                tree = new SClassTree(id, boardState);
+                tree = new SClassTree(id, boardState, player);
                 break;
             case A_CLASS:
-                tree = new AClassTree(id, boardState);
+                tree = new AClassTree(id, boardState, player);
                 break;
             case B_CLASS:
-                tree = new BClassTree(id, boardState);
+                tree = new BClassTree(id, boardState, player);
                 break;
             case C_CLASS:
-                tree = new CClassTree(id, boardState);
+                tree = new CClassTree(id, boardState, player);
                 break;
             case D_CLASS:
-                tree = new DClassTree(id, boardState);
+                tree = new DClassTree(id, boardState, player);
                 break;
             case E_CLASS:
-                tree = new EClassTree(id, boardState);
+                tree = new EClassTree(id, boardState, player);
                 break;
             case OMEGA:
             default:
-                tree = new OmegaTree(id, boardState);
+                tree = new OmegaTree(id, boardState, player);
         }
     }
 
@@ -87,12 +87,12 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     @Override
     public void Play() {
-        System.out.println("Playing!");
+        tree.Play();
     }
 
     @Override
     public void Pause() {
-        System.out.println("Paused!");
+        tree.Pause();
     }
 
     @Override
@@ -104,7 +104,6 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
     }
 
     private void UpdateTree(float delta) {
-        tree.SetSourcePoint(player.GetWorldX(), player.GetWorldY());
         tree.Update(delta);
         UpdateMovement();
     }
@@ -187,6 +186,12 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
             deathReset = true;
         }
 
+        if (tree.GetData(NodeKeys.CRASHED) != null) {
+            //tree.ClearData(NodeKeys.CRASHED);
+            player.Burn();
+            return;
+        }
+
         // Continuously update the player regardless of death status.
         player.MoveAlongX(movementVector.x);
         player.MoveAlongY(movementVector.y);
@@ -221,6 +226,7 @@ public class ArtificialIntelligenceController extends BoomPlayerController {
 
     @Override
     public void dispose() {
+        tree.Stop();
         player.dispose();
     }
 

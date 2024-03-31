@@ -44,7 +44,7 @@ public class FindBombArea extends Solidifier {
 
         id = "[!] FindBombArea";
 
-        theoryCrafter = new TheoreticalSafeSpace();
+        theoryCrafter = new TheoreticalSafeSpace(boardState);
     }
 
     @Override
@@ -61,9 +61,9 @@ public class FindBombArea extends Solidifier {
             return Failure();
         }
 
+        List<Point> path = pathFinder.FindShortestPath(this.boardCost, srcPoint.x, srcPoint.y, targetPoint.x, targetPoint.y);
         Node root = GetRoot();
         Point setTargetPoint = (Point) root.GetData(NodeKeys.TARGET_POINT);
-        List<Point> path = PathFinder.ReconstructPath(targetPoint);
         int setPathSize = 0, pathSize = path.size();
         if (setTargetPoint != null) {
             AssessBombArea(setTargetPoint.x, setTargetPoint.y);

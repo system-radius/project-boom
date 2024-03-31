@@ -82,6 +82,7 @@ public class TimerDisplay extends Actor implements TimerEventListener {
         if (totalTime < 0) {
             FireOverTimeEvent();
             PauseTimer();
+            return;
         }
 
         DeriveTime(totalTime);

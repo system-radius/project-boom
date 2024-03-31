@@ -4,6 +4,8 @@ public class GlobalConstants {
 
     public static final String APP_NAME = "project-boom";
 
+    public static final float TICKS_PER_SECOND = 30f;
+
     public static final float MAX_ZOOM = 0.5f;
 
     public static final float VIEWPORT_WIDTH = 16f;

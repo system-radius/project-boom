@@ -4,15 +4,20 @@ import com.radius.system.ai.behaviortree.tasks.FindTarget;
 import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
+import com.radius.system.board.BoardState;
 import com.radius.system.enums.NodeState;
 
 import java.util.List;
 
 public class TheoreticalSafeSpace extends FindTarget {
 
-    private final PathFinder pathFinder = new PathFinder();
+    protected final PathFinder pathFinder;
 
     private int[][] boardCost;
+
+    public TheoreticalSafeSpace(BoardState boardState) {
+        pathFinder = new PathFinder(boardState);
+    }
 
     @Override
     public NodeState Evaluate(Point srcPoint, PathFinder pathFinder, int[][] boardCost) {

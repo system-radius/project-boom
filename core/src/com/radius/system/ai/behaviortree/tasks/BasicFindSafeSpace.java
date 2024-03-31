@@ -6,6 +6,7 @@ import com.radius.system.ai.behaviortree.nodes.Solidifier;
 import com.radius.system.ai.pathfinding.PathFinder;
 import com.radius.system.ai.pathfinding.Point;
 import com.radius.system.assets.GlobalConstants;
+import com.radius.system.board.BoardState;
 import com.radius.system.enums.NodeState;
 
 import java.util.List;
@@ -20,9 +21,9 @@ public class BasicFindSafeSpace extends Solidifier {
 
     protected PathFinder pathFinder;
 
-    public BasicFindSafeSpace(int fireThreshold) {
+    public BasicFindSafeSpace(int fireThreshold, BoardState boardState) {
         this.fireThreshold = fireThreshold;
-        theoryCrafter = new TheoreticalSafeSpaceCounter();
+        theoryCrafter = new TheoreticalSafeSpaceCounter(boardState);
         id = "[!] BasicFindSafeSpace";
     }
 
@@ -41,7 +42,8 @@ public class BasicFindSafeSpace extends Solidifier {
             return Failure();
         }
 
-        List<Point> path = PathFinder.ReconstructPath(targetPoint);
+        //List<Point> path = PathFinder.ReconstructPath(targetPoint);
+        List<Point> path = pathFinder.FindShortestPath(this.boardCost, srcPoint.x, srcPoint.y, targetPoint.x, targetPoint.y);
         //TimerDisplay.LogTimeStamped("[" + displayId + "] Target point acquired: " + targetPoint);
         return Success(path.size(), targetPoint);
     }

@@ -1,6 +1,7 @@
 package com.radius.system.ai.pathfinding;
 
 import com.radius.system.assets.GlobalConstants;
+import com.radius.system.board.BoardState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,24 +9,41 @@ import java.util.List;
 
 public class PathFinder {
 
-    private final List<Point> openList = new ArrayList<>();
+    private final List<PathFinderPoint> openList = new ArrayList<>();
 
-    private final List<Point> closedList = new ArrayList<>();
+    private final List<PathFinderPoint> closedList = new ArrayList<>();
+
+    private final PathFinderPoint[][] pointsPool;
 
     private int[][] maze;
 
-    public PathFinder() {}
+    public PathFinder(BoardState boardState) {
+        int width = boardState.BOARD_WIDTH, height = boardState.BOARD_HEIGHT;
+        pointsPool = new PathFinderPoint[width][height];
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                switch(boardState.GetBoardEntry(i, j)) {
+                    case PERMANENT_BLOCK:
+                    case VOID:
+                        pointsPool[i][j] = null;
+                        break;
+                    default:
+                        pointsPool[i][j] = new PathFinderPoint(null, -1, -1);
+                }
+            }
+        }
+    }
 
     public List<Point> FindShortestPath(int[][] boardCost, int srcX, int srcY, int dstX, int dstY) {
         return FindShortestPath(boardCost, srcX, srcY, dstX, dstY, GlobalConstants.WORLD_AREA + 1);
     }
 
     public List<Point> FindShortestPath(int[][] boardCost, int srcX, int srcY, int dstX, int dstY, float costThreshold) {
-        openList.clear();
-        closedList.clear();
+        Reset();
 
         maze = boardCost;
-        Point now = new Point(null, srcX, srcY, boardCost[srcX][srcY], 0, 0);
+        PathFinderPoint now = new PathFinderPoint(null, srcX, srcY, boardCost[srcX][srcY], 0, 0);
 
         for (openList.add(now); openList.size() > 0;) {
             now = this.openList.remove(0);
@@ -50,11 +68,10 @@ public class PathFinder {
     }
 
     public List<Point> FindOpenSpaces(int[][] boardCost, int srcX, int srcY, int depthLimit, float costThreshold) {
-        openList.clear();
-        closedList.clear();
+        Reset();
 
         maze = boardCost;
-        Point now = new Point(null, srcX, srcY, boardCost[srcX][srcY], 0, 0);
+        PathFinderPoint now = new PathFinderPoint(null, srcX, srcY, boardCost[srcX][srcY], 0, 0);
         openList.add(now);
 
         for (int i = 0; openList.size() > 0; i++) {
@@ -70,10 +87,10 @@ public class PathFinder {
             AddChildrenToOpenList(now, srcX, srcY);
         }
 
-        return closedList;
+        return ConvertPoints(closedList);
     }
 
-    private void AddChildrenToOpenList(Point parent, int hX, int hY) {
+    private void AddChildrenToOpenList(PathFinderPoint parent, int hX, int hY) {
         int parentX = parent.x, parentY = parent.y;
         float parentG = parent.parentCost;
 
@@ -94,7 +111,7 @@ public class PathFinder {
                     continue;
                 }
 
-                Point child = new Point(parent, childX, childY, maze[childX][childY], parentG + 1 + maze[childX][childY], ComputeHeuristic(childX, childY, hX, hY));
+                PathFinderPoint child = new PathFinderPoint(parent, childX, childY, maze[childX][childY], parentG + 1 + maze[childX][childY], ComputeHeuristic(childX, childY, hX, hY));
                 if (!(FindInList(openList, child) || FindInList(closedList, child))) {
                     openList.add(child);
                 }
@@ -113,8 +130,8 @@ public class PathFinder {
         return (float) Math.abs(x - dstX) + Math.abs(y - dstY);
     }
 
-    private boolean FindInList(List<Point> points, Point point) {
-        for (Point inList : points) {
+    private boolean FindInList(List<PathFinderPoint> points, PathFinderPoint point) {
+        for (PathFinderPoint inList : points) {
             if (point.IsEqualPosition(inList)) {
                 return true;
             }
@@ -123,15 +140,39 @@ public class PathFinder {
         return false;
     }
 
-    public static List<Point> ReconstructPath(Point point) {
+    private List<Point> ConvertPoints(List<PathFinderPoint> points) {
+        List<Point> convertedPoints = new ArrayList<>();
+        for (PathFinderPoint point : points) {
+            convertedPoints.add(new Point(point));
+        }
+        return convertedPoints;
+    }
+
+    private void Reset() {
+        openList.clear();
+        closedList.clear();
+
+        for (int i = 0; i < pointsPool.length; i++) {
+            for (int j = 0; j < pointsPool[i].length; j++) {
+                PathFinderPoint point = pointsPool[i][j];
+                if (point != null) {
+                    point.parent = null;
+                    point.x = point.y = -1;
+                    point.parentCost = point.selfCost = point.h = 0;
+                }
+            }
+        }
+    }
+
+    public static List<Point> ReconstructPath(PathFinderPoint point) {
         List<Point> path = new ArrayList<>();
-        path.add(point);
-        for (Point parent = point.GetParent(); parent != null; parent = parent.GetParent()) {
+        path.add(new Point(point));
+        for (PathFinderPoint parent = point.GetParent(); parent != null; parent = parent.GetParent()) {
             if (parent.GetParent() == null) {
                 break;
             }
 
-            path.add(0, parent);
+            path.add(0, new Point(parent));
         }
 
         return path;

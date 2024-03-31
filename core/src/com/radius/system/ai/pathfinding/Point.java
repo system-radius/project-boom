@@ -1,36 +1,18 @@
 package com.radius.system.ai.pathfinding;
 
-import com.radius.system.assets.GlobalConstants;
-
-public class Point implements Comparable<Point> {
-
-    private final static float diffThreshold = 0.015f;
-
+public class Point{
     public int x, y;
 
-    public float h, parentCost, selfCost;
+    public float selfCost;
 
-    private final Point parent;
-
-    public Point(Point parent, int x, int y) {
-        this(parent, x, y, 0, 0, 0);
+    public Point(PathFinderPoint pathFinderPoint) {
+        this.x = pathFinderPoint.x;
+        this.y = pathFinderPoint.y;
+        this.selfCost = (int) pathFinderPoint.selfCost;
     }
 
-    public Point(Point parent, int x, int y, float selfCost, float g, float h) {
-        this.parent = parent;
-        this.x = x;
-        this.y = y;
-        this.selfCost = selfCost;
-        this.parentCost = g;
-        this.h = h;
-    }
+    public Point() {
 
-    public Point GetParent() {
-        return parent;
-    }
-
-    public float GetCost() {
-        return h + parentCost + selfCost;
     }
 
     public boolean IsEqualPosition(Point that) {
@@ -46,11 +28,6 @@ public class Point implements Comparable<Point> {
 
     @Override
     public String toString() {
-        return "[" + x + ", " + y + "]: " + GetCost() + "---> " + selfCost;
-    }
-
-    @Override
-    public int compareTo(Point that) {
-        return Float.compare(this.GetCost(), that.GetCost());
+        return "[" + x + ", " + y + "]";
     }
 }

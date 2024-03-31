@@ -2,18 +2,17 @@ package com.radius.system.ai.behaviortree.trees;
 
 import com.radius.system.ai.behaviortree.checks.IsPlantingBomb;
 import com.radius.system.ai.behaviortree.nodes.Node;
-import com.radius.system.ai.behaviortree.nodes.RootSelector;
 import com.radius.system.ai.behaviortree.nodes.Selector;
 import com.radius.system.ai.behaviortree.nodes.Sequencer;
-import com.radius.system.ai.behaviortree.tasks.BasicFindPlayer;
 import com.radius.system.ai.behaviortree.tasks.MoveToTarget;
 import com.radius.system.ai.behaviortree.tasks.PlantBomb;
 import com.radius.system.ai.behaviortree.tasks.RangedFindPlayer;
 import com.radius.system.board.BoardState;
+import com.radius.system.objects.players.Player;
 
 public class AClassTree extends Tree {
-    public AClassTree(int id, BoardState boardState) {
-        super(id, 2, boardState);
+    public AClassTree(int id, BoardState boardState, Player player) {
+        super(id, 2, boardState, player);
     }
 
     @Override

@@ -38,6 +38,7 @@ import com.radius.system.screens.game_ui.BoomGameStage;
 import com.radius.system.screens.game_ui.GameCamera;
 import com.radius.system.modes.GameMode;
 import com.radius.system.utils.FontUtils;
+import com.radius.system.utils.ThreadUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -378,8 +379,10 @@ public class GameScreen extends AbstractScreen implements StartGameListener, But
     public void dispose() {
         super.dispose();
         font.dispose();
+        gameMode.dispose();
         gameStage.dispose();
         FontUtils.Dispose();
+        ThreadUtils.Stop();
     }
 
     @Override

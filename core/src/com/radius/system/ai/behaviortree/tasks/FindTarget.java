@@ -40,7 +40,7 @@ public class FindTarget extends NoExecuteNode {
             Point space = spaces.get(i);
             if (AcceptPoint(space)) {
                 targetPoint = space;
-                lowestCost = (int) space.GetCost();
+                lowestCost = (int) space.selfCost;
             }
         }
 
@@ -48,6 +48,6 @@ public class FindTarget extends NoExecuteNode {
     }
 
     protected boolean AcceptPoint(Point point) {
-        return !point.IsEqualPosition(srcPoint) && point.GetCost() < lowestCost && point.selfCost <= 1;
+        return !point.IsEqualPosition(srcPoint) && point.selfCost < lowestCost && point.selfCost <= 1;
     }
 }

@@ -41,9 +41,8 @@ public class BasicFindBombArea extends Solidifier {
             return NodeState.FAILURE;
         }
 
-        int pathSize = PathFinder.ReconstructPath(targetPoint).size();
         //TimerDisplay.LogTimeStamped("[" + displayId + "]  Target point acquired: " + targetPoint + ", burnCount: " + maxBurnCount + ", path size: " + path.size());
-        return Success(pathSize, targetPoint);
+        return Success(0, targetPoint);
     }
 
     @Override

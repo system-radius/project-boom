@@ -419,7 +419,7 @@ public class Bomb extends Block {
 
     @Override
     public boolean HasActiveCollision(Player player) {
-        if (IsMoving() || IsExploding() || IsExploded() || owner == null) {
+        if (IsMoving() || IsExploding() || IsExploded() || owner == null || !playerCollisions.containsKey(player) || playerCollisions.get(player) == null) {
             return false;
         }
 

@@ -40,7 +40,8 @@ public class FindBonus extends Solidifier {
             return Failure();
         }
 
-        List<Point> path = PathFinder.ReconstructPath(targetPoint);
+        //List<Point> path = PathFinder.ReconstructPath(targetPoint);
+        List<Point> path = pathFinder.FindShortestPath(solidifiedBoard, srcPoint.x, srcPoint.y, targetPoint.x, targetPoint.y);
         //TimerDisplay.LogTimeStamped("[" + displayId + "] Target point acquired: " + targetPoint);
         return Success(defaultSuccessWeight < 0 ? path.size() : defaultSuccessWeight, targetPoint);
     }

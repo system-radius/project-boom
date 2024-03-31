@@ -5,11 +5,12 @@ import com.radius.system.ai.behaviortree.nodes.Node;
 import com.radius.system.ai.behaviortree.nodes.RootSelector;
 import com.radius.system.assets.GlobalConstants;
 import com.radius.system.board.BoardState;
+import com.radius.system.objects.players.Player;
 
 public class OmegaTree extends Tree {
 
-    public OmegaTree(int id, BoardState boardState) {
-        super(id, (int)(GlobalConstants.WORLD_AREA * 0.75f), boardState);
+    public OmegaTree(int id, BoardState boardState, Player player) {
+        super(id, (int)(GlobalConstants.WORLD_AREA * 0.75f), boardState, player);
     }
 
     @Override

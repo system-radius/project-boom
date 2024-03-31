@@ -5,5 +5,6 @@ public enum PlayerState {
     IDLE,
     MOVING,
     DYING,
-    DEAD;
+    DEAD,
+    SPAWNING;
 }
