@@ -17,7 +17,7 @@ import com.radius.system.objects.players.Player;
 public class SClassTree extends Tree {
 
     public SClassTree(int id, BoardState boardState, Player player) {
-        super(id, (int)(GlobalConstants.WORLD_AREA * 0.5f), boardState, player);
+        super(id, (int)(GlobalConstants.WORLD_AREA * 0.65f), boardState, player);
     }
 
     @Override

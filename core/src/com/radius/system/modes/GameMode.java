@@ -263,9 +263,16 @@ public class GameMode implements Disposable, OverTimeListener {
                 } else {
                     // Return true as there are still more than one player alive.
                     endGameEvent.playerName = null;
+                    endGameEvent.id = -1;
                     return true;
                 }
             }
+        }
+
+        if (!hasOneAlive) {
+            // Every player lost.
+            endGameEvent.playerName = null;
+            endGameEvent.id = -1;
         }
 
         // The game is to be terminated.
